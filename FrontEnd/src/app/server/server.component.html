@@ -1,0 +1,56 @@
+<div class="server-page">
+
+  <div class="banner">
+    <div class="container">
+      <h1>{{ server.title }}</h1>
+
+      <app-server-meta [server]="server">
+
+          <span [hidden]="!canModify">
+          <a class="btn btn-sm btn-outline-secondary"
+             [routerLink]="['/editor', server.slug]">
+            <i class="ion-edit"></i> Edit Server
+          </a>
+
+          <button class="btn btn-sm btn-outline-danger"
+            [ngClass]="{disabled: isDeleting}"
+            (click)="deleteServer()">
+            <i class="ion-trash-a"></i> Delete Server
+          </button>
+        </span>
+      </app-server-meta>
+    </div>
+  </div>
+
+  <div class="container page">
+
+    <div class="row server-content">
+      <div class="col-md-12">
+
+        <div [innerHTML]="server.body | markdown"></div>
+
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="server-actions">
+      <app-server-meta [server]="server">
+
+          <span [hidden]="!canModify">
+          <a class="btn btn-sm btn-outline-secondary"
+             [routerLink]="['/editor', server.slug]">
+            <i class="ion-edit"></i> Edit Server
+          </a>
+
+          <button class="btn btn-sm btn-outline-danger"
+            [ngClass]="{disabled: isDeleting}"
+            (click)="deleteServer()">
+            <i class="ion-trash-a"></i> Delete Server
+          </button>
+        </span>
+      </app-server-meta>
+    </div>
+
+  </div>
+</div>
