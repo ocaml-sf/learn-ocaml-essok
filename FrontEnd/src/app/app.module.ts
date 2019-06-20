@@ -13,7 +13,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
 import { HelpModule } from './help/help.module';
 import { ContactModule } from './contact/contact.module';
-import { ServerSettingsModule } from './server-settings/server-settings.module';
 
 @NgModule({
   declarations: [AppComponent, FooterComponent, HeaderComponent],
@@ -25,7 +24,6 @@ import { ServerSettingsModule } from './server-settings/server-settings.module';
     AuthModule,
     HelpModule,
     ContactModule,
-    ServerSettingsModule,
     AppRoutingModule,
   ],
   providers: [],

@@ -2,14 +2,13 @@
 
   <div class="banner">
     <div class="container">
-      <h1>{{ server.title }}</h1>
+      <h1>{{ getOutletName()}}</h1>
 
       <app-server-meta [server]="server">
+        <span [hidden]="!canModify">
+          <a class="btn btn-sm btn-outline-secondary">
 
-          <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary"
-             [routerLink]="['/editor', server.slug]">
-            <i class="ion-edit"></i> Edit Server
+            <i class="ion-edit"></i> Manage Server
           </a>
 
           <button class="btn btn-sm btn-outline-danger"
@@ -23,34 +22,32 @@
   </div>
 
   <div class="container page">
+    <div class="row">
 
-    <div class="row server-content">
-      <div class="col-md-12">
+      <div class="col-md-9">
+        <div class="feed-toggle">
+          <ul class="nav nav-pills outline-active">
+            <li class="nav-item">
+              <a class="nav-link"
+              [ngClass]="{'active': outletName === 'server-settings'}"
+              (click)="setOutletName('server-settings')">
 
-        <div [innerHTML]="server.body | markdown"></div>
-
+              Your Feed
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"
+              [ngClass]="{'active': outletName === 'server-vue'}"
+              (click)="setOutletName('server-vue')">
+                 Global Feed
+              </a>
+            </li>
+          </ul>
+        </div>
+        <router-outlet name= "outletName" ></router-outlet>
       </div>
+
     </div>
-
-    <hr />
-
-    <div class="server-actions">
-      <app-server-meta [server]="server">
-
-          <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary"
-             [routerLink]="['/editor', server.slug]">
-            <i class="ion-edit"></i> Edit Server
-          </a>
-
-          <button class="btn btn-sm btn-outline-danger"
-            [ngClass]="{disabled: isDeleting}"
-            (click)="deleteServer()">
-            <i class="ion-trash-a"></i> Delete Server
-          </button>
-        </span>
-      </app-server-meta>
-    </div>
-
   </div>
+
 </div>

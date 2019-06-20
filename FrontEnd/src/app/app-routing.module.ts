@@ -15,17 +15,9 @@ const routes: Routes = [
     loadChildren: './editor/editor.module#EditorModule'
   },
   {
-    path: 'server-settings',
-    loadChildren: './server-settings/server-settings.module#ServerSettingsModule'
-  },
-  {
     path: 'server',
     loadChildren: './server/server.module#ServerModule'
   },
-  {
-    path: 'help',
-    loadChildren: './help/help.module#HelpModule'
-  }
 ];
 
 @NgModule({

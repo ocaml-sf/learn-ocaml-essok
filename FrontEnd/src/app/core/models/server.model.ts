@@ -5,6 +5,7 @@ export interface Server {
   title: string;
   description: string;
   body: string; //la vue
+  file: File;
   createdAt: string;
   updatedAt: string;
   author: Profile;
