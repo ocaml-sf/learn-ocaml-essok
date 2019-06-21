@@ -23,11 +23,16 @@ export class AuthComponent implements OnInit {
   ) {
     // use FormBuilder to create a form group
     this.authForm = this.fb.group({
-      'email': ['', Validators.required],
-      'password': ['', Validators.required],
-      'description': ['', Validators.required],
-      'place': ['', Validators.required],
-      'goal': ['', Validators.required],
+      'email': ['', [Validators.required, Validators.email]],
+      'password': ['', [
+        Validators.required,
+        Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
+        Validators.minLength(6),
+        Validators.maxLength(25),
+      ]],
+      'description': ['',],
+      'place': ['',],
+      'goal': ['',],
     });
   }
 

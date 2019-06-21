@@ -101,6 +101,16 @@
         </a>
       </li>
 
+      <li class="nav-item">
+        <a class="btn btn-outline-danger"
+          (click)="logout()"
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          Logout
+        </a>
+      </li>
+
     </ul>
 
   </div>
