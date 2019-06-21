@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HelpComponent } from './help.component';
-import { CanActivate } from '@angular/router/src/utils/preactivation';
 
 const routes: Routes = [
   {
