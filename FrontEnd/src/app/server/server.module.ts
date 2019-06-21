@@ -6,7 +6,6 @@ import { ServerResolver } from './server-resolver.service';
 import { MarkdownPipe } from './markdown.pipe';
 import { SharedModule } from '../shared';
 import { ServerRoutingModule } from './server-routing.module';
-import { ServerSettingsComponent } from './server-settings.component';
 
 @NgModule({
   imports: [
@@ -15,7 +14,6 @@ import { ServerSettingsComponent } from './server-settings.component';
   ],
   declarations: [
     ServerComponent,
-    ServerSettingsComponent,
     MarkdownPipe
   ],
 

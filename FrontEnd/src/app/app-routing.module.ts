@@ -18,6 +18,10 @@ const routes: Routes = [
     path: 'server',
     loadChildren: './server/server.module#ServerModule'
   },
+  {
+    path: 'server-settings',
+    loadChildren: './server-settings/server-settings.module#ServerSettingsModule'
+  },
 ];
 
 @NgModule({

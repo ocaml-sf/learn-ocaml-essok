@@ -31,7 +31,7 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.route.parent.data.subscribe((data: { server: Server }) => {
+    this.route.data.subscribe((data: { server: Server }) => {
       if (data.server) {
         this.server = data.server;
         this.serverSettingsForm.patchValue(data.server);
@@ -47,7 +47,7 @@ export class ServerSettingsComponent implements OnInit {
 
     // post the changes
     this.serversService.save(this.server).subscribe(
-      server => this.router.navigateByUrl('/'),
+      server => this.router.navigateByUrl('/server/' + server.slug),
       err => {
         this.errors = err;
         this.isSubmitting = false;

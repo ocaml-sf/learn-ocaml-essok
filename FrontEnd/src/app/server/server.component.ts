@@ -17,7 +17,6 @@ export class ServerComponent implements OnInit {
   server: Server;
   currentUser: User;
   canModify: boolean;
-  outletName: string;
   isSubmitting = false;
   isDeleting = false;
 
@@ -45,17 +44,6 @@ export class ServerComponent implements OnInit {
         this.canModify = (this.currentUser.username === this.server.author.username);
       }
     );
-  }
-
-  setOutletName(name: string = 'server-vue') {
-    this.outletName = name;
-    this.router.navigate([this.route, {outlets: this.outletName}]);
-    return;
-  }
-
-
-  getOutletName() {
-    return this.outletName;
   }
 
   deleteServer() {

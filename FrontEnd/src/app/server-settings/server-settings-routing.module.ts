@@ -1,22 +1,23 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ServerComponent } from './server.component';
-import { ServerResolver } from './server-resolver.service';
+import { ServerSettingsComponent } from './server-settings.component';
 import { AuthGuard } from '../core';
+import { ServerSettingsResolver } from './server-settings-resolver.service';
 
 const routes: Routes = [
+
   {
     path: ':slug',
-    component: ServerComponent,
+    component: ServerSettingsComponent,
     canActivate: [AuthGuard],
     resolve: {
-      server: ServerResolver
+      server: ServerSettingsResolver
     }
-  }
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ServerRoutingModule { }
+export class ServerSettingsRoutingModule { }
