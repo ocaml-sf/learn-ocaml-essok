@@ -79,4 +79,7 @@
 # Optional REPL history
 /BackEnd/.node_repl_history
 
+# Uploads files
+/BackEnd/uploads
+
 /BackEnd/.idea
