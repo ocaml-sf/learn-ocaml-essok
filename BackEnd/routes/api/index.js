@@ -3,6 +3,7 @@ router.use('/', require('./users'));
 router.use('/profiles', require('./profiles'));
 router.use('/servers', require('./server'));
 router.use('/uploads', require('./upload'));
+router.use('/vues', require('./vue'));
 
 router.use(function(err, req, res, next){
   if(err.name === 'ValidationError'){

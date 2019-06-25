@@ -15,6 +15,7 @@ export class ServerSettingsComponent implements OnInit {
   server: Server = {} as Server;
   serverSettingsForm: FormGroup;
   errors: Object = {};
+  uploadErrors: string;
   isSubmitting = false;
   uploader: FileUploader = new FileUploader({ url: URL });
   hasBaseDropZoneOver: boolean;
@@ -46,8 +47,8 @@ export class ServerSettingsComponent implements OnInit {
     });
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-         console.log('FileUpload:uploaded:', item, status, response);
-
+      console.log('FileUpload:uploaded:', item, status, response);
+      this.uploadErrors = response;
     };
     this.router.navigateByUrl('/server/server-settings/' + this.server.slug);
 

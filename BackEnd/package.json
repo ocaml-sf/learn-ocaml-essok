@@ -36,7 +36,8 @@
     "passport-local": "1.0.0",
     "request": "^2.88.0",
     "slug": "1.1.0",
-    "underscore": "1.9.1"
+    "underscore": "1.9.1",
+    "unzip": "^0.1.11"
   },
   "devDependencies": {
     "newman": "^4.5.1",
