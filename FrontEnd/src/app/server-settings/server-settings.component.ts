@@ -49,6 +49,7 @@ export class ServerSettingsComponent implements OnInit {
          console.log('FileUpload:uploaded:', item, status, response);
 
     };
+    this.router.navigateByUrl('/server/server-settings/' + this.server.slug);
 
   }
   public fileOverBase(e: any): void {
