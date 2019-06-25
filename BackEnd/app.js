@@ -44,7 +44,7 @@ require('./config/passport');
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   //set headers to allow cross origin request.
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", 'http://localhost:4200');
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.setHeader('Access-Control-Allow-Credentials', true);

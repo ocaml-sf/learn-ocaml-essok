@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-
 import { Server, ServersService } from '../core';
 import { FileUploader, FileSelectDirective } from 'ng2-file-upload/ng2-file-upload';
 
@@ -48,7 +47,7 @@ export class ServerSettingsComponent implements OnInit {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
          console.log('FileUpload:uploaded:', item, status, response);
-         alert('File uploaded successfully');
+
     };
 
   }
