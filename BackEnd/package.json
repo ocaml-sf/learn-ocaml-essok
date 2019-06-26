@@ -17,6 +17,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@kubernetes/client-node": "^0.10.2",
     "body-parser": "^1.19.0",
     "cors": "2.8.5",
     "ejs": "2.6.2",
