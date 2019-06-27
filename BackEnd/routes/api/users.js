@@ -4,6 +4,9 @@ var passport = require('passport');
 var User = mongoose.model('User');
 var auth = require('../auth');
 const k8s = require('@kubernetes/client-node');
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
@@ -117,12 +120,6 @@ router.post('/users', function (req, res, next) {
   user.place = req.body.user.place;
   user.goal = req.body.user.goal;
   user.setPassword(req.body.user.password);
-
-  // creer les namespaces ici
-  const kc = new k8s.KubeConfig();
-  kc.loadFromDefault();
-
-  const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
   var namespace = {
     metadata: {

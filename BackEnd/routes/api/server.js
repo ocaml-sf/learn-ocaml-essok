@@ -4,11 +4,13 @@ var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
 
+var title = '';
+
 const k8s = require('@kubernetes/client-node');
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
-const k8sApi = kc.makeApiClient(k8s.AppsV1Api);
-var title = '';
+const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
 
 // Preload server objects on routes with ':server'
@@ -19,7 +21,8 @@ router.param('server', function (req, res, next, slug) {
       if (!server) { return res.sendStatus(404); }
 
       req.server = server;
-
+      title = server.title;
+      
       return next();
     }).catch(next);
 });
@@ -73,14 +76,11 @@ router.get('/', auth.required, function (req, res, next) {
 router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
-
     var server = new Server(req.body.server);
-
     server.author = user;
     title = server.title;
-    // creer les pods ici
 
-    var deployments = {
+    var deployment = {
       apiVersion: 'apps/v1',
       kind: 'Deployment',
       metadata: {
@@ -119,23 +119,78 @@ router.post('/', auth.required, function (req, res, next) {
       }
     };
 
-    k8sApiIngress.readNamespacedIngress('ingress', 'default').then(
+
+
+    k8sApiDeploy.createNamespacedDeployment('default', deployment).then(
       (response) => {
         console.log('Created deployment ' + title);
+        //console.log(response);
+        k8sApiDeploy.readNamespacedDeployment(title, 'default').then((response) => {
+          //console.log(response);
+        },
+          (err) => {
+            console.log('Error!: ' + err);
+          });
+      },
+      (err) => {
+        console.log('Error!: ' + err);
+      },
+    );
+
+    var service = {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: title,
+        labels: {
+          app: title
+        }
+      },
+      spec: {
+        type: 'ClusterIP',
+        selector: {
+          app: title
+        },
+        ports: [
+          {
+            name: 'http',
+            port: 80,
+            targetPort: 8080
+          }
+        ]
+      }
+    }
+
+
+    k8sApi.createNamespacedService('default', service).then(
+      (response) => {
+        console.log('Service created');
         //console.log(response);
       },
       (err) => {
         console.log('Error!: ' + err);
       },
     );
-    
-    k8sApi.createNamespacedDeployment('default', deployments).then(
+
+    var path = {
+      backend: {
+        serviceName: title,
+        servicePort: 80
+      },
+      path: '/(' + title + ')?/?(.*)'
+    }
+
+    k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
       (response) => {
-        console.log('Created deployment ' + title);
-        //console.log(response);
-        k8sApi.readNamespacedDeployment(title, 'default').then((response) => {
-          //console.log(response);
-        });
+        console.log('Ingress read');
+        k8sApiIngress.patchNamespacedIngress(title, 'default', response.body.spec.rules[0].http.paths.push(path)).then(
+          (response) => {
+            console.log('Ingress updated');
+          },
+          (err) => {
+            console.log('Error!: ' + err);
+          },
+        );
       },
       (err) => {
         console.log('Error!: ' + err);
@@ -192,7 +247,32 @@ router.delete('/:server', auth.required, function (req, res, next) {
     if (!user) { return res.sendStatus(401); }
     if (req.server.author._id.toString() === req.payload.id.toString()) {
       return req.server.remove().then(function () {
-        k8sApi.deleteNamespacedDeployment(title, 'default').then((response) => {
+
+        k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
+          (response) => {
+            console.log('Ingress read');
+            /*response.body.spec.rules[0].http.paths.push(path).then(
+              (response) => {
+                console.log('Ingress updated');
+              },
+              (err) => {
+                console.log('Error!: ' + err);
+              },
+            );*/
+          },
+          (err) => {
+            console.log('Error!: ' + err);
+          },
+        );
+
+        k8sApi.deleteNamespacedService(title, 'default').then((response) => {
+          console.log('delete service ok');
+        },
+          (err) => {
+            console.log('Error!: ' + err);
+          },
+        );
+        k8sApiDeploy.deleteNamespacedDeployment(title, 'default').then((response) => {
           console.log('delete depoyment ok');
         },
           (err) => {
