@@ -4,9 +4,15 @@ var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
 
+const k8s = require('@kubernetes/client-node');
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const k8sApi = kc.makeApiClient(k8s.AppsV1Api);
+var title = '';
+
 // Preload server objects on routes with ':server'
-router.param('server', function(req, res, next, slug) {
-  Server.findOne({ slug: slug})
+router.param('server', function (req, res, next, slug) {
+  Server.findOne({ slug: slug })
     .populate('author')
     .then(function (server) {
       if (!server) { return res.sendStatus(404); }
@@ -16,25 +22,26 @@ router.param('server', function(req, res, next, slug) {
       return next();
     }).catch(next);
 });
-router.get('/', auth.required, function(req, res, next) {
+
+router.get('/', auth.required, function (req, res, next) {
   var query = {};
   var limit = 20;
   var offset = 0;
 
-  if(typeof req.query.limit !== 'undefined'){
+  if (typeof req.query.limit !== 'undefined') {
     limit = req.query.limit;
   }
 
-  if(typeof req.query.offset !== 'undefined'){
+  if (typeof req.query.offset !== 'undefined') {
     offset = req.query.offset;
   }
 
   Promise.all([
-    req.query.author ? User.findOne({username: req.query.author}) : null,
-  ]).then(function(results){
+    req.query.author ? User.findOne({ username: req.query.author }) : null,
+  ]).then(function (results) {
     var author = results[0];
 
-    if(author){
+    if (author) {
       query.author = author._id;
     }
 
@@ -42,18 +49,18 @@ router.get('/', auth.required, function(req, res, next) {
       Server.find(query)
         .limit(Number(limit))
         .skip(Number(offset))
-        .sort({createdAt: 'desc'})
+        .sort({ createdAt: 'desc' })
         .populate('author')
         .exec(),
       Server.count(query).exec(),
       req.payload ? User.findById(req.payload.id) : null,
-    ]).then(function(results){
+    ]).then(function (results) {
       var servers = results[0];
       var serversCount = results[1];
       var user = results[2];
 
       return res.json({
-        servers: servers.map(function(server){
+        servers: servers.map(function (server) {
           return server.toJSONFor(user);
         }),
         serversCount: serversCount
@@ -62,51 +69,105 @@ router.get('/', auth.required, function(req, res, next) {
   }).catch(next);
 });
 
-router.post('/', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
+router.post('/', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
     var server = new Server(req.body.server);
 
     server.author = user;
+    title = server.title;
+    // creer les pods ici
 
-    return server.save().then(function(){
+    var deployments = {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: title,
+        labels: {
+          app: title
+        }
+      },
+      spec: {
+        replicas: 3,
+        selector: {
+          matchLabels: {
+            app: title
+          }
+        },
+        template: {
+          metadata: {
+            labels: {
+              app: title
+            }
+          },
+          spec: {
+            containers: [
+              {
+                name: 'learn-ocaml',
+                image: 'ocamlsf/learn-ocaml:latest',
+                ports: [
+                  {
+                    containerPort: 8080
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    k8sApi.createNamespacedDeployment('default', deployments).then(
+      (response) => {
+        console.log('Created deployment ' + title);
+        //console.log(response);
+        k8sApi.readNamespacedDeployment(title, 'default').then((response) => {
+          //console.log(response);
+        });
+      },
+      (err) => {
+        console.log('Error!: ' + err);
+      },
+    );
+
+    return server.save().then(function () {
       console.log(server.author);
-      return res.json({server: server.toJSONFor(user)});
+      return res.json({ server: server.toJSONFor(user) });
     });
   }).catch(next);
 });
 
 // return a server
-router.get('/:server', auth.optional, function(req, res, next) {
+router.get('/:server', auth.optional, function (req, res, next) {
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
     req.server.populate('author').execPopulate()
-  ]).then(function(results){
+  ]).then(function (results) {
     var user = results[0];
 
-    return res.json({server: req.server.toJSONFor(user)});
+    return res.json({ server: req.server.toJSONFor(user) });
   }).catch(next);
 });
 
 // update server
-router.put('/:server', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if(req.server.author._id.toString() === req.payload.id.toString()){
-      if(typeof req.body.server.title !== 'undefined'){
+router.put('/:server', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (req.server.author._id.toString() === req.payload.id.toString()) {
+      if (typeof req.body.server.title !== 'undefined') {
         req.server.title = req.body.server.title;
       }
 
-      if(typeof req.body.server.description !== 'undefined'){
+      if (typeof req.body.server.description !== 'undefined') {
         req.server.description = req.body.server.description;
       }
 
-      if(typeof req.body.server.body !== 'undefined'){
+      if (typeof req.body.server.body !== 'undefined') {
         req.server.body = req.body.server.body;
       }
 
-      req.server.save().then(function(server){
-        return res.json({server: server.toJSONFor(user)});
+      req.server.save().then(function (server) {
+        return res.json({ server: server.toJSONFor(user) });
       }).catch(next);
     } else {
       return res.sendStatus(403);
@@ -115,12 +176,18 @@ router.put('/:server', auth.required, function(req, res, next) {
 });
 
 // delete server
-router.delete('/:server', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
+router.delete('/:server', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
-
-    if(req.server.author._id.toString() === req.payload.id.toString()){
-      return req.server.remove().then(function(){
+    if (req.server.author._id.toString() === req.payload.id.toString()) {
+      return req.server.remove().then(function () {
+        k8sApi.deleteNamespacedDeployment(title, 'default').then((response) => {
+          console.log('delete depoyment ok');
+        },
+          (err) => {
+            console.log('Error!: ' + err);
+          },
+        );
         return res.sendStatus(204);
       });
     } else {
