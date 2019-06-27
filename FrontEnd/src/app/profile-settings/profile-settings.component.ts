@@ -41,11 +41,6 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileSettingsForm.patchValue(this.user);
   }
 
-  logout() {
-    this.userService.purgeAuth();
-    this.router.navigateByUrl('/');
-  }
-
   submitForm() {
     this.isSubmitting = true;
 

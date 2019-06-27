@@ -3,13 +3,13 @@ var uniqueValidator = require('mongoose-unique-validator');
 var slug = require('slug');
 var User = mongoose.model('User');
 const k8s = require('@kubernetes/client-node');
-var deployment = Object;
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
   title: String,
   description: String,
   body: String,
+  vue: String,
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
@@ -44,7 +44,7 @@ ServerSchema.methods.toJSONFor = function (user) {
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     author: this.author.toProfileJSONFor(user),
-    deployment,
+    vue: 'Arborescence de la vue',
 
   };
 };

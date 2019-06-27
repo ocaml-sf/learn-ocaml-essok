@@ -9,6 +9,7 @@ const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 const k8sApi = kc.makeApiClient(k8s.AppsV1Api);
 var title = '';
+const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
 
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
@@ -118,6 +119,16 @@ router.post('/', auth.required, function (req, res, next) {
       }
     };
 
+    k8sApiIngress.readNamespacedIngress('ingress', 'default').then(
+      (response) => {
+        console.log('Created deployment ' + title);
+        //console.log(response);
+      },
+      (err) => {
+        console.log('Error!: ' + err);
+      },
+    );
+    
     k8sApi.createNamespacedDeployment('default', deployments).then(
       (response) => {
         console.log('Created deployment ' + title);

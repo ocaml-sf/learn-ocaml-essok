@@ -67,6 +67,47 @@ router.post('/users/login', function (req, res, next) {
   })(req, res, next);
 });
 
+router.post('/reset-password', auth.required, function (req, res, next) {
+ 
+  if (!req.body.reset.new_password) {
+    return res.status(422).json({ errors: { password: "can't be blank" } });
+  }
+
+  if (!req.body.reset.new_password_verification) {
+    return res.status(422).json({ errors: { password: "can't be blank" } });
+  }
+
+  if (req.body.reset.new_password !== req.body.reset.new_password_verification) {
+    return res.status(422).json({ errors: { password: "verification mismatch" } });
+  }
+
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+
+    if (!req.body.user.email) {
+      return res.status(422).json({ errors: { email: "can't be blank" } });
+    }
+
+    if (req.body.user.email !== user.email) {
+      return res.status(422).json({ errors: { email: "does not correspond" } });
+    }
+  
+    if (!req.body.user.password) {
+      return res.status(422).json({ errors: { password: "can't be blank" } });
+    }
+
+    if (!user.validPassword(req.body.user.password)) {
+      return res.status(422).json({ errors: { password: "does not correspond" } });
+    }
+
+    user.setPassword(req.body.reset.new_password);
+
+    return user.save().then(function () {
+      return res.json({ user: user.toAuthJSON() });
+    });
+  }).catch(next);
+});
+
 router.post('/users', function (req, res, next) {
   var user = new User();
 

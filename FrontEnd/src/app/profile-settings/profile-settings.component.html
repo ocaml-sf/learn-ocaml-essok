@@ -1,7 +1,7 @@
 <div class="profileSettings-page">
   <div class="container page">
     <div class="row">
-      <div class="col-md-8 offset-md-2 col-xs-12">
+      <div class="col-md-10 offset-md-1 col-xs-12">
 
         <h1 class="text-xs-center">Your Settings</h1>
 
@@ -55,20 +55,6 @@
                 formControlName="email" />
             </fieldset>
 
-            <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="password"
-                placeholder="New Password"
-                formControlName="password" />
-            </fieldset>
-
-            <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="password"
-                placeholder="New Password Verification"
-                formControlName="password_verification" />
-            </fieldset>
-
             <button class="btn btn-lg btn-primary pull-xs-right"
               type="submit">
               Update Settings
@@ -81,8 +67,9 @@
         <hr />
 
         <button class="btn btn-outline-danger"
-          (click)="logout()">
-          Or click here to logout.
+          routerLink="/reset-password"
+          routerLinkActive="active">
+          Click here to reset your password.
         </button>
 
       </div>

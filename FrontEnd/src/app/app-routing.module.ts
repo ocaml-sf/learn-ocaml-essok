@@ -15,6 +15,10 @@ const routes: Routes = [
     loadChildren: './editor/editor.module#EditorModule'
   },
   {
+    path: 'reset-password',
+    loadChildren: './reset-password/reset-password.module#ResetPasswordModule'
+  },
+  {
     path: 'server',
     loadChildren: './server/server.module#ServerModule'
   },
