@@ -4,15 +4,16 @@ var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
 
-var title = '';
-
 const k8s = require('@kubernetes/client-node');
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
-
+k8sApiIngress.defaultHeaders = {
+  'Content-Type': 'application/strategic-merge-patch+json',
+  ...k8sApiIngress.defaultHeaders,
+};
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
   Server.findOne({ slug: slug })
@@ -22,7 +23,7 @@ router.param('server', function (req, res, next, slug) {
 
       req.server = server;
       title = server.title;
-      
+
       return next();
     }).catch(next);
 });
@@ -120,22 +121,8 @@ router.post('/', auth.required, function (req, res, next) {
     };
 
 
-
-    k8sApiDeploy.createNamespacedDeployment('default', deployment).then(
-      (response) => {
-        console.log('Created deployment ' + title);
-        //console.log(response);
-        k8sApiDeploy.readNamespacedDeployment(title, 'default').then((response) => {
-          //console.log(response);
-        },
-          (err) => {
-            console.log('Error!: ' + err);
-          });
-      },
-      (err) => {
-        console.log('Error!: ' + err);
-      },
-    );
+    server.createNamespacedDeployment(deployment);
+    server.readNamespacedDeployment();
 
     var service = {
       apiVersion: 'v1',
@@ -161,41 +148,16 @@ router.post('/', auth.required, function (req, res, next) {
       }
     }
 
-
-    k8sApi.createNamespacedService('default', service).then(
-      (response) => {
-        console.log('Service created');
-        //console.log(response);
-      },
-      (err) => {
-        console.log('Error!: ' + err);
-      },
-    );
+    server.createNamespacedService(service);
 
     var path = {
       backend: {
         serviceName: title,
         servicePort: 80
       },
-      path: '/(' + title + ')?/?(.*)'
+      path: '/(' + title + ')/?(.*)'
     }
-
-    k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
-      (response) => {
-        console.log('Ingress read');
-        k8sApiIngress.patchNamespacedIngress(title, 'default', response.body.spec.rules[0].http.paths.push(path)).then(
-          (response) => {
-            console.log('Ingress updated');
-          },
-          (err) => {
-            console.log('Error!: ' + err);
-          },
-        );
-      },
-      (err) => {
-        console.log('Error!: ' + err);
-      },
-    );
+    server.createNamespacedIngress(path);
 
     return server.save().then(function () {
       console.log(server.author);
@@ -246,39 +208,12 @@ router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (req.server.author._id.toString() === req.payload.id.toString()) {
+
+      server.deleteNamespacedIngress();
+      server.deleteNamespacedService();
+      server.deleteNamespacedDeployment();
+
       return req.server.remove().then(function () {
-
-        k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
-          (response) => {
-            console.log('Ingress read');
-            /*response.body.spec.rules[0].http.paths.push(path).then(
-              (response) => {
-                console.log('Ingress updated');
-              },
-              (err) => {
-                console.log('Error!: ' + err);
-              },
-            );*/
-          },
-          (err) => {
-            console.log('Error!: ' + err);
-          },
-        );
-
-        k8sApi.deleteNamespacedService(title, 'default').then((response) => {
-          console.log('delete service ok');
-        },
-          (err) => {
-            console.log('Error!: ' + err);
-          },
-        );
-        k8sApiDeploy.deleteNamespacedDeployment(title, 'default').then((response) => {
-          console.log('delete depoyment ok');
-        },
-          (err) => {
-            console.log('Error!: ' + err);
-          },
-        );
         return res.sendStatus(204);
       });
     } else {

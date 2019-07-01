@@ -11,4 +11,4 @@ import { ContactRoutingModule } from './contact-routing.module';
   declarations: [ContactComponent]
 
 })
-export class ContactModule {}
+export class ContactModule { }

@@ -15,4 +15,4 @@ import { ProfileSettingsRoutingModule } from './profile-settings-routing.module'
     ProfileSettingsComponent
   ]
 })
-export class ProfileSettingsModule {}
+export class ProfileSettingsModule { }

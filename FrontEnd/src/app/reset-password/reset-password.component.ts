@@ -57,14 +57,16 @@ export class ResetPasswordComponent implements OnInit {
     Object.assign(this.user, this.userService.getCurrentUser());
   }
 
-  submitForm() {
+  preForm() {
     this.isSubmitting = true;
     this.errors = { errors: {} };
-    const credentialsLogin = this.authForm.value;
-    const credentialsReset = this.resetPasswordForm.value;
+  }
 
+  submitForm() {
+
+    this.preForm();
     this.userService
-      .attemptChangePassword(credentialsReset, credentialsLogin)
+      .attemptChangePassword(this.resetPasswordForm.value, this.authForm.value)
       .subscribe(
         updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
         err => {

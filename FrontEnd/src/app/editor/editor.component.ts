@@ -19,18 +19,17 @@ export class EditorComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder
   ) {
-    // use the FormBuilder to create a form group
     this.serverForm = this.fb.group({
       title: '',
       description: '',
     });
-
-
-    // Optional: subscribe to value changes on the form
-    // this.serverForm.valueChanges.subscribe(value => this.updateServer(value));
   }
 
   ngOnInit() {
+  }
+
+  updateServer(values: Object) {
+    Object.assign(this.server, values);
   }
 
   submitForm() {
@@ -49,7 +48,5 @@ export class EditorComponent implements OnInit {
     );
   }
 
-  updateServer(values: Object) {
-    Object.assign(this.server, values);
-  }
+
 }

@@ -20,4 +20,4 @@ import { ProfileRoutingModule } from './profile-routing.module';
     ProfileResolver
   ]
 })
-export class ProfileModule {}
+export class ProfileModule { }

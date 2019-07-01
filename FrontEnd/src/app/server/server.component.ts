@@ -28,19 +28,24 @@ export class ServerComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.loadServer();
+    this.loadUser();
+  }
+
+  loadServer() {
     // Retreive the prefetched server
     this.route.data.subscribe(
       (data: { server: Server }) => {
         this.server = data.server;
-
       }
     );
+  }
 
+  loadUser() {
     // Load the current user's data
     this.userService.currentUser.subscribe(
       (userData: User) => {
         this.currentUser = userData;
-
         this.canModify = (this.currentUser.username === this.server.author.username);
       }
     );

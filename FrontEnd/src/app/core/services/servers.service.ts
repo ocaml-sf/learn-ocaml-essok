@@ -8,24 +8,24 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ServersService {
-  constructor (
+  constructor(
     private apiService: ApiService
-  ) {}
+  ) { }
 
-  query(config: ServerListConfig): Observable<{servers: Server[], serversCount: number}> {
+  query(config: ServerListConfig): Observable<{ servers: Server[], serversCount: number }> {
     // Convert any filters over to Angular's URLSearchParams
     const params = {};
 
     Object.keys(config.filters)
-    .forEach((key) => {
-      params[key] = config.filters[key];
-    });
+      .forEach((key) => {
+        params[key] = config.filters[key];
+      });
 
     return this.apiService
-    .get(
-      '/servers' + (''),
-      new HttpParams({ fromObject: params })
-    );
+      .get(
+        '/servers' + (''),
+        new HttpParams({ fromObject: params })
+      );
   }
 
   get(slug): Observable<Server> {
@@ -40,12 +40,12 @@ export class ServersService {
   save(server): Observable<Server> {
     // If we're updating an existing server
     if (server.slug) {
-      return this.apiService.put('/servers/' + server.slug, {server: server})
+      return this.apiService.put('/servers/' + server.slug, { server: server })
         .pipe(map(data => data.server));
 
-    // Otherwise, create a new server
+      // Otherwise, create a new server
     } else {
-      return this.apiService.post('/servers/', {server: server})
+      return this.apiService.post('/servers/', { server: server })
         .pipe(map(data => data.server));
     }
   }

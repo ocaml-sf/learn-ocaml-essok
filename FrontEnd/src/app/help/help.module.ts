@@ -11,4 +11,4 @@ import { HelpRoutingModule } from './help-routing.module';
   declarations: [HelpComponent]
 
 })
-export class HelpModule {}
+export class HelpModule { }

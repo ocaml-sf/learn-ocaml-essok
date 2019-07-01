@@ -16,47 +16,55 @@ export class HomeComponent implements OnInit {
   ) { }
 
   currentUser: User;
-
   isAuthenticated: boolean;
   listConfig: ServerListConfig = {
     type: 'all',
     filters: {
     }
   };
-
   title: string;
   header: string;
   body: string;
 
   ngOnInit() {
+    this.authStatus();
+
+    if (this.isAuthenticated) {
+      this.authTrue();
+
+    } else {
+      this.authFalse();
+    }
+  }
+
+  authStatus() {
     this.userService.isAuthenticated.subscribe(
       (authenticated) => {
         this.isAuthenticated = authenticated;
       }
     );
-
-    // set the server list accordingly
-    if (this.isAuthenticated) {
-      this.userService.currentUser.subscribe(
-        (userData) => {
-          this.currentUser = userData;
-          this.listConfig = {
-            type: 'all',
-            filters: {
-              author: this.currentUser.username,
-            }
-          };
-        }
-      );
-
-    } else {
-      this.route.url.subscribe(data => {
-        this.title = 'Home';
-        this.header = 'This is the header of the home page';
-        this.body = 'This is the body of the home page';
-      });
-    }
-
-
   }
+
+  authTrue() {
+    this.userService.currentUser.subscribe(
+      (userData) => {
+        this.currentUser = userData;
+        this.listConfig = {
+          type: 'all',
+          filters: {
+            author: this.currentUser.username,
+          }
+        };
+      }
+    );
+  }
+
+  authFalse() {
+    this.route.url.subscribe(data => {
+      this.title = 'Home';
+      this.header = 'This is the header of the home page';
+      this.body = 'This is the body of the home page';
+    });
+  }
+
 }

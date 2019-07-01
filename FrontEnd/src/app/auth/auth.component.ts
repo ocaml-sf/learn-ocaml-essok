@@ -43,22 +43,28 @@ export class AuthComponent implements OnInit {
       // Set a title for the page accordingly
       this.title = (this.authType === 'login') ? 'Sign in' : 'Sign up';
       // add form control for username if this is the register page
-      if (this.authType === 'register') {
-        this.authForm.addControl('username', new FormControl());
-        this.authForm.addControl('description', new FormControl());
-        this.authForm.addControl('place', new FormControl());
-        this.authForm.addControl('goal', new FormControl());
-      }
+      this.isregister();
     });
   }
 
-  submitForm() {
+  isregister() {
+    if (this.authType === 'register') {
+      this.authForm.addControl('username', new FormControl());
+      this.authForm.addControl('description', new FormControl());
+      this.authForm.addControl('place', new FormControl());
+      this.authForm.addControl('goal', new FormControl());
+    }
+  }
+
+  preparingValuesSubmitting() {
     this.isSubmitting = true;
     this.errors = { errors: {} };
+  }
 
-    const credentials = this.authForm.value;
+  submitForm() {
+    this.preparingValuesSubmitting();
     this.userService
-      .attemptAuth(this.authType, credentials)
+      .attemptAuth(this.authType, this.authForm.value)
       .subscribe(
         data => this.router.navigateByUrl('/'),
         err => {

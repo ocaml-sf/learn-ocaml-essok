@@ -21,4 +21,4 @@ import { ServerRoutingModule } from './server-routing.module';
     ServerResolver
   ]
 })
-export class ServerModule {}
+export class ServerModule { }

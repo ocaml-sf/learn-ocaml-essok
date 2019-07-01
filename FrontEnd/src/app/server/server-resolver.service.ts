@@ -11,7 +11,7 @@ export class ServerResolver implements Resolve<Server> {
     private serversService: ServersService,
     private router: Router,
     private userService: UserService
-  ) {}
+  ) { }
 
   resolve(
     route: ActivatedRouteSnapshot,
