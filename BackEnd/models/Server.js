@@ -97,18 +97,22 @@ ServerSchema.methods.deleteNamespacedIngress = function () {
     (response) => {
       var paths = response.body.spec.rules[0].http.paths;
       console.log('Ingress read');
-      for (let index = 0; index < paths.length; index++) {
-        if (paths[index].backend.serviceName === this.title) {
-          paths.splice(index, 1);
-        }
-      }
-      console.log('preparing file for ingress');
+      this.removeIngressFile(paths);
       this.patchNamespacedIngress(response);
     },
     (err) => {
       console.log('Error!: ' + err);
     },
   );
+};
+
+ServerSchema.methods.removeIngressFile = function (paths) {
+  for (let index = 0; index < paths.length; index++) {
+    if (paths[index].backend.serviceName === this.title) {
+      paths.splice(index, 1);
+    }
+  }
+  console.log('preparing file for ingress');
 };
 
 ServerSchema.methods.deleteNamespacedService = function () {
