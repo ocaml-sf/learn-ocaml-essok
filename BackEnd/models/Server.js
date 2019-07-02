@@ -15,7 +15,7 @@ k8sApiIngress.defaultHeaders = {
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
-  title: String,
+  title: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/^[a-zA-Z]+$/, 'is invalid'], index: true },
   description: String,
   body: String,
   vue: String,
