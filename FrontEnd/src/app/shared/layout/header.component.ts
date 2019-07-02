@@ -9,7 +9,7 @@ import { User, UserService } from '../../core';
 export class HeaderComponent implements OnInit {
   constructor(
     private userService: UserService
-  ) {}
+  ) { }
 
   currentUser: User;
 

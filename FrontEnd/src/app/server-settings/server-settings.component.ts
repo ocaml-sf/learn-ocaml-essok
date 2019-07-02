@@ -39,20 +39,28 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadData();
+    this.uploadPrepare();
+    this.router.navigateByUrl('/server/server-settings/' + this.server.slug);
+  }
+
+  loadData() {
     this.route.data.subscribe((data: { server: Server }) => {
       if (data.server) {
         this.server = data.server;
         this.serverSettingsForm.patchValue(data.server);
       }
     });
+  }
+
+  uploadPrepare() {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
       console.log('FileUpload:uploaded:', item, status, response);
       this.uploadErrors = response;
     };
-    this.router.navigateByUrl('/server/server-settings/' + this.server.slug);
-
   }
+
   public fileOverBase(e: any): void {
     this.hasBaseDropZoneOver = e;
   }
