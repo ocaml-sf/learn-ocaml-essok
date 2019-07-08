@@ -49,6 +49,12 @@ export class ServerComponent implements OnInit {
         this.canModify = (this.currentUser.username === this.server.author.username);
       }
     );
+    this.userService.isAdmin.subscribe(
+      (isAdmin) => {
+        this.canModify = (this.canModify || isAdmin);
+      }
+    );
+
   }
 
   deleteServer() {

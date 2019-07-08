@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 
 import { ApiService } from './api.service';
 import { JwtService } from './jwt.service';
-import { User } from '../models';
+import { User, UserListConfig } from '../models';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
 
@@ -15,6 +15,9 @@ export class UserService {
 
   private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
   public isAuthenticated = this.isAuthenticatedSubject.asObservable();
+
+  private isAdminSubject = new ReplaySubject<boolean>(1);
+  public isAdmin = this.isAdminSubject.asObservable();
 
   constructor(
     private apiService: ApiService,
@@ -45,6 +48,8 @@ export class UserService {
     this.currentUserSubject.next(user);
     // Set isAuthenticated to true
     this.isAuthenticatedSubject.next(true);
+    // Set isAadmin to the good value
+    this.isAdminSubject.next(user.admin);
   }
 
   purgeAuth() {
@@ -54,6 +59,8 @@ export class UserService {
     this.currentUserSubject.next({} as User);
     // Set auth status to false
     this.isAuthenticatedSubject.next(false);
+    // Set admin status to false
+    this.isAdminSubject.next(false);
   }
 
   attemptAuth(type, credentials): Observable<User> {
@@ -90,6 +97,22 @@ export class UserService {
         this.currentUserSubject.next(data.user);
         return data.user;
       }));
+  }
+
+  query(config: UserListConfig): Observable<{ users: User[], usersCount: number }> {
+    // Convert any filters over to Angular's URLSearchParams
+    const params = {};
+
+    Object.keys(config.filters)
+      .forEach((key) => {
+        params[key] = config.filters[key];
+      });
+
+    return this.apiService
+      .get(
+        '/users' + (''),
+        new HttpParams({ fromObject: params })
+      );
   }
 
 }

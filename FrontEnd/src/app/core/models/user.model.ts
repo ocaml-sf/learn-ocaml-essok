@@ -1,4 +1,5 @@
 export interface User {
+  admin: boolean;
   email: string;
   token: string;
   username: string;

@@ -1,0 +1,29 @@
+<app-user-preview
+  *ngFor="let user of results"
+  [user]="user">
+</app-user-preview>
+
+<div class="app-user-preview"
+  [hidden]="!loading">
+  Loading users...
+</div>
+
+<div class="app-user-preview"
+  [hidden]="loading || results.length">
+  No users are here... yet.
+</div>
+
+<nav [hidden]="loading || totalPages.length <= 1">
+  <ul class="pagination">
+
+    <li class="page-item"
+      [ngClass]="{'active': pageNumber === currentPage}"
+      *ngFor="let pageNumber of totalPages"
+      (click)="setPageTo(pageNumber)">
+
+      <a class="page-link" >{{ pageNumber }}</a>
+
+    </li>
+
+  </ul>
+</nav>

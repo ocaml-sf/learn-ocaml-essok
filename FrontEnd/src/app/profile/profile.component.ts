@@ -17,7 +17,7 @@ export class ProfileComponent implements OnInit {
   profile: Profile;
   currentUser: User;
   isUser: boolean;
-
+  
   ngOnInit() {
     this.route.data.pipe(
       concatMap((data: { profile: Profile }) => {
@@ -26,7 +26,7 @@ export class ProfileComponent implements OnInit {
         return this.userService.currentUser.pipe(tap(
           (userData: User) => {
             this.currentUser = userData;
-            this.isUser = (this.currentUser.username === this.profile.username);
+            this.isUser = (this.currentUser.username === this.profile.username) || this.currentUser.admin;
           }
         ));
       })

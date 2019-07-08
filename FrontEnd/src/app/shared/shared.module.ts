@@ -7,6 +7,8 @@ import { RouterModule } from '@angular/router';
 import { ServerListComponent, ServerMetaComponent, ServerPreviewComponent } from './server-helpers';
 import { ListErrorsComponent } from './list-errors.component';
 import { ShowAuthedDirective } from './show-authed.directive';
+import { ShowAdminDirective } from './show-admin.directive';
+import { UserListComponent, UserPreviewComponent } from './user-helpers';
 
 @NgModule({
   imports: [
@@ -20,20 +22,26 @@ import { ShowAuthedDirective } from './show-authed.directive';
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,
+    UserListComponent,
+    UserPreviewComponent,
     ListErrorsComponent,
-    ShowAuthedDirective
+    ShowAuthedDirective,
+    ShowAdminDirective
   ],
   exports: [
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,
+    UserListComponent,
+    UserPreviewComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
     ListErrorsComponent,
     RouterModule,
-    ShowAuthedDirective
+    ShowAuthedDirective,
+    ShowAdminDirective
   ]
 })
 export class SharedModule { }

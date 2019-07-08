@@ -1,0 +1,28 @@
+<div class="admin-page">
+
+    <div class="banner" *appShowAdmin="false">
+        <div class="container">
+            <h1 class="logo-font">Learn OCaml Essok</h1>
+            <p>A place to manage your <i>SHALL NOT PASS</i> .</p>
+        </div>
+    </div>
+
+    <div class="container page" *appShowAdmin="true">
+        <h1 class="text-xs-center">God Board</h1>
+        
+        <button class="btn btn-md btn-outline-warning" [ngClass]="{disabled: isUser}" (click)="getUser()">
+            <i class="ion-person"></i> Manage by User
+        </button>
+        <button class="btn btn-md btn-outline-warning" [ngClass]="{disabled: isServer}" (click)="getServer()">
+            <i class="ion-settings"></i> Manage by Server
+        </button>
+        <hr />
+
+        <div class="row">
+            <router-outlet name="server" *ngIf="isServer"></router-outlet>
+        </div>
+        <div class="row">
+            <router-outlet name="user" *ngIf="isUser"></router-outlet>
+        </div>
+    </div>
+</div>

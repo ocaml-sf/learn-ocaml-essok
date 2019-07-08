@@ -3,44 +3,34 @@
     <a class="navbar-brand" routerLink="/">Learn OCaml Essok</a>
 
     <!-- Show this for logged out users -->
-    <ul *appShowAuthed="false"
-      class="nav navbar-nav pull-xs-right">
+    <ul *appShowAuthed="false" class="nav navbar-nav pull-xs-right">
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/">
+        <a class="btn btn-outline-success" routerLink="/">
           Home
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/login"
-          routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/login" routerLinkActive="active">
           Sign in
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/register"
-          routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/register" routerLinkActive="active">
           Sign up
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/contact"
-          routerLinkActive="active">
+        <a class="btn btn-outline-success" routerLink="/contact" routerLinkActive="active">
           Contacts
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/help"
-          routerLinkActive="active">
+        <a class="btn btn-outline-success" routerLink="/help" routerLinkActive="active">
           Help
         </a>
       </li>
@@ -48,64 +38,51 @@
     </ul>
 
     <!-- Show this for logged in users -->
-    <ul *appShowAuthed="true"
-      class="nav navbar-nav pull-xs-right">
+    <ul *appShowAuthed="true" class="nav navbar-nav pull-xs-right">
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }">
+        <a class="btn btn-outline-success" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           Home
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/editor"
-          routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active">
           <i class="ion-compose"></i>&nbsp;New Server
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/profile-settings"
-          routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/profile-settings" routerLinkActive="active">
           <i class="ion-gear-a"></i>&nbsp;Profile Settings
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          [routerLink]="['/profile', currentUser.username]"
-          routerLinkActive="active">
+        <a class="btn btn-outline-info" [routerLink]="['/profile', currentUser.username]" routerLinkActive="active">
           <img [src]="currentUser.image" *ngIf="currentUser.image" class="user-pic" />
           {{ currentUser.username }}
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/contact"
-          routerLinkActive="active">
+        <a class="btn btn-outline-success" routerLink="/contact" routerLinkActive="active">
           Contacts
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link"
-          routerLink="/help"
-          routerLinkActive="active">
+        <a class="btn btn-outline-success" routerLink="/help" routerLinkActive="active">
           Help
         </a>
       </li>
+      <li class="nav-item" *appShowAdmin="true">
+        <a class="btn btn-outline-warning" routerLink="/admin" routerLinkActive="active">
+          Admin Panel
+        </a>
 
       <li class="nav-item">
-        <a class="btn btn-outline-danger"
-          (click)="logout()"
-          routerLink="/"
-          routerLinkActive="active"
+        <a class="btn btn-outline-danger" (click)="logout()" routerLink="/" routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }">
           Logout
         </a>

@@ -87,7 +87,7 @@ ServerSchema.methods.createNamespacedIngress = function (path) {
       this.patchNamespacedIngress(response);
     },
     (err) => {
-      console.log('Error!: ' + err);
+      console.log('Error!: ' + JSON.stringify(err));
     },
   );
 };

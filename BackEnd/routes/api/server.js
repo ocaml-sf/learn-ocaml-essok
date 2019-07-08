@@ -3,17 +3,8 @@ var mongoose = require('mongoose');
 var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
+var events = require('events');
 
-const k8s = require('@kubernetes/client-node');
-const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
-const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
-const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
-k8sApiIngress.defaultHeaders = {
-  'Content-Type': 'application/strategic-merge-patch+json',
-  ...k8sApiIngress.defaultHeaders,
-};
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
   Server.findOne({ slug: slug })
@@ -22,7 +13,6 @@ router.param('server', function (req, res, next, slug) {
       if (!server) { return res.sendStatus(404); }
 
       req.server = server;
-      title = server.title;
 
       return next();
     }).catch(next);
@@ -32,7 +22,6 @@ router.get('/', auth.required, function (req, res, next) {
   var query = {};
   var limit = 20;
   var offset = 0;
-
   if (typeof req.query.limit !== 'undefined') {
     limit = req.query.limit;
   }
@@ -40,37 +29,47 @@ router.get('/', auth.required, function (req, res, next) {
   if (typeof req.query.offset !== 'undefined') {
     offset = req.query.offset;
   }
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
 
-  Promise.all([
-    req.query.author ? User.findOne({ username: req.query.author }) : null,
-  ]).then(function (results) {
-    var author = results[0];
+    Promise.all([
 
-    if (author) {
-      query.author = author._id;
-    }
-
-    return Promise.all([
-      Server.find(query)
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .sort({ createdAt: 'desc' })
-        .populate('author')
-        .exec(),
-      Server.count(query).exec(),
-      req.payload ? User.findById(req.payload.id) : null,
+      req.query.author ? User.findOne({ username: req.query.author }) : null,
     ]).then(function (results) {
-      var servers = results[0];
-      var serversCount = results[1];
-      var user = results[2];
+      var author = results[0];
 
-      return res.json({
-        servers: servers.map(function (server) {
-          return server.toJSONFor(user);
-        }),
-        serversCount: serversCount
+      if (user.isAdmin()) {
+        if (author) {
+          query.author = author._id;
+        }
+      }
+      else {
+        query.author = req.payload.id;
+      }
+
+
+      return Promise.all([
+        Server.find(query)
+          .limit(Number(limit))
+          .skip(Number(offset))
+          .sort({ createdAt: 'desc' })
+          .populate('author')
+          .exec(),
+        Server.countDocuments(query).exec(),
+        req.payload ? User.findById(req.payload.id) : null,
+      ]).then(function (results) {
+        var servers = results[0];
+        var serversCount = results[1];
+        var user = results[2];
+
+        return res.json({
+          servers: servers.map(function (server) {
+            return server.toJSONFor(user);
+          }),
+          serversCount: serversCount
+        });
       });
-    });
+    }).catch(next);
   }).catch(next);
 });
 
@@ -167,14 +166,18 @@ router.post('/', auth.required, function (req, res, next) {
 });
 
 // return a server
-router.get('/:server', auth.optional, function (req, res, next) {
+router.get('/:server', auth.required, function (req, res, next) {
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
-    req.server.populate('author').execPopulate()
+    req.server.populate('author').execPopulate(),
+    
   ]).then(function (results) {
     var user = results[0];
+    var server = req.server.toJSONFor(user);
+    if (!user) { return res.sendStatus(401); }
+    if ((user.username !== server.author.username) && (!user.isAdmin())) { return res.sendStatus(401); }
 
-    return res.json({ server: req.server.toJSONFor(user) });
+    return res.json({ server });
   }).catch(next);
 });
 
@@ -207,15 +210,35 @@ router.put('/:server', auth.required, function (req, res, next) {
 router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
-    if (req.server.author._id.toString() === req.payload.id.toString()) {
+    if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
-      server.deleteNamespacedIngress();
-      server.deleteNamespacedService();
-      server.deleteNamespacedDeployment();
+      var eventEmitter = new events.EventEmitter();
 
-      return req.server.remove().then(function () {
-        return res.sendStatus(204);
+      var deleteHandler = function () {
+        req.server.deleteNamespacedIngress();
+        eventEmitter.emit('Ingress_deleted');
+      }
+
+      eventEmitter.on('kube_deletion', deleteHandler);
+
+      eventEmitter.on('Ingress_deleted', function () {
+        req.server.deleteNamespacedService();
+        eventEmitter.emit('Service_deleted');
       });
+
+      eventEmitter.on('Service_deleted', function () {
+        req.server.deleteNamespacedDeployment();
+        eventEmitter.emit('Deploy_deleted');
+      });
+
+      eventEmitter.on('Deploy_deleted', function () {
+        return req.server.remove().then(function () {
+          return res.sendStatus(204);
+        });
+      });
+
+      eventEmitter.emit('kube_deletion');
+
     } else {
       return res.sendStatus(403);
     }

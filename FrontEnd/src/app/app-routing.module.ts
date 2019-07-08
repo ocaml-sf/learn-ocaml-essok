@@ -3,6 +3,10 @@ import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: 'admin',
+    loadChildren: './admin/admin.module#AdminModule'
+  },
+  {
     path: 'profile-settings',
     loadChildren: './profile-settings/profile-settings.module#ProfileSettingsModule'
   },

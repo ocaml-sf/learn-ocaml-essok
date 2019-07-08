@@ -3,16 +3,49 @@ var router = require('express').Router();
 var passport = require('passport');
 var User = mongoose.model('User');
 var auth = require('../auth');
-const k8s = require('@kubernetes/client-node');
-const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
-const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
     return res.json({ user: user.toAuthJSON() });
+  }).catch(next);
+});
+
+router.get('/users', auth.required, function (req, res, next) {
+  var query = {};
+  var limit = 20;
+  var offset = 0;
+  if (typeof req.query.limit !== 'undefined') {
+    limit = req.query.limit;
+  }
+
+  if (typeof req.query.offset !== 'undefined') {
+    offset = req.query.offset;
+  }
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    if (user.isAdmin()) {
+
+      return Promise.all([
+        User.find(query)
+          .limit(Number(limit))
+          .skip(Number(offset))
+          .sort({ createdAt: 'desc' })
+          .exec(),
+        User.countDocuments(query).exec(),
+      ]).then(function (results) {
+        var users = results[0];
+        var usersCount = results[1];
+
+        return res.json({
+          users: users,
+          usersCount: usersCount
+        });
+      });
+    } else {
+      return res.sendStatus(403);
+    }
   }).catch(next);
 });
 
@@ -71,7 +104,7 @@ router.post('/users/login', function (req, res, next) {
 });
 
 router.post('/reset-password', auth.required, function (req, res, next) {
- 
+
   if (!req.body.reset.new_password) {
     return res.status(422).json({ errors: { password: "can't be blank" } });
   }
@@ -94,7 +127,7 @@ router.post('/reset-password', auth.required, function (req, res, next) {
     if (req.body.user.email !== user.email) {
       return res.status(422).json({ errors: { email: "does not correspond" } });
     }
-  
+
     if (!req.body.user.password) {
       return res.status(422).json({ errors: { password: "can't be blank" } });
     }
@@ -127,18 +160,9 @@ router.post('/users', function (req, res, next) {
     },
   };
 
-  k8sApi.createNamespace(namespace).then(
-    (response) => {
-      console.log('Created namespace');
-      //console.log(response);
-      k8sApi.readNamespace(namespace.metadata.name).then((response) => {
-        //console.log(response);
-      });
-    },
-    (err) => {
-      console.log('Error!: ' + err);
-    },
-  );
+  user.createNamespace(namespace);
+  user.readNamespace(namespace.metadata.name);
+
 
   user.save().then(function () {
     return res.json({ user: user.toAuthJSON() });

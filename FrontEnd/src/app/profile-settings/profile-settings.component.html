@@ -6,7 +6,6 @@
         <h1 class="text-xs-center">Your Settings</h1>
 
         <app-list-errors [errors]="errors"></app-list-errors>
-
         <form [formGroup]="profileSettingsForm" (ngSubmit)="submitForm()">
           <fieldset [disabled]="isSubmitting">
 
