@@ -144,6 +144,20 @@ router.post('/reset-password', auth.required, function (req, res, next) {
   }).catch(next);
 });
 
+
+//disable or enable an user
+/**
+ * Factorization of the code line 21 in server.js to use it here
+ * 
+ * 1/ Query for the user
+ * 2/ Query for the server(s) (code line 21 )
+ * 3/ Disable all the servers (function already done)
+ * 4/ Disable the user (easy)
+ * 
+ */
+router.post('/users/disable/', auth.required, function (req, res, next) {
+});
+
 router.post('/users', function (req, res, next) {
   var user = new User();
 

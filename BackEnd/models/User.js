@@ -15,7 +15,7 @@ var UserSchema = new mongoose.Schema({
   place: String,
   goal: String,
   admin: { type: Boolean, default: false },
-  active: Boolean,
+  active: { type: Boolean, default: true },
   image: String,
   hash: String,
   salt: String
