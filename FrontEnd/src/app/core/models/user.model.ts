@@ -7,4 +7,5 @@ export interface User {
   place: string;
   goal: string;
   image: string;
+  active: boolean;
 }

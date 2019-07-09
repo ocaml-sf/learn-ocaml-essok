@@ -19,6 +19,7 @@ var ServerSchema = new mongoose.Schema({
   description: String,
   body: String,
   vue: String,
+  active: { type: Boolean, default: true },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
@@ -68,7 +69,7 @@ ServerSchema.methods.createNamespacedService = function (service) {
 };
 
 ServerSchema.methods.patchNamespacedIngress = function (response) {
-  k8sApiIngress.patchNamespacedIngress('ingress', 'default', { spec: response.body.spec }).then(
+  k8sApiIngress.patchNamespacedIngress('learn-ocaml', 'default', { spec: response.body.spec }).then(
     (response) => {
       console.log('Ingress updated');
     },
@@ -79,7 +80,7 @@ ServerSchema.methods.patchNamespacedIngress = function (response) {
 };
 
 ServerSchema.methods.createNamespacedIngress = function (path) {
-  k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
+  k8sApiIngress.readNamespacedIngress('learn-ocaml', 'default', 'true').then(
     (response) => {
       console.log('Ingress read');
       response.body.spec.rules[0].http.paths.push(path);
@@ -92,8 +93,105 @@ ServerSchema.methods.createNamespacedIngress = function (path) {
   );
 };
 
+ServerSchema.methods.removekubelink = function (eventEmitter, server) {
+  eventEmitter.on('begin-unlink', function () {
+    server.deleteNamespacedIngress();
+    eventEmitter.emit('Ingress_deleted');
+  });
+  eventEmitter.on('Ingress_deleted', function () {
+    server.deleteNamespacedService();
+    eventEmitter.emit('Service_deleted');
+  });
+  eventEmitter.on('Service_deleted', function () {
+    server.deleteNamespacedDeployment();
+  });
+  eventEmitter.emit('begin-unlink');
+};
+
+ServerSchema.methods.createkubelink = function () {
+
+  var deployment = {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: this.title,
+      labels: {
+        app: this.title
+      }
+    },
+    spec: {
+      replicas: 3,
+      selector: {
+        matchLabels: {
+          app: this.title
+        }
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: this.title
+          }
+        },
+        spec: {
+          containers: [
+            {
+              name: 'learn-ocaml',
+              image: 'ocamlsf/learn-ocaml:latest',
+              ports: [
+                {
+                  containerPort: 8080
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  };
+
+
+  this.createNamespacedDeployment(deployment);
+  this.readNamespacedDeployment();
+
+  var service = {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: this.title,
+      labels: {
+        app: this.title
+      }
+    },
+    spec: {
+      type: 'ClusterIP',
+      selector: {
+        app: this.title
+      },
+      ports: [
+        {
+          name: 'http',
+          port: 80,
+          targetPort: 8080
+        }
+      ]
+    }
+  }
+
+  this.createNamespacedService(service);
+
+  var path = {
+    backend: {
+      serviceName: this.title,
+      servicePort: 80
+    },
+    path: '/(' + this.title + ')/?(.*)'
+  }
+  this.createNamespacedIngress(path);
+
+};
+
 ServerSchema.methods.deleteNamespacedIngress = function () {
-  k8sApiIngress.readNamespacedIngress('ingress', 'default', 'true').then(
+  k8sApiIngress.readNamespacedIngress('learn-ocaml', 'default', 'true').then(
     (response) => {
       var paths = response.body.spec.rules[0].http.paths;
       console.log('Ingress read');
@@ -144,6 +242,7 @@ ServerSchema.methods.toJSONFor = function (user) {
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     author: this.author.toProfileJSONFor(user),
+    active: this.active,
     vue: 'Arborescence de la vue',
 
   };

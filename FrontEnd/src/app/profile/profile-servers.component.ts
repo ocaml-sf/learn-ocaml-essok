@@ -12,8 +12,8 @@ export class ProfileServersComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) { }
-
   profile: Profile;
+
   serversConfig: ServerListConfig = {
     type: 'all',
     filters: {}
@@ -27,6 +27,7 @@ export class ProfileServersComponent implements OnInit {
           type: 'all',
           filters: {
             author: this.profile.username,
+            active: false
           }
         };
       }

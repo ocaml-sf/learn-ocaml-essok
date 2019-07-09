@@ -9,4 +9,5 @@ export interface Server {
   createdAt: string;
   updatedAt: string;
   author: Profile;
+  active: boolean;
 }

@@ -37,6 +37,10 @@ export class ServersService {
     return this.apiService.delete('/servers/' + slug);
   }
 
+  disable(slug) {
+    return this.apiService.post('/servers/disable/' + slug);
+  }
+
   save(server): Observable<Server> {
     // If we're updating an existing server
     if (server.slug) {

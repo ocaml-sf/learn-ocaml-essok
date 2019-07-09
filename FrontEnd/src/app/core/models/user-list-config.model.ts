@@ -3,6 +3,7 @@ export interface UserListConfig {
 
   filters: {
     username?: string,
+    active?: boolean,
     limit?: number,
     offset?: number
   };

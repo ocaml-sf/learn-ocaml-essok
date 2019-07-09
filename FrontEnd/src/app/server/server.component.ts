@@ -19,7 +19,8 @@ export class ServerComponent implements OnInit {
   canModify: boolean;
   isSubmitting = false;
   isDeleting = false;
-
+  isDisabled = false;
+  
   constructor(
     private route: ActivatedRoute,
     private serversService: ServersService,
@@ -61,6 +62,17 @@ export class ServerComponent implements OnInit {
     this.isDeleting = true;
 
     this.serversService.destroy(this.server.slug)
+      .subscribe(
+        success => {
+          this.router.navigateByUrl('/');
+        }
+      );
+  }
+
+  disableServer() {
+    this.isDisabled = true;
+
+    this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
           this.router.navigateByUrl('/');

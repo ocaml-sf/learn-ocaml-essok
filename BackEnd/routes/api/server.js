@@ -45,6 +45,8 @@ router.get('/', auth.required, function (req, res, next) {
       }
       else {
         query.author = req.payload.id;
+        // we'll see
+        //query.active = true;
       }
 
 
@@ -78,86 +80,7 @@ router.post('/', auth.required, function (req, res, next) {
     if (!user) { return res.sendStatus(401); }
     var server = new Server(req.body.server);
     server.author = user;
-    title = server.title;
-
-    var deployment = {
-      apiVersion: 'apps/v1',
-      kind: 'Deployment',
-      metadata: {
-        name: title,
-        labels: {
-          app: title
-        }
-      },
-      spec: {
-        replicas: 3,
-        selector: {
-          matchLabels: {
-            app: title
-          }
-        },
-        template: {
-          metadata: {
-            labels: {
-              app: title
-            }
-          },
-          spec: {
-            containers: [
-              {
-                name: 'learn-ocaml',
-                image: 'ocamlsf/learn-ocaml:latest',
-                ports: [
-                  {
-                    containerPort: 8080
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      }
-    };
-
-
-    server.createNamespacedDeployment(deployment);
-    server.readNamespacedDeployment();
-
-    var service = {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: title,
-        labels: {
-          app: title
-        }
-      },
-      spec: {
-        type: 'ClusterIP',
-        selector: {
-          app: title
-        },
-        ports: [
-          {
-            name: 'http',
-            port: 80,
-            targetPort: 8080
-          }
-        ]
-      }
-    }
-
-    server.createNamespacedService(service);
-
-    var path = {
-      backend: {
-        serviceName: title,
-        servicePort: 80
-      },
-      path: '/(' + title + ')/?(.*)'
-    }
-    server.createNamespacedIngress(path);
-
+    server.createkubelink();
     return server.save().then(function () {
       console.log(server.author);
       return res.json({ server: server.toJSONFor(user) });
@@ -170,7 +93,7 @@ router.get('/:server', auth.required, function (req, res, next) {
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
     req.server.populate('author').execPopulate(),
-    
+
   ]).then(function (results) {
     var user = results[0];
     var server = req.server.toJSONFor(user);
@@ -206,6 +129,47 @@ router.put('/:server', auth.required, function (req, res, next) {
   });
 });
 
+//disable or enable a server
+router.post('/disable/:server', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+
+      var eventEmitter = new events.EventEmitter();
+
+      eventEmitter.emit('kube_creation');
+
+      var createHandler = function () {
+        req.server.createkubelink();
+        eventEmitter.emit('kube_disable');
+      }
+      var deleteHandler = function () {
+        req.server.removekubelink(eventEmitter, req.server);
+        eventEmitter.emit('kube_disable');
+        console.log('done');
+
+      }
+      eventEmitter.on('kube_deletion', deleteHandler);
+      eventEmitter.on('kube_creation', createHandler);
+
+      eventEmitter.on('kube_disable', function () {
+        req.server.active = !req.server.active;
+
+        req.server.save().then(function () {
+          return res.sendStatus(204);
+        });
+      });
+
+      if (req.server.active) {
+        eventEmitter.emit('kube_deletion');
+      } else {
+        eventEmitter.emit('kube_creation');
+      }
+    } else {
+      return res.sendStatus(403);
+    }
+  }).catch(next);
+});
+
 // delete server
 router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
@@ -213,25 +177,12 @@ router.delete('/:server', auth.required, function (req, res, next) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
       var eventEmitter = new events.EventEmitter();
-
       var deleteHandler = function () {
-        req.server.deleteNamespacedIngress();
-        eventEmitter.emit('Ingress_deleted');
+        req.server.removekubelink(eventEmitter, req.server);
+        eventEmitter.emit('kube_unlinked');
       }
-
       eventEmitter.on('kube_deletion', deleteHandler);
-
-      eventEmitter.on('Ingress_deleted', function () {
-        req.server.deleteNamespacedService();
-        eventEmitter.emit('Service_deleted');
-      });
-
-      eventEmitter.on('Service_deleted', function () {
-        req.server.deleteNamespacedDeployment();
-        eventEmitter.emit('Deploy_deleted');
-      });
-
-      eventEmitter.on('Deploy_deleted', function () {
+      eventEmitter.on('kube_unlinked', function () {
         return req.server.remove().then(function () {
           return res.sendStatus(204);
         });

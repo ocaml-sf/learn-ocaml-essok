@@ -17,7 +17,7 @@ export class ProfileComponent implements OnInit {
   profile: Profile;
   currentUser: User;
   isUser: boolean;
-  
+
   ngOnInit() {
     this.route.data.pipe(
       concatMap((data: { profile: Profile }) => {
@@ -32,4 +32,5 @@ export class ProfileComponent implements OnInit {
       })
     ).subscribe();
   }
+
 }

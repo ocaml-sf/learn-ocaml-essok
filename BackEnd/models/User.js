@@ -15,6 +15,7 @@ var UserSchema = new mongoose.Schema({
   place: String,
   goal: String,
   admin: { type: Boolean, default: false },
+  active: Boolean,
   image: String,
   hash: String,
   salt: String
@@ -80,6 +81,7 @@ UserSchema.methods.toAuthJSON = function () {
     goal: this.goal,
     admin: this.admin,
     image: this.image,
+    active: this.active,
   };
 }
 
@@ -89,6 +91,7 @@ UserSchema.methods.toProfileJSONFor = function (user) {
     description: this.description,
     place: this.place,
     goal: this.goal,
+    active: this.active,
     image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
   };
 };

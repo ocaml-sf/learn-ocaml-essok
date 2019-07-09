@@ -1,9 +1,16 @@
 <div class="server-preview">
 
-  <a [routerLink]="['/server', server.slug]" class="preview-link">
+  <a [routerLink]="['/server', server.slug]" class="preview-link" *ngIf="server.active">
     <h1>{{ server.title }}</h1>
     <p>{{ server.description }}</p>
-    <hr/>
+    <hr />
+
+  </a>
+  <a [routerLink]="['/server', server.slug]" class="preview-link-archived" *ngIf="!server.active">
+    <i>Archived</i>
+    <h1>{{ server.title }}</h1>
+    <p>{{ server.description }}</p>
+    <hr />
 
   </a>
 </div>
