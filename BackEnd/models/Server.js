@@ -40,7 +40,7 @@ ServerSchema.methods.slugify = function () {
 ServerSchema.methods.createNamespacedDeployment = function (deployment) {
   k8sApiDeploy.createNamespacedDeployment('default', deployment).then(
     (response) => {
-      console.log('Created deployment ' + this.title);
+      console.log('Created deployment ' + this.slug);
     },
     (err) => {
       console.log('Error!: ' + err);
@@ -49,7 +49,7 @@ ServerSchema.methods.createNamespacedDeployment = function (deployment) {
 };
 
 ServerSchema.methods.readNamespacedDeployment = function () {
-  k8sApiDeploy.readNamespacedDeployment(this.title, 'default').then((response) => {
+  k8sApiDeploy.readNamespacedDeployment(this.slug, 'default').then((response) => {
     console.log('Namespace read');
   },
     (err) => {
@@ -79,11 +79,11 @@ ServerSchema.methods.patchNamespacedIngress = function (response) {
   );
 };
 
-ServerSchema.methods.createNamespacedIngress = function (path) {
+ServerSchema.methods.createNamespacedIngress = function (rule) {
   k8sApiIngress.readNamespacedIngress('learn-ocaml', 'default', 'true').then(
     (response) => {
       console.log('Ingress read');
-      response.body.spec.rules[0].http.paths.push(path);
+      response.body.spec.rules.push(rule);
       console.log('preparing file for ingress');
       this.patchNamespacedIngress(response);
     },
@@ -110,26 +110,27 @@ ServerSchema.methods.removekubelink = function (eventEmitter, server) {
 
 ServerSchema.methods.createkubelink = function () {
 
+  var slugged = this.slug;
   var deployment = {
     apiVersion: 'apps/v1',
     kind: 'Deployment',
     metadata: {
-      name: this.title,
+      name: slugged,
       labels: {
-        app: this.title
+        app: slugged
       }
     },
     spec: {
       replicas: 3,
       selector: {
         matchLabels: {
-          app: this.title
+          app: slugged
         }
       },
       template: {
         metadata: {
           labels: {
-            app: this.title
+            app: slugged
           }
         },
         spec: {
@@ -151,21 +152,20 @@ ServerSchema.methods.createkubelink = function () {
 
 
   this.createNamespacedDeployment(deployment);
-  this.readNamespacedDeployment();
 
   var service = {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
-      name: this.title,
+      name: slugged,
       labels: {
-        app: this.title
+        app: slugged
       }
     },
     spec: {
       type: 'ClusterIP',
       selector: {
-        app: this.title
+        app: slugged
       },
       ports: [
         {
@@ -179,23 +179,27 @@ ServerSchema.methods.createkubelink = function () {
 
   this.createNamespacedService(service);
 
-  var path = {
-    backend: {
-      serviceName: this.title,
-      servicePort: 80
-    },
-    path: '/(' + this.title + ')/?(.*)'
+  var rule = {
+    host: this.author.username + '.' + slugged + '.learnocaml.org',
+    http: {
+      paths: [{
+        backend: {
+          serviceName: slugged,
+          servicePort: 80
+        }
+      }]
+    }
   }
-  this.createNamespacedIngress(path);
+  this.createNamespacedIngress(rule);
 
 };
 
 ServerSchema.methods.deleteNamespacedIngress = function () {
   k8sApiIngress.readNamespacedIngress('learn-ocaml', 'default', 'true').then(
     (response) => {
-      var paths = response.body.spec.rules[0].http.paths;
+      var rules = response.body.spec.rules;
       console.log('Ingress read');
-      this.removeIngressFile(paths);
+      this.removeIngressFile(rules);
       this.patchNamespacedIngress(response);
     },
     (err) => {
@@ -204,17 +208,17 @@ ServerSchema.methods.deleteNamespacedIngress = function () {
   );
 };
 
-ServerSchema.methods.removeIngressFile = function (paths) {
-  for (let index = 0; index < paths.length; index++) {
-    if (paths[index].backend.serviceName === this.title) {
-      paths.splice(index, 1);
+ServerSchema.methods.removeIngressFile = function (rules) {
+  for (let index = 0; index < rules.length; index++) {
+    if (rules[index].http.paths[0].backend.serviceName === this.slug) {
+      rules.splice(index, 1);
     }
   }
   console.log('preparing file for ingress');
 };
 
 ServerSchema.methods.deleteNamespacedService = function () {
-  k8sApi.deleteNamespacedService(this.title, 'default').then((response) => {
+  k8sApi.deleteNamespacedService(this.slug, 'default').then((response) => {
     console.log('delete service ok');
   },
     (err) => {
@@ -224,7 +228,7 @@ ServerSchema.methods.deleteNamespacedService = function () {
 };
 
 ServerSchema.methods.deleteNamespacedDeployment = function () {
-  k8sApiDeploy.deleteNamespacedDeployment(this.title, 'default').then((response) => {
+  k8sApiDeploy.deleteNamespacedDeployment(this.slug, 'default').then((response) => {
     console.log('delete depoyment ok');
   },
     (err) => {

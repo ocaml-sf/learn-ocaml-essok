@@ -23,18 +23,12 @@ router.get('/users', auth.required, function (req, res, next) {
   if (typeof req.query.offset !== 'undefined') {
     offset = req.query.offset;
   }
+
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (user.isAdmin()) {
 
-      return Promise.all([
-        User.find(query)
-          .limit(Number(limit))
-          .skip(Number(offset))
-          .sort({ createdAt: 'desc' })
-          .exec(),
-        User.countDocuments(query).exec(),
-      ]).then(function (results) {
+      return user.findAllUsers(query, limit, offset).then(function (results) {
         var users = results[0];
         var usersCount = results[1];
 
@@ -156,6 +150,30 @@ router.post('/reset-password', auth.required, function (req, res, next) {
  * 
  */
 router.post('/users/disable/', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    
+    var author = req.query.author;
+    user.findAnUser(author).then(function (results) {
+
+      author = results[0];
+
+      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
+        var servers = results[0];
+        var serversCount = results[1];
+        var user = results[2];
+
+        return res.json({
+          servers: servers.map(function (server) {
+            router.post('/disable/:server', auth.required,  (req, res, next) );
+              
+          }),
+          serversCount: serversCount
+        });
+      });
+    }).catch(next);
+
+  }).catch(next);
 });
 
 router.post('/users', function (req, res, next) {

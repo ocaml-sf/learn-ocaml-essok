@@ -20,6 +20,10 @@ export class ServerSettingsComponent implements OnInit {
   uploader: FileUploader = new FileUploader({ url: URL });
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
+  isDeleting = false;
+  isDisabled = false;
+  isChecked = false;
+  isAssuming = false;
 
   constructor(
     private router: Router,
@@ -34,7 +38,6 @@ export class ServerSettingsComponent implements OnInit {
       description: '',
       url: '',
       file: '',
-      password_verification: ''
     });
   }
 
@@ -89,4 +92,33 @@ export class ServerSettingsComponent implements OnInit {
     Object.assign(this.server, values);
   }
 
+  deleteServer() {
+    if (this.isChecked && this.isAssuming) {
+      this.isDeleting = true;
+      this.serversService.destroy(this.server.slug)
+        .subscribe(
+          success => {
+            this.router.navigateByUrl('/');
+          }
+        );
+    }
+  }
+
+  disableServer() {
+    this.isDisabled = true;
+    this.serversService.disable(this.server.slug)
+      .subscribe(
+        success => {
+          this.router.navigateByUrl('/');
+        }
+      );
+  }
+
+  assumeDelete() {
+    this.isAssuming = !this.isAssuming;
+  }
+
+  understandDelete() {
+    this.isChecked = !this.isChecked;
+  }
 }

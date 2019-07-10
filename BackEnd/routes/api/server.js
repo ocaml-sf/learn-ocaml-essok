@@ -19,47 +19,16 @@ router.param('server', function (req, res, next, slug) {
 });
 
 router.get('/', auth.required, function (req, res, next) {
-  var query = {};
-  var limit = 20;
-  var offset = 0;
-  if (typeof req.query.limit !== 'undefined') {
-    limit = req.query.limit;
-  }
-
-  if (typeof req.query.offset !== 'undefined') {
-    offset = req.query.offset;
-  }
+  
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    Promise.all([
+    var author = req.query.author;
+    user.findAnUser(author).then(function (results) {
 
-      req.query.author ? User.findOne({ username: req.query.author }) : null,
-    ]).then(function (results) {
-      var author = results[0];
+      author = results[0];
 
-      if (user.isAdmin()) {
-        if (author) {
-          query.author = author._id;
-        }
-      }
-      else {
-        query.author = req.payload.id;
-        // we'll see
-        //query.active = true;
-      }
-
-
-      return Promise.all([
-        Server.find(query)
-          .limit(Number(limit))
-          .skip(Number(offset))
-          .sort({ createdAt: 'desc' })
-          .populate('author')
-          .exec(),
-        Server.countDocuments(query).exec(),
-        req.payload ? User.findById(req.payload.id) : null,
-      ]).then(function (results) {
+      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
         var servers = results[0];
         var serversCount = results[1];
         var user = results[2];

@@ -10,52 +10,37 @@
           <fieldset [disabled]="isSubmitting">
 
             <fieldset class="form-group">
-              <input class="form-control"
-                type="text"
-                placeholder="URL of profile picture"
-                formControlName="image" />
+              <input class="form-control" type="text" placeholder="URL of profile picture" formControlName="image" />
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="text"
-                placeholder="Username"
+              <input class="form-control form-control-lg" type="text" placeholder="Username"
                 formControlName="username" />
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                rows="5"
-                placeholder="Short description about you"
+              <textarea class="form-control form-control-lg" rows="5" placeholder="Short description about you"
                 formControlName="description">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                formControlName="place"
-                placeholder="Where do you work ?"
+              <textarea class="form-control form-control-lg" formControlName="place" placeholder="Where do you work ?"
                 rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                formControlName="goal"
-                placeholder="Why would you want an account ?"
-                rows="5">
+              <textarea class="form-control form-control-lg" formControlName="goal"
+                placeholder="Why would you want an account ?" rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="email"
-                placeholder="Email"
-                formControlName="email" />
+              <input class="form-control form-control-lg" type="email" placeholder="Email" formControlName="email" />
             </fieldset>
 
-            <button class="btn btn-lg btn-primary pull-xs-right"
-              type="submit">
+            <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
               Update Settings
             </button>
 
@@ -64,13 +49,27 @@
 
         <!-- Line break for logout button -->
         <hr />
-
-        <button class="btn btn-outline-danger"
-          routerLink="/reset-password"
-          routerLinkActive="active">
-          Click here to reset your password.
-        </button>
-
+        <div class="col-md-12 offset-md-0 col-xs-12">
+          <div class="danger">
+            <h2>Dangerous ZONE</h2>
+            <p>TO RESET YOUR PASSWORD :</p>
+            <button class="btn btn-outline-danger" routerLink="/reset-password" routerLinkActive="active">
+              Click here to reset your password.
+            </button>
+            <br />
+            <br />
+            <p>TO DISABLE YOUR ACCOUNT :</p> 
+            <button class="btn btn-outline-danger" routerLink="/disable-account" routerLinkActive="active">
+              Click here to disable your account.
+            </button>
+            <br />
+            <br />
+            <p>TO DELETE YOUR ACCOUNT :</p>
+            <button class="btn btn-outline-danger" routerLink="/delete-account" routerLinkActive="active">
+              Click here to delete your account.
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

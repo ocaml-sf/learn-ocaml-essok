@@ -23,6 +23,14 @@ const routes: Routes = [
     loadChildren: './reset-password/reset-password.module#ResetPasswordModule'
   },
   {
+    path: 'delete-account',
+    loadChildren: './delete-account/delete-account.module#DeleteAccountModule'
+  },
+  {
+    path: 'disable-account',
+    loadChildren: './disable-account/disable-account.module#DisableAccountModule'
+  },
+  {
     path: 'server',
     loadChildren: './server/server.module#ServerModule'
   },

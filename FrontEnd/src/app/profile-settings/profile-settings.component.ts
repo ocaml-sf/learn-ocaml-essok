@@ -6,7 +6,8 @@ import { User, UserService } from '../core';
 
 @Component({
   selector: 'app-profile-settings-page',
-  templateUrl: './profile-settings.component.html'
+  templateUrl: './profile-settings.component.html',
+  styleUrls: ['./profile-settings.component.css']
 })
 export class ProfileSettingsComponent implements OnInit {
   user: User = {} as User;

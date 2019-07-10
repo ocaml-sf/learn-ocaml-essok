@@ -1,0 +1,48 @@
+<div class="disableAccount-page">
+    <div class="container page">
+        <div class="row">
+            <div class="col-md-10 offset-md-1 col-xs-12">
+
+                <h1 class="text-xs-center">Disable your account</h1>
+                <p class="text-xs-center">When you disable your account, your data will be keep safe until you return
+                </p>
+                <app-list-errors [errors]="errors"></app-list-errors>
+
+                <form [formGroup]="authForm" (ngSubmit)="submitForm()">
+                    <fieldset class="form-group">
+                        <input formControlName="email" placeholder="Email Verification"
+                            class="form-control form-control-lg" rows="5" type="text" />
+                    </fieldset>
+
+                    <fieldset class="form-group">
+                        <input class="form-control form-control-lg" type="password" placeholder="Password"
+                            formControlName="password" />
+                    </fieldset>
+                </form>
+
+                <form [formGroup]="disableAccountForm" (ngSubmit)="submitForm()">
+                    <fieldset [disabled]="isSubmitting">
+                        <fieldset class="form-group">
+                            <input class="form-control form-control-lg" type="password"
+                                placeholder="Password Verification" formControlName="old_password_verification" />
+                        </fieldset>
+
+                        <input type="checkbox" (click)="understandDelete()">
+                        I confirm I understand I want to DISABLE my account !
+                        <br />
+                        <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DISABLING
+                        my account will DISABLE all my servers during this time !
+                        <br />
+                        <br />
+
+                        <button class="btn btn-lg btn-warning pull-xs-right"
+                            [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
+                            Disable my account
+                        </button>
+
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

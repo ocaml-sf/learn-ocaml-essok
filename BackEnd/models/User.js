@@ -71,6 +71,63 @@ UserSchema.methods.readNamespace = function (name) {
   );
 };
 
+UserSchema.methods.findAllUsers = function (query, limit, offset) {
+
+  if (this.isAdmin()) {
+
+    return Promise.all([
+      mongoose.model('User').find(query)
+        .limit(Number(limit))
+        .skip(Number(offset))
+        .sort({ createdAt: 'desc' })
+        .exec(),
+      mongoose.model('User').countDocuments(query).exec(),
+    ]);
+  }
+};
+
+UserSchema.methods.findAnUser = function (author) {
+  return Promise.all([
+    author ? mongoose.model('User').findOne({ username: author }) : null,
+  ]);
+};
+
+UserSchema.methods.findAllServersOfAnUser = function (limit_, offset_, author, payload) {
+
+  var query = {};
+  var limit = 20;
+  var offset = 0;
+  if (typeof limit_ !== 'undefined') {
+    limit = limit_;
+  }
+
+  if (typeof offset_ !== 'undefined') {
+    offset = offset_;
+  }
+
+
+  if (this.isAdmin()) {
+    if (author) {
+      query.author = author._id;
+    }
+  }
+  else {
+    query.author = payload.id;
+    // we'll see
+    //query.active = true;
+  }
+  return Promise.all([
+    mongoose.model('Server').find(query)
+      .limit(Number(limit))
+      .skip(Number(offset))
+      .sort({ createdAt: 'desc' })
+      .populate('author')
+      .exec(),
+    mongoose.model('Server').countDocuments(query).exec(),
+    payload ? mongoose.model('User').findById(payload.id) : null,
+  ]);
+};
+
 UserSchema.methods.toAuthJSON = function () {
   return {
     username: this.username,

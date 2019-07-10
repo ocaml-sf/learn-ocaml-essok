@@ -10,18 +10,9 @@
             <i class="ion-edit"></i> Manage Server
           </a>
 
-          <button class="btn btn-sm btn-outline-warning" *ngIf="server.active" [ngClass]="{disabled: isDisabled}"
-            (click)="disableServer()">
-            <i class="ion-settings"></i> Disable Server
-          </button>
-
           <button class="btn btn-sm btn-outline-warning" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
             (click)="disableServer()">
             <i class="ion-settings"></i> Enable Server
-          </button>
-
-          <button class="btn btn-sm btn-outline-danger" [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
-            <i class="ion-trash-a"></i> Delete Server
           </button>
 
         </span>
