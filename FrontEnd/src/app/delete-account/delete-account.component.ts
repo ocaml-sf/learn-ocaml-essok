@@ -24,7 +24,8 @@ export class DeleteAccountComponent implements OnInit {
   ) {
 
     this.deleteAccountForm = this.fb.group({
-      'old_password_verification': ['', [
+      'username_verification': ['', [Validators.required]],
+      'password_verification': ['', [
         Validators.required,
         Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
         Validators.minLength(6),
@@ -55,7 +56,8 @@ export class DeleteAccountComponent implements OnInit {
       (userData: User) => {
         this.user = userData;
       }
-    ); this.router.navigateByUrl('/delete-account');
+    );
+    this.router.navigateByUrl('/delete-account');
 
   }
 
@@ -68,9 +70,12 @@ export class DeleteAccountComponent implements OnInit {
     if (this.isAssuming && this.isChecked) {
       this.preForm();
       this.userService
-        .attemptChangePassword(this.deleteAccountForm.value, this.authForm.value)
+        .delete(this.deleteAccountForm.value, this.authForm.value)
         .subscribe(
-          updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
+          succes => {
+            this.userService.purgeAuth();
+            this.router.navigateByUrl('');
+          },
           err => {
             this.errors = err;
             this.isSubmitting = false;

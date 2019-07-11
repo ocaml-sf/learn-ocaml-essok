@@ -4,7 +4,7 @@
             <div class="col-md-10 offset-md-1 col-xs-12">
 
                 <h1 class="text-xs-center">Delete your account</h1>
-                <p class="text-xs-center">When you delete your account, all your data will be destroyed 
+                <p class="text-xs-center">When you delete your account, all your data will be destroyed
                 </p>
                 <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -24,11 +24,17 @@
                     <fieldset [disabled]="isSubmitting">
                         <fieldset class="form-group">
                             <input class="form-control form-control-lg" type="password"
-                                placeholder="Password Verification" formControlName="old_password_verification" />
+                                placeholder="Password Verification" formControlName="password_verification" />
+                        </fieldset>
+
+                        <fieldset class="form-group">
+                            <input class="form-control form-control-lg" type="username"
+                                placeholder="Username Verification" formControlName="username_verification" />
                         </fieldset>
 
                         <input type="checkbox" (click)="understandDelete()">
-                        I confirm I understand I want to DELETE my account ! All my data will be lost and nobody could retrieve it !
+                        I confirm I understand I want to DELETE my account ! All my data will be lost and nobody could
+                        retrieve it !
                         <br />
                         <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DELETING
                         my account will DELETE all my servers !

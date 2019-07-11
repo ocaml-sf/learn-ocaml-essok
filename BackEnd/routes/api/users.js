@@ -142,18 +142,104 @@ router.post('/reset-password', auth.required, function (req, res, next) {
   }).catch(next);
 });
 
-
 //disable or enable an user
-/**
- * Factorization of the code line 21 in server.js to use it here
- * 
- * 1/ Query for the user
- * 2/ Query for the server(s) (code line 21 )
- * 3/ Disable all the servers (function already done)
- * 4/ Disable the user (easy)
- * 
- */
 router.post('/users/disable/', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+
+    if (!user.isAdmin()) {
+
+      if (!req.body.user.email) {
+        return res.status(422).json({ errors: { email: "can't be blank" } });
+      }
+
+      if (req.body.user.email !== user.email) {
+        return res.status(422).json({ errors: { email: "does not correspond" } });
+      }
+
+      if (!req.body.user.password) {
+        return res.status(422).json({ errors: { password: "can't be blank" } });
+      }
+
+      if (!user.validPassword(req.body.user.password)) {
+        return res.status(422).json({ errors: { password: "does not correspond" } });
+      }
+
+      if (!req.body.disable.password_verification) {
+        return res.status(422).json({ errors: { password: "can't be blank" } });
+      }
+
+      if (req.body.user.password !== req.body.disable.password_verification) {
+        return res.status(422).json({ errors: { password: "verification mismatch" } });
+      }
+      if (!req.body.disable.username_verification) {
+        return res.status(422).json({ errors: { username: "can't be blank" } });
+      }
+      if (req.body.disable.username_verification !== user.username) {
+        return res.status(422).json({ errors: { username: "verification mismatch" } });
+      }
+    }
+
+    var author = req.body.disable.username;
+
+    user.findAnUser(author).then(function (results) {
+
+      author = results[0];
+
+      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
+        var servers = results[0];
+        var users = results[2];
+
+        servers.map(function (server) {
+          var eventEmitter = new events.EventEmitter();
+
+          eventEmitter.emit('kube_creation');
+
+          var createHandler = function () {
+            server.createkubelink();
+            eventEmitter.emit('kube_disable');
+            console.log('server' + server.title + 'enabled');
+          }
+          var deleteHandler = function () {
+            server.removekubelink(eventEmitter, server);
+            eventEmitter.emit('kube_disable');
+            console.log('server' + server.title + 'disabled');
+
+          }
+          eventEmitter.on('kube_deletion', deleteHandler);
+          eventEmitter.on('kube_creation', createHandler);
+
+          eventEmitter.on('kube_disable', function () {
+            server.active = !server.active;
+            server.save();
+          });
+
+          if (server.active && user.active) {
+            eventEmitter.emit('kube_deletion');
+          } else if (!server.active && !user.active) {
+            eventEmitter.emit('kube_creation');
+          }
+          else {
+            //server in an abnormal state
+          }
+
+        });
+
+        console.log('all servers are done');
+
+        user.active = !user.active;
+        console.log('user status up to date');
+
+
+        user.save();
+        return res.json({ user: user.toAuthJSON() });
+      });
+    }).catch(next);
+  }).catch(next);
+});
+
+//delete an user
+router.post('/users/delete/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
@@ -202,31 +288,25 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
         servers.map(function (server) {
           var eventEmitter = new events.EventEmitter();
 
-          eventEmitter.emit('kube_creation');
-
-          var createHandler = function () {
-            server.createkubelink();
-            eventEmitter.emit('kube_disable');
-            console.log('server' + server.title + 'enabled');
-          }
           var deleteHandler = function () {
             server.removekubelink(eventEmitter, server);
             eventEmitter.emit('kube_disable');
-            console.log('server' + server.title + 'disabled');
+            console.log('server' + server.title + 'delete');
 
           }
           eventEmitter.on('kube_deletion', deleteHandler);
-          eventEmitter.on('kube_creation', createHandler);
 
           eventEmitter.on('kube_disable', function () {
             server.active = !server.active;
-            server.save();
+            server.remove();
+            console.log('server deleted');
           });
 
           if (server.active) {
             eventEmitter.emit('kube_deletion');
-          } else {
-            eventEmitter.emit('kube_creation');
+          }
+          else {
+            server.remove();
           }
 
         });
@@ -234,11 +314,10 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
         console.log('all servers are done');
         // User.findOne({ username: req.body.user.username }).then(function (user_) {
         user.active = !user.active;
-        console.log('user status up to date');
+        user.remove();
 
         // });
-        user.save();
-        return res.json({ user: user.toAuthJSON() });
+        return res.sendStatus(204);
       });
     }).catch(next);
   }).catch(next);

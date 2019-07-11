@@ -105,6 +105,14 @@ export class UserService {
       ));
   }
 
+  delete(credentialsDisable, credentialsLogin): Observable<User> {
+    return this.apiService
+      .post(
+        '/users/delete/',
+        { user: credentialsLogin, disable: credentialsDisable }
+      );
+  }
+
   query(config: UserListConfig): Observable<{ users: User[], usersCount: number }> {
     // Convert any filters over to Angular's URLSearchParams
     const params = {};

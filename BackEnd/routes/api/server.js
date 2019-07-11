@@ -32,7 +32,7 @@ router.get('/', auth.required, function (req, res, next) {
         var servers = results[0];
         var serversCount = results[1];
         var user = results[2];
-
+        
         return res.json({
           servers: servers.map(function (server) {
             return server.toJSONFor(user);
@@ -41,7 +41,9 @@ router.get('/', auth.required, function (req, res, next) {
         });
       });
     }).catch(next);
+
   }).catch(next);
+
 });
 
 router.post('/', auth.required, function (req, res, next) {
