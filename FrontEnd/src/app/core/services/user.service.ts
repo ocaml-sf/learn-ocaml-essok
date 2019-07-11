@@ -42,13 +42,9 @@ export class UserService {
   }
 
   setAuth(user: User) {
-    // Save JWT sent from server in localstorage
     this.jwtService.saveToken(user.token);
-    // Set current user data into observable
     this.currentUserSubject.next(user);
-    // Set isAuthenticated to true
     this.isAuthenticatedSubject.next(true);
-    // Set isAadmin to the good value
     this.isAdminSubject.next(user.admin);
   }
 
@@ -92,11 +88,21 @@ export class UserService {
   update(user): Observable<User> {
     return this.apiService
       .put('/user', { user })
+      .pipe(map(data => data.user));
+
+  }
+
+  disable(credentialsDisable, credentialsLogin): Observable<User> {
+    return this.apiService
+      .post(
+        '/users/disable/',
+        { user: credentialsLogin, disable: credentialsDisable }
+      )
       .pipe(map(data => {
-        // Update the currentUser observable
         this.currentUserSubject.next(data.user);
         return data.user;
-      }));
+      }
+      ));
   }
 
   query(config: UserListConfig): Observable<{ users: User[], usersCount: number }> {

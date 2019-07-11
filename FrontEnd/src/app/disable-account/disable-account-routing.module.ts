@@ -9,7 +9,7 @@ const routes: Routes = [
   {
     path: '',
     component: DisableAccountComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   }
 ];
 

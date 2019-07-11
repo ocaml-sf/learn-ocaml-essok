@@ -131,10 +131,11 @@
           <div class="danger">
             <h2>Dangerous ZONE</h2>
             <p>TO DISABLE YOUR SERVER :</p>
-            <button class="btn btn-sm btn-outline-warning" *ngIf="server.active" [ngClass]="{disabled: isDisabled}"
+            <button class="btn btn-sm btn-outline-warning" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
               (click)="disableServer()">
-              <i class="ion-settings"></i> Disable Server
+              <i class="ion-settings"></i> Enable my Server
             </button>
+            
             <br />
             <br />
             <p>TO DELETE YOUR SERVER :</p>

@@ -19,7 +19,7 @@ var ServerSchema = new mongoose.Schema({
   description: String,
   body: String,
   vue: String,
-  active: { type: Boolean, default: true },
+  active: { type: Boolean, default: false },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

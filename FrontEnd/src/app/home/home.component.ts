@@ -35,6 +35,8 @@ export class HomeComponent implements OnInit {
     } else {
       this.authFalse();
     }
+    this.router.navigateByUrl('/');
+
   }
 
   authStatus() {

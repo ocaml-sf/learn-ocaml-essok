@@ -47,14 +47,20 @@
       </li>
 
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active" *ngIf="currentUser.active">
           <i class="ion-compose"></i>&nbsp;New Server
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/profile-settings" routerLinkActive="active">
+        <a class="btn btn-outline-info" routerLink="/profile-settings" routerLinkActive="active" *ngIf="currentUser.active">
           <i class="ion-gear-a"></i>&nbsp;Profile Settings
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="btn btn-outline-warning" routerLink="/disable-account" routerLinkActive="active" *ngIf="!currentUser.active">
+          <i class="ion-gear-a"></i>&nbsp;Activate your Account
         </a>
       </li>
 

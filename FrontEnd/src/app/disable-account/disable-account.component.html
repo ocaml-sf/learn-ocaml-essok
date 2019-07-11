@@ -3,8 +3,13 @@
         <div class="row">
             <div class="col-md-10 offset-md-1 col-xs-12">
 
-                <h1 class="text-xs-center">Disable your account</h1>
-                <p class="text-xs-center">When you disable your account, your data will be keep safe until you return
+                <h1 class="text-xs-center" *ngIf="user.active">Disable your account</h1>
+                <h1 class="text-xs-center" *ngIf="!user.active">Enable your account</h1>
+                <p class="text-xs-center" *ngIf="user.active">When you disable your account, your data will be keep safe
+                    until you return
+                </p>
+                <p class="text-xs-center" *ngIf="!user.active">When you enable your account, your data will be ready for
+                    use
                 </p>
                 <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -24,21 +29,42 @@
                     <fieldset [disabled]="isSubmitting">
                         <fieldset class="form-group">
                             <input class="form-control form-control-lg" type="password"
-                                placeholder="Password Verification" formControlName="old_password_verification" />
+                                placeholder="Password Verification" formControlName="password_verification" />
                         </fieldset>
 
-                        <input type="checkbox" (click)="understandDelete()">
-                        I confirm I understand I want to DISABLE my account !
-                        <br />
-                        <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DISABLING
-                        my account will DISABLE all my servers during this time !
-                        <br />
-                        <br />
+                        <fieldset class="form-group">
+                            <input class="form-control form-control-lg" type="username"
+                                placeholder="Username Verification" formControlName="username_verification" />
+                        </fieldset>
+                        <div *ngIf="user.active">
+                            <input type="checkbox" (click)="understandDelete()">
+                            I confirm I understand I want to DISABLE my account !
+                            <br />
+                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                            DISABLING
+                            my account will DISABLE all my servers during this time !
+                            <br />
+                            <br />
+                            <button class="btn btn-lg btn-warning pull-xs-right"
+                                [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
+                                Disable my account
+                            </button>
+                        </div>
+                        <div *ngIf="!user.active">
+                            <input type="checkbox" (click)="understandDelete()">
+                            I confirm I understand I want to Enable my account !
+                            <br />
+                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                            ENABLING
+                            my account will ENABLE all my servers !
+                            <br />
+                            <br />
+                            <button class="btn btn-lg btn-warning pull-xs-right"
+                                [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
+                                Enable my account
+                            </button>
+                        </div>
 
-                        <button class="btn btn-lg btn-warning pull-xs-right"
-                            [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
-                            Disable my account
-                        </button>
 
                     </fieldset>
                 </form>

@@ -54,7 +54,12 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit() {
     // Make a fresh copy of the current user's object to place in editable form fields
-    Object.assign(this.user, this.userService.getCurrentUser());
+    this.userService.currentUser.subscribe(
+      (userData: User) => {
+        this.user = userData;
+      }
+    ); this.router.navigateByUrl('/reset-password');
+
   }
 
   preForm() {

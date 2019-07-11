@@ -19,7 +19,7 @@ router.param('server', function (req, res, next, slug) {
 });
 
 router.get('/', auth.required, function (req, res, next) {
-  
+
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
@@ -47,9 +47,10 @@ router.get('/', auth.required, function (req, res, next) {
 router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
+    if (!user.active) { return res.sendStatus(401); }
+
     var server = new Server(req.body.server);
     server.author = user;
-    server.createkubelink();
     return server.save().then(function () {
       console.log(server.author);
       return res.json({ server: server.toJSONFor(user) });
@@ -77,6 +78,8 @@ router.get('/:server', auth.required, function (req, res, next) {
 router.put('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (req.server.author._id.toString() === req.payload.id.toString()) {
+      if (req.server.active) { return res.sendStatus(401); }
+
       if (typeof req.body.server.title !== 'undefined') {
         req.server.title = req.body.server.title;
       }
@@ -102,6 +105,7 @@ router.put('/:server', auth.required, function (req, res, next) {
 router.post('/disable/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+      if (!user.active) { return res.sendStatus(401); }
 
       var eventEmitter = new events.EventEmitter();
 
@@ -143,6 +147,8 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
+    if (!user.active) { return res.sendStatus(401); }
+
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
       var eventEmitter = new events.EventEmitter();

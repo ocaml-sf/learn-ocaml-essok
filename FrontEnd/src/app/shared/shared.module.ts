@@ -27,6 +27,7 @@ import { UserListComponent, UserPreviewComponent } from './user-helpers';
     ListErrorsComponent,
     ShowAuthedDirective,
     ShowAdminDirective
+
   ],
   exports: [
     ServerListComponent,

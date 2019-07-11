@@ -9,9 +9,13 @@
           <h4>{{ profile.username }}</h4>
           <p>{{ profile.description }}</p>
 
-          <a [routerLink]="['/profile-settings']" [hidden]="!isUser"
-            class="btn btn-sm btn-outline-secondary action-btn">
+          <a [routerLink]="['/profile-settings']" [hidden]="!isUser" *ngIf="currentUser.active"
+            class="btn btn-sm btn-outline-info">
             <i class="ion-gear-a"></i> Edit Profile Settings
+          </a>
+          <a [routerLink]="['/disable-account']" [hidden]="!isUser" *ngIf="!currentUser.active"
+            class="btn btn-sm btn-outline-warning">
+            <i class="ion-gear-a"></i> Active my account
           </a>
         </div>
 

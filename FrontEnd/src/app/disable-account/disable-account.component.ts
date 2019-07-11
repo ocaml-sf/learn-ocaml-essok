@@ -24,7 +24,8 @@ export class DisableAccountComponent implements OnInit {
   ) {
 
     this.disableAccountForm = this.fb.group({
-      'old_password_verification': ['', [
+      'username_verification': ['', [Validators.required]],
+      'password_verification': ['', [
         Validators.required,
         Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
         Validators.minLength(6),
@@ -51,7 +52,13 @@ export class DisableAccountComponent implements OnInit {
 
   ngOnInit() {
     // Make a fresh copy of the current user's object to place in editable form fields
-    Object.assign(this.user, this.userService.getCurrentUser());
+    this.userService.currentUser.subscribe(
+      (userData: User) => {
+        this.user = userData;
+      }
+    );
+    this.router.navigateByUrl('/disable-account');
+
   }
 
   preForm() {
@@ -63,9 +70,11 @@ export class DisableAccountComponent implements OnInit {
     if (this.isAssuming && this.isChecked) {
       this.preForm();
       this.userService
-        .attemptChangePassword(this.disableAccountForm.value, this.authForm.value)
+        .disable(this.disableAccountForm.value, this.authForm.value)
         .subscribe(
-          updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
+          updatedUser => {
+            this.router.navigateByUrl('/profile/' + updatedUser.username)
+          },
           err => {
             this.errors = err;
             this.isSubmitting = false;
