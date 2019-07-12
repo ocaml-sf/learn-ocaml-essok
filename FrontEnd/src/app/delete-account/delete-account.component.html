@@ -3,11 +3,13 @@
         <div class="row">
             <div class="col-md-10 offset-md-1 col-xs-12">
 
-                <h1 class="text-xs-center" *ngIf="!user.admin" >Delete your account</h1>
-                <h1 class="text-xs-center" *ngIf="user.admin" >Delete an account : Admin mode</h1>
-                <p class="text-xs-center" *ngIf="!user.admin">When you delete your account, all your data will be destroyed
+                <h1 class="text-xs-center" *ngIf="!user.admin">Delete your account</h1>
+                <h1 class="text-xs-center" *ngIf="user.admin">Delete an account : Admin mode</h1>
+                <p class="text-xs-center" *ngIf="!user.admin">When you delete your account, all your data will be
+                    destroyed
                 </p>
-                <p class="text-xs-center" *ngIf="user.admin">When you delete an account, all account's data will be destroyed
+                <p class="text-xs-center" *ngIf="user.admin">When you delete an account, all account's data will be
+                    destroyed
                 </p>
                 <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -35,14 +37,17 @@
                                 placeholder="Username Verification" formControlName="username_verification" />
                         </fieldset>
                         <div *ngIf="!user.admin">
-                            <input type="checkbox" (click)="understandDelete()">
-                            I confirm I understand I want to DELETE my account ! All my data will be lost and nobody
-                            could
-                            retrieve it !
-                            <br />
-                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DELETING
-                            my account will DELETE all my servers !
-                            <br />
+                            <div class="danger">
+                                <input type="checkbox" (click)="understandDelete()">
+                                I confirm I understand I want to DELETE my account ! All my data will be lost and nobody
+                                could
+                                retrieve it !
+                                <br />
+                                <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                                DELETING
+                                my account will DELETE all my servers !
+                                <br />
+                            </div>
                             <br />
 
                             <button class="btn btn-lg btn-danger pull-xs-right"
@@ -51,13 +56,15 @@
                             </button>
                         </div>
                         <div *ngIf="user.admin">
-                            <input type="checkbox" (click)="understandDelete()">
-                            I confirm I understand I want to DELETE an account with ADMIN PRIVILEGE!
-                            <br />
-                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
-                            DELETE
-                            an account will DELETE PERMANENTLY all the account's data !
-                            <br />
+                            <div class="danger">
+                                <input type="checkbox" (click)="understandDelete()">
+                                I confirm I understand I want to DELETE an account with ADMIN PRIVILEGE!
+                                <br />
+                                <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                                DELETE
+                                an account will DELETE PERMANENTLY all the account's data !
+                                <br />
+                            </div>
                             <br />
                             <button class="btn btn-lg btn-danger pull-xs-right"
                                 [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">

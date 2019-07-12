@@ -20,7 +20,8 @@ export class ServerComponent implements OnInit {
   isSubmitting = false;
   isDeleting = false;
   isDisabled = false;
-  
+  isDangerous = false;
+
   constructor(
     private route: ActivatedRoute,
     private serversService: ServersService,
@@ -78,6 +79,9 @@ export class ServerComponent implements OnInit {
           this.router.navigateByUrl('/');
         }
       );
+  }
+  showDangerous() {
+    this.isDangerous = !this.isDangerous;
   }
 
 }

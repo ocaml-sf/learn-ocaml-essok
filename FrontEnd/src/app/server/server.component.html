@@ -5,7 +5,7 @@
       <h1>{{server.title}}</h1>
       <app-server-meta [server]="server">
         <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
+          <a class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active && !currentUser.admin"
             [routerLink]="['/server-settings', server.slug]">
             <i class="ion-edit"></i> Manage Server
           </a>
@@ -18,6 +18,20 @@
           <button class="btn btn-sm btn-outline-warning" *ngIf="server.active && currentUser.active"
             [ngClass]="{disabled: isDisabled}" (click)="disableServer()">
             <i class="ion-settings"></i> Disable Server
+          </button>
+
+          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && !isDangerous"
+             (click)="showDangerous()">
+            <i class="ion-settings"></i> Show Dangerous options
+          </button>
+          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
+             (click)="showDangerous()">
+            <i class="ion-settings"></i> Hide Dangerous options
+          </button>
+
+          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
+            [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
+            <i class="ion-trash-a"></i> Delete Server
           </button>
 
         </span>
