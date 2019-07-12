@@ -23,6 +23,7 @@ router.get('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
+    if ((user.username !== req.query.author) && !user.isAdmin()) { return res.sendStatus(401); }
     var author = req.query.author;
     user.findAnUser(author).then(function (results) {
 
@@ -31,11 +32,10 @@ router.get('/', auth.required, function (req, res, next) {
       user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
         var servers = results[0];
         var serversCount = results[1];
-        var user = results[2];
-        
+
         return res.json({
           servers: servers.map(function (server) {
-            return server.toJSONFor(user);
+            return server.toJSONFor(author);
           }),
           serversCount: serversCount
         });

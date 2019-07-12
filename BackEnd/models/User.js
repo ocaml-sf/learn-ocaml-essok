@@ -124,7 +124,6 @@ UserSchema.methods.findAllServersOfAnUser = function (limit_, offset_, author, p
       .populate('author')
       .exec(),
     mongoose.model('Server').countDocuments(query).exec(),
-    payload ? mongoose.model('User').findById(payload.id) : null,
   ]);
 };
 

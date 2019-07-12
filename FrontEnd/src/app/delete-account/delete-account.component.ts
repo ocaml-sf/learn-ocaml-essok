@@ -73,8 +73,9 @@ export class DeleteAccountComponent implements OnInit {
         .delete(this.deleteAccountForm.value, this.authForm.value)
         .subscribe(
           succes => {
-            this.userService.purgeAuth();
-            this.router.navigateByUrl('');
+            if (!this.user.admin)
+              this.userService.purgeAuth();
+            this.router.navigateByUrl('/');
           },
           err => {
             this.errors = err;

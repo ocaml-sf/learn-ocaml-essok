@@ -180,15 +180,14 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
       }
     }
 
-    var author = req.body.disable.username;
+    var authors = req.body.disable.username_verification;
 
-    user.findAnUser(author).then(function (results) {
+    user.findAnUser(authors).then(function (results) {
 
       author = results[0];
 
       user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
         var servers = results[0];
-        var users = results[2];
 
         servers.map(function (server) {
           var eventEmitter = new events.EventEmitter();
@@ -198,12 +197,10 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
           var createHandler = function () {
             server.createkubelink();
             eventEmitter.emit('kube_disable');
-            console.log('server' + server.title + 'enabled');
           }
           var deleteHandler = function () {
             server.removekubelink(eventEmitter, server);
             eventEmitter.emit('kube_disable');
-            console.log('server' + server.title + 'disabled');
 
           }
           eventEmitter.on('kube_deletion', deleteHandler);
@@ -224,15 +221,21 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
           }
 
         });
+        console.log('author = ' + author);
 
         console.log('all servers are done');
 
-        user.active = !user.active;
+        author.active = !author.active;
         console.log('user status up to date');
 
 
-        user.save();
-        return res.json({ user: user.toAuthJSON() });
+        author.save();
+        if (!user.isAdmin()) {
+          return res.json({ user: author.toAuthJSON() });
+        }
+        else {
+          return res.json({ user: user.toAuthJSON() });
+        }
       });
     }).catch(next);
   }).catch(next);
@@ -276,14 +279,16 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
       }
     }
 
-    var author = req.body.disable.username;
-
-    user.findAnUser(author).then(function (results) {
+    var authors = req.body.disable.username_verification;
+    console.log('author = ' + authors);
+    user.findAnUser(authors).then(function (results) {
 
       author = results[0];
+      console.log('author = ' + author);
 
       user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
         var servers = results[0];
+        console.log('author = ' + author);
 
         servers.map(function (server) {
           var eventEmitter = new events.EventEmitter();
@@ -312,11 +317,8 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
         });
 
         console.log('all servers are done');
-        // User.findOne({ username: req.body.user.username }).then(function (user_) {
-        user.active = !user.active;
-        user.remove();
-
-        // });
+        author.active = !author.active;
+        author.remove();
         return res.sendStatus(204);
       });
     }).catch(next);

@@ -5,7 +5,7 @@
       <h1>{{server.title}}</h1>
       <app-server-meta [server]="server">
         <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary" *ngIf="!server.active"
+          <a class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
             [routerLink]="['/server-settings', server.slug]">
             <i class="ion-edit"></i> Manage Server
           </a>

@@ -3,8 +3,11 @@
         <div class="row">
             <div class="col-md-10 offset-md-1 col-xs-12">
 
-                <h1 class="text-xs-center">Delete your account</h1>
-                <p class="text-xs-center">When you delete your account, all your data will be destroyed
+                <h1 class="text-xs-center" *ngIf="!user.admin" >Delete your account</h1>
+                <h1 class="text-xs-center" *ngIf="user.admin" >Delete an account : Admin mode</h1>
+                <p class="text-xs-center" *ngIf="!user.admin">When you delete your account, all your data will be destroyed
+                </p>
+                <p class="text-xs-center" *ngIf="user.admin">When you delete an account, all account's data will be destroyed
                 </p>
                 <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -31,20 +34,36 @@
                             <input class="form-control form-control-lg" type="username"
                                 placeholder="Username Verification" formControlName="username_verification" />
                         </fieldset>
+                        <div *ngIf="!user.admin">
+                            <input type="checkbox" (click)="understandDelete()">
+                            I confirm I understand I want to DELETE my account ! All my data will be lost and nobody
+                            could
+                            retrieve it !
+                            <br />
+                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DELETING
+                            my account will DELETE all my servers !
+                            <br />
+                            <br />
 
-                        <input type="checkbox" (click)="understandDelete()">
-                        I confirm I understand I want to DELETE my account ! All my data will be lost and nobody could
-                        retrieve it !
-                        <br />
-                        <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and DELETING
-                        my account will DELETE all my servers !
-                        <br />
-                        <br />
-
-                        <button class="btn btn-lg btn-danger pull-xs-right"
-                            [disabled]="!deleteAccountForm.valid || !authForm.valid" type="submit">
-                            Delete my account
-                        </button>
+                            <button class="btn btn-lg btn-danger pull-xs-right"
+                                [disabled]="!deleteAccountForm.valid || !authForm.valid" type="submit">
+                                Delete my account
+                            </button>
+                        </div>
+                        <div *ngIf="user.admin">
+                            <input type="checkbox" (click)="understandDelete()">
+                            I confirm I understand I want to DELETE an account with ADMIN PRIVILEGE!
+                            <br />
+                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                            DELETE
+                            an account will DELETE PERMANENTLY all the account's data !
+                            <br />
+                            <br />
+                            <button class="btn btn-lg btn-danger pull-xs-right"
+                                [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
+                                DELETE an account
+                            </button>
+                        </div>
 
                     </fieldset>
                 </form>

@@ -3,13 +3,16 @@
         <div class="row">
             <div class="col-md-10 offset-md-1 col-xs-12">
 
-                <h1 class="text-xs-center" *ngIf="user.active">Disable your account</h1>
-                <h1 class="text-xs-center" *ngIf="!user.active">Enable your account</h1>
-                <p class="text-xs-center" *ngIf="user.active">When you disable your account, your data will be keep safe
+                <h1 class="text-xs-center" *ngIf="user.active && !user.admin">Disable your account</h1>
+                <h1 class="text-xs-center" *ngIf="!user.active && !user.admin">Enable your account</h1>
+                <h1 class="text-xs-center" *ngIf="user.admin">Enable or Disable an account : Admin mode</h1>
+                <p class="text-xs-center" *ngIf="user.active && !user.admin">When you disable your account, your data will be keep safe
                     until you return
                 </p>
-                <p class="text-xs-center" *ngIf="!user.active">When you enable your account, your data will be ready for
+                <p class="text-xs-center" *ngIf="!user.active && !user.admin">When you enable your account, your data will be ready for
                     use
+                </p>
+                <p class="text-xs-center" *ngIf="user.admin">When you enable or you disable an account, their data will be keep safe
                 </p>
                 <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -36,7 +39,7 @@
                             <input class="form-control form-control-lg" type="username"
                                 placeholder="Username Verification" formControlName="username_verification" />
                         </fieldset>
-                        <div *ngIf="user.active">
+                        <div *ngIf="user.active && !user.admin">
                             <input type="checkbox" (click)="understandDelete()">
                             I confirm I understand I want to DISABLE my account !
                             <br />
@@ -50,7 +53,7 @@
                                 Disable my account
                             </button>
                         </div>
-                        <div *ngIf="!user.active">
+                        <div *ngIf="!user.active && !user.admin">
                             <input type="checkbox" (click)="understandDelete()">
                             I confirm I understand I want to Enable my account !
                             <br />
@@ -62,6 +65,20 @@
                             <button class="btn btn-lg btn-warning pull-xs-right"
                                 [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
                                 Enable my account
+                            </button>
+                        </div>
+                        <div *ngIf="user.admin">
+                            <input type="checkbox" (click)="understandDelete()">
+                            I confirm I understand I want to Enable or Disable an account !
+                            <br />
+                            <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and
+                            ENABLING or DISABLING
+                            an account will ENABLE or DISABLE all the account's servers !
+                            <br />
+                            <br />
+                            <button class="btn btn-lg btn-warning pull-xs-right"
+                                [disabled]="!disableAccountForm.valid || !authForm.valid" type="submit">
+                                Enable or Disable an account
                             </button>
                         </div>
 
