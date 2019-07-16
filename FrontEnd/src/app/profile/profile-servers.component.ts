@@ -27,7 +27,7 @@ export class ProfileServersComponent implements OnInit {
           type: 'all',
           filters: {
             author: this.profile.username,
-            active: false
+            active: true
           }
         };
       }

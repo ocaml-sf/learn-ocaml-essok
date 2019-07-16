@@ -9,17 +9,36 @@
 
   <div class="container page" *appShowAuthed="false">
     <div class="col-md-10 offset-md-1 col-xs-12">
-        <h1 class="text-xs-center">{{ title }}</h1>
-        <p class="text-xs-center">{{ header }}</p>
-        <p class="text-xs-center">{{ body }}</p>
-      </div>
+      <h1 class="text-xs-center">{{ title }}</h1>
+      <p class="text-xs-center">{{ header }}</p>
+      <p class="text-xs-center">{{ body }}</p>
+    </div>
   </div>
 
   <div class="container page" *appShowAuthed="true">
-    <h1 class="text-xs-center">Mainboard</h1>
-    <hr />
-    <div class="row">
-        <app-server-list [limit]="5" [config]="listConfig"></app-server-list>
+    <div *ngIf="!currentUser.authorized && !currentUser.admin">
+      <h1 class="text-xs-center">Information</h1>
+      <hr />
+      <div class="col-md-10 offset-md-1 col-xs-12">
+        <h1 class="text-xs-center">Your account is pending verification... </h1>
+      </div>
     </div>
+
+    <div *ngIf="currentUser.authorized || currentUser.admin">
+      <h1 class="text-xs-center">Mainboard</h1>
+      <hr />
+      <button class="btn btn-md btn-outline-info" (click)="getActived()">
+        <i class="ion-settings"></i> Filter by Active : {{ isActive }}
+      </button>
+      <hr />
+
+      <div class="row">
+        <app-server-list [limit]="5" [config]="listConfig"></app-server-list>
+      </div>
+    </div>
+  </div>
+
+  <div class="container page" *appShowAuthed="true">
+
   </div>
 </div>

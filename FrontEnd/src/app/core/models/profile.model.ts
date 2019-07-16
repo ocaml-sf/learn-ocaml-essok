@@ -5,4 +5,5 @@ export interface Profile {
   goal: string;
   active: boolean;
   image: string;
+  authorized: boolean;
 }

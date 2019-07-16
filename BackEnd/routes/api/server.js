@@ -22,6 +22,7 @@ router.get('/', auth.required, function (req, res, next) {
 
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
     if ((user.username !== req.query.author) && !user.isAdmin()) { return res.sendStatus(401); }
     var author = req.query.author;
@@ -29,7 +30,7 @@ router.get('/', auth.required, function (req, res, next) {
 
       author = results[0];
 
-      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
+      user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
         var serversCount = results[1];
 
@@ -50,7 +51,7 @@ router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (!user.active) { return res.sendStatus(401); }
-
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
     var server = new Server(req.body.server);
     server.author = user;
     return server.save().then(function () {
@@ -70,6 +71,8 @@ router.get('/:server', auth.required, function (req, res, next) {
     var user = results[0];
     var server = req.server.toJSONFor(user);
     if (!user) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+
     if ((user.username !== server.author.username) && (!user.isAdmin())) { return res.sendStatus(401); }
 
     return res.json({ server });
@@ -79,6 +82,9 @@ router.get('/:server', auth.required, function (req, res, next) {
 // update server
 router.put('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
+    if (!user.active) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+
     if (req.server.author._id.toString() === req.payload.id.toString()) {
       if (req.server.active) { return res.sendStatus(401); }
 
@@ -107,24 +113,29 @@ router.put('/:server', auth.required, function (req, res, next) {
 router.post('/disable/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
-      if (!user.active) { return res.sendStatus(401); }
+    if (!user.active) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
       var eventEmitter = new events.EventEmitter();
 
-      eventEmitter.emit('kube_creation');
-
       var createHandler = function () {
-        req.server.createkubelink();
+        req.server.createNamespacedPersistentVolumeClaim().then((response) => {
+          console.log('my response' + response);
+          req.server.createkubelink();
+        });
         eventEmitter.emit('kube_disable');
       }
       var deleteHandler = function () {
         req.server.removekubelink(eventEmitter, req.server);
-        eventEmitter.emit('kube_disable');
-        console.log('done');
-
+        eventEmitter.emit('volume_deletion');
       }
       eventEmitter.on('kube_deletion', deleteHandler);
-      eventEmitter.on('kube_creation', createHandler);
+      eventEmitter.on('volume_creation', createHandler);
+
+      eventEmitter.on('volume_deletion', function () {
+        req.server.deleteNamespacedPersistentVolumeClaim();
+        eventEmitter.emit('kube_disable');
+      });
 
       eventEmitter.on('kube_disable', function () {
         req.server.active = !req.server.active;
@@ -134,10 +145,11 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
         });
       });
 
+
       if (req.server.active) {
         eventEmitter.emit('kube_deletion');
       } else {
-        eventEmitter.emit('kube_creation');
+        eventEmitter.emit('volume_creation');
       }
     } else {
       return res.sendStatus(403);
@@ -150,6 +162,7 @@ router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (!user.active) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 

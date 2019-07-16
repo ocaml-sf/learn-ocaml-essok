@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { ServerListConfig, UserService, User } from '../core';
+import { ServerListConfig, UserService, User, FilterService } from '../core';
 
 @Component({
   selector: 'app-home-page',
@@ -12,7 +12,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private userService: UserService
+    private userService: UserService,
+    private filterService: FilterService
   ) { }
 
   currentUser: User;
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit {
   title: string;
   header: string;
   body: string;
+  isActive: boolean;
 
   ngOnInit() {
     this.authStatus();
@@ -57,6 +59,18 @@ export class HomeComponent implements OnInit {
             author: this.currentUser.username,
           }
         };
+        this.filterService.isActive$.subscribe(
+          filterActive => {
+            this.listConfig = {
+              type: 'all',
+              filters: {
+                author: this.currentUser.username,
+                active: filterActive
+              }
+            };
+          }
+        );
+
       }
     );
   }
@@ -69,4 +83,12 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  getActived() {
+    if (this.isActive === undefined) {
+      this.isActive = true;
+    }
+    this.isActive = !this.isActive;
+    this.filterService.getActive(this.isActive);
+  }
 }
+

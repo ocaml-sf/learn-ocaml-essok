@@ -129,4 +129,10 @@ export class UserService {
       );
   }
 
+  activateAccount(user): Observable<User> {
+    return this.apiService
+      .post('/user/activate', { user })
+      .pipe(map(data => data.user));
+  }
+
 }

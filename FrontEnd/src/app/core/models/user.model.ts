@@ -8,4 +8,5 @@ export interface User {
   goal: string;
   image: string;
   active: boolean;
+  authorized: boolean;
 }

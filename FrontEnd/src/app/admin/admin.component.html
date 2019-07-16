@@ -19,6 +19,14 @@
         </button>
         <hr />
 
+        <button class="btn btn-md btn-outline-info" (click)="getActived()">
+            <i class="ion-settings"></i> Filter by Active : {{ isActive }}
+        </button>
+        <button class="btn btn-md btn-outline-info" [hidden]="isServer" (click)="getAuthorized()">
+            <i class="ion-settings"></i> Filter by Authorized : {{ isAuthorized }}
+        </button>
+        <hr />
+
         <div class="row">
             <router-outlet name="server" *ngIf="isServer"></router-outlet>
         </div>

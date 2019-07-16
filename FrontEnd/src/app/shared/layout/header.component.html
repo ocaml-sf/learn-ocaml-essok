@@ -47,13 +47,13 @@
       </li>
 
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active" *ngIf="currentUser.active">
+        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active" *ngIf="currentUser.active && currentUser.authorized || currentUser.admin">
           <i class="ion-compose"></i>&nbsp;New Server
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/profile-settings" routerLinkActive="active" *ngIf="currentUser.active">
+        <a class="btn btn-outline-info" [routerLink]="['/profile-settings', currentUser.username]" routerLinkActive="active" *ngIf="currentUser.active && currentUser.authorized  || currentUser.admin">
           <i class="ion-gear-a"></i>&nbsp;Profile Settings
         </a>
       </li>

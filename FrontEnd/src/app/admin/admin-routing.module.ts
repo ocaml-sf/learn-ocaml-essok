@@ -17,7 +17,8 @@ const routes: Routes = [
         children: [{
             path: '',
             component: AdminUsersComponent,
-            outlet: 'user'
+            outlet: 'user',
+            data: { isAuthorized: true }
         },
         {
             path: '',

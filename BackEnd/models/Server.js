@@ -15,10 +15,11 @@ k8sApiIngress.defaultHeaders = {
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
-  title: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/^[a-zA-Z]+$/, 'is invalid'], index: true },
+  title: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/^[a-zA-Z0-9]+$/, 'is invalid'], index: true },
   description: String,
   body: String,
   vue: String,
+  volume: String,
   active: { type: Boolean, default: false },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -43,7 +44,7 @@ ServerSchema.methods.createNamespacedDeployment = function (deployment) {
       console.log('Created deployment ' + this.slug);
     },
     (err) => {
-      console.log('Error!: ' + err);
+      console.log('Error!: ' + JSON.stringify(err));
     },
   );
 };
@@ -53,7 +54,7 @@ ServerSchema.methods.readNamespacedDeployment = function () {
     console.log('Namespace read');
   },
     (err) => {
-      console.log('Error!: ' + err);
+      console.log('Error!: ' + JSON.stringify(err));
     });
 };
 
@@ -110,6 +111,8 @@ ServerSchema.methods.removekubelink = function (eventEmitter, server) {
 
 ServerSchema.methods.createkubelink = function () {
 
+  console.log('this.volume = ' + this.volume);
+
   var slugged = this.slug;
   var deployment = {
     apiVersion: 'apps/v1',
@@ -121,7 +124,7 @@ ServerSchema.methods.createkubelink = function () {
       }
     },
     spec: {
-      replicas: 3,
+      replicas: 1,
       selector: {
         matchLabels: {
           app: slugged
@@ -142,7 +145,31 @@ ServerSchema.methods.createkubelink = function () {
                 {
                   containerPort: 8080
                 }
+              ],
+              volumeMounts: [
+                {
+                  name: slugged,
+                  mountPath: '/repository/',
+                  subPath: 'repository',
+                },
+                {
+                  name: slugged,
+                  mountPath: '/sync/',
+                  subPath: 'sync',
+                }
               ]
+            }
+          ],
+          securityContext: {
+            fsGroup: 1000
+          },
+          volumes: [
+            {
+              name: slugged,
+              cinder: {
+                volumeID: this.volume,
+                fsType: 'ext4'
+              }
             }
           ]
         }
@@ -237,6 +264,141 @@ ServerSchema.methods.deleteNamespacedDeployment = function () {
   );
 };
 
+ServerSchema.methods.listPersistentVolume = function () {
+  server = this;
+  return new Promise(function (resolve, reject) {
+    k8sApi.listPersistentVolume().then((response) => {
+      response.body.items.forEach(element => {
+        if (element.spec.claimRef.name === server.slug) {
+          console.log('item bound found ' + element);
+          console.log('Volume ' + server.slug + ' Bound ' + element.spec.cinder.volumeID);
+          server.volume = element.spec.cinder.volumeID;
+          console.log('volume recu  = ' + server.volume);
+          server.save();
+          return resolve(server);
+        }
+
+      });
+    },
+      (err) => {
+        console.log('Error!: ' + err);
+        return reject(err);
+      },
+    );
+  });
+};
+
+ServerSchema.methods.createNamespacedPersistentVolumeClaim = function () {
+
+  var pvc = {
+    apiVersion: 'v1',
+    kind: 'PersistentVolumeClaim',
+    metadata: {
+      name: this.slug,
+      namespace: 'default'
+    },
+    spec: {
+      accessModes: [
+        'ReadWriteOnce'
+      ],
+      resources: {
+        requests: {
+          storage: '1Gi'
+        }
+      },
+      storageClassName: 'cinder-classic',
+      volumeMode: 'Filesystem'
+    }
+  };
+
+  server = this;
+  var volumeID;
+  return k8sApi.createNamespacedPersistentVolumeClaim('default', pvc)
+    .then((response) => {
+      console.log('Volume ' + this.slug + ' claimed');
+      k8sApi.listNamespacedPersistentVolumeClaim('default');
+      console.log('before pause');
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5000);
+      console.log('after pause');
+
+      // var p = new Promise(function (resolve, reject) {
+      //   return resolve(server);
+      // })
+      return k8sApi.listNamespacedPersistentVolumeClaim('default').then((response) => {
+        console.log('listNamespacedPersistentVolumeClaim ' + response);
+        response.body.items.forEach(element => {
+          if (element.metadata.name === this.slug) {
+            console.log('item found ' + element);
+            status = element.status.phase;
+            console.log('status found ' + status);
+            if (element.status.phase !== 'Bound') {
+              console.log('before pause');
+              Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5000);
+              console.log('after pause');
+              return k8sApi.listNamespacedPersistentVolumeClaim('default').then((response) => {
+                console.log('listNamespacedPersistentVolumeClaim ' + response);
+                response.body.items.forEach(element => {
+                  if (element.metadata.name === this.slug) {
+                    console.log('item found ' + element);
+                    status = element.status.phase;
+                    console.log('status found ' + status);
+                    if (element.status.phase !== 'Bound') {
+                      console.log('abandon');
+                    } else {
+                      return server.listPersistentVolume().then((response) => {
+                        console.log('after bonding' + response);
+                        server.volume = response.volume;
+                        volumeID = response.volume;
+                      });
+                    }
+                  }
+                },
+                  (err) => {
+                    console.log('Error!: ' + err);
+                  },
+                )
+              })
+            } else {
+              return server.listPersistentVolume().then((response) => {
+                console.log('after bonding' + response);
+                server.volume = response.volume;
+                volumeID = response.volume;
+              });
+            }
+          }
+        },
+          (err) => {
+            console.log('Error!: ' + err);
+          },
+        )
+
+      });
+    },
+
+
+      (err) => {
+        console.log('Error!: ' + err);
+      },
+    )
+    // .then((response) => {
+    //   return new Promise(function (resolve, reject) {
+    //     return resolve(volumeID);
+    //   })
+    // });
+
+};
+
+ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
+  k8sApi.deleteNamespacedPersistentVolumeClaim(this.slug, 'default').then((response) => {
+    console.log('volume ' + this.slug + ' deleted');
+
+  },
+    (err) => {
+      console.log('Error!: ' + err);
+    }
+  );
+}
+
 ServerSchema.methods.toJSONFor = function (user) {
   return {
     slug: this.slug,
@@ -247,6 +409,7 @@ ServerSchema.methods.toJSONFor = function (user) {
     updatedAt: this.updatedAt,
     author: this.author.toProfileJSONFor(user),
     active: this.active,
+    volume: this.volume,
     vue: 'Arborescence de la vue',
 
   };

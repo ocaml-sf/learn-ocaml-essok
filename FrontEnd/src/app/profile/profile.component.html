@@ -9,7 +9,7 @@
           <h4>{{ profile.username }}</h4>
           <p>{{ profile.description }}</p>
 
-          <a [routerLink]="['/profile-settings']" [hidden]="!isUser" *ngIf="currentUser.active"
+          <a [routerLink]="['/profile-settings/' + profile.username]" [hidden]="!isUser && !currentUser.admin" *ngIf="currentUser.active"
             class="btn btn-sm btn-outline-info">
             <i class="ion-gear-a"></i> Edit Profile Settings
           </a>

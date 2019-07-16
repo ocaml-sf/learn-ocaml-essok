@@ -16,6 +16,7 @@ var UserSchema = new mongoose.Schema({
   goal: String,
   admin: { type: Boolean, default: false },
   active: { type: Boolean, default: true },
+  authorized: { type: Boolean, default: false },
   image: String,
   hash: String,
   salt: String
@@ -92,19 +93,21 @@ UserSchema.methods.findAnUser = function (author) {
   ]);
 };
 
-UserSchema.methods.findAllServersOfAnUser = function (limit_, offset_, author, payload) {
+UserSchema.methods.findAllServersOfAnUser = function (query_, author, payload) {
 
   var query = {};
   var limit = 20;
   var offset = 0;
-  if (typeof limit_ !== 'undefined') {
-    limit = limit_;
+  if (typeof query_.limit !== 'undefined') {
+    limit = query_.limit;
   }
 
-  if (typeof offset_ !== 'undefined') {
-    offset = offset_;
+  if (typeof query_.offset !== 'undefined') {
+    offset = query_.offset;
   }
-
+  if (typeof query_.active !== 'undefined') {
+    query.active = query_.active;
+  }
 
   if (this.isAdmin()) {
     if (author) {
@@ -138,16 +141,19 @@ UserSchema.methods.toAuthJSON = function () {
     admin: this.admin,
     image: this.image,
     active: this.active,
+    authorized: this.authorized,
   };
 }
 
 UserSchema.methods.toProfileJSONFor = function (user) {
   return {
+    email: this.email,
     username: this.username,
     description: this.description,
     place: this.place,
     goal: this.goal,
     active: this.active,
+    authorized: this.authorized,
     image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
   };
 };

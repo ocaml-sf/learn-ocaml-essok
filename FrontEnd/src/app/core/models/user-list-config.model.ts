@@ -4,6 +4,7 @@ export interface UserListConfig {
   filters: {
     username?: string,
     active?: boolean,
+    authorized?: boolean,
     limit?: number,
     offset?: number
   };

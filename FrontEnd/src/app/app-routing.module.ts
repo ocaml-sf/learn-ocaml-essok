@@ -38,6 +38,10 @@ const routes: Routes = [
     path: 'server-settings',
     loadChildren: './server-settings/server-settings.module#ServerSettingsModule'
   },
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  { path: '**', redirectTo: '/', pathMatch: 'full' }
+
+  // { path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({

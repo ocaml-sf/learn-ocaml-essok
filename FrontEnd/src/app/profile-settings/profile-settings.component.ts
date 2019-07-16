@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
-import { User, UserService } from '../core';
+import { User, UserService, ProfilesService, Profile } from '../core';
 
 @Component({
   selector: 'app-profile-settings-page',
@@ -11,13 +11,17 @@ import { User, UserService } from '../core';
 })
 export class ProfileSettingsComponent implements OnInit {
   user: User = {} as User;
+  userToModify: User = {} as User;
   profileSettingsForm: FormGroup;
   errors: Object = {};
   isSubmitting = false;
+  profile: Profile = {} as Profile;
 
   constructor(
     private router: Router,
     private userService: UserService,
+    private profileService: ProfilesService,
+    private route: ActivatedRoute,
     private fb: FormBuilder
   ) {
     // create form group using the form builder
@@ -29,7 +33,6 @@ export class ProfileSettingsComponent implements OnInit {
       description: '',
       place: '',
       goal: '',
-      password_verification: ''
     });
     // Optional: subscribe to changes on the form
     // this.profileSettingsForm.valueChanges.subscribe(values => this.updateUser(values));
@@ -38,8 +41,24 @@ export class ProfileSettingsComponent implements OnInit {
   ngOnInit() {
     // Make a fresh copy of the current user's object to place in editable form fields
     Object.assign(this.user, this.userService.getCurrentUser());
+
+    this.route.data.subscribe(
+      (data: { profile: Profile }) => {
+        this.profile = data.profile;
+      }
+    );
+
+    this.profileService
+      .getUser(this.profile.username)
+      .subscribe(
+        userTM => Object.assign(this.userToModify, userTM),
+        err => {
+          this.errors = err;
+        }
+      );
+
     // Fill the form
-    this.profileSettingsForm.patchValue(this.user);
+    this.profileSettingsForm.patchValue(this.profile);
   }
 
   submitForm() {
@@ -49,7 +68,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.updateUser(this.profileSettingsForm.value);
 
     this.userService
-      .update(this.user)
+      .update(this.userToModify)
       .subscribe(
         updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
         err => {
@@ -60,7 +79,19 @@ export class ProfileSettingsComponent implements OnInit {
   }
 
   updateUser(values: Object) {
-    Object.assign(this.user, values);
+    Object.assign(this.userToModify, values);
   }
 
+  activateAccount() {
+    this.userService
+      .activateAccount(this.userToModify)
+      .subscribe(
+        success =>
+          this.router.navigateByUrl('/'),
+        err => {
+          this.errors = err;
+          this.isSubmitting = false;
+        }
+      );
+  }
 }

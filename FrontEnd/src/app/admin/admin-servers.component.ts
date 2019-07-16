@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ServerListConfig, Profile } from '../core';
+import { ServerListConfig, Profile, FilterService } from '../core';
 
 @Component({
   selector: 'app-admin-servers',
@@ -10,7 +10,8 @@ import { ServerListConfig, Profile } from '../core';
 export class AdminServersComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private filterService: FilterService
   ) { }
 
   serversConfig: ServerListConfig = {
@@ -20,12 +21,17 @@ export class AdminServersComponent implements OnInit {
 
   ngOnInit() {
     this.route.data.subscribe(
-      (data: { profile: Profile }) => {
-        this.serversConfig = {
-          type: 'all',
-          filters: {
+      (data: {}) => {
+        this.filterService.isActive$.subscribe(
+          filterActive => {
+            this.serversConfig = {
+              type: 'all',
+              filters: {
+                active: filterActive,
+              }
+            };
           }
-        };
+        );
       }
     );
   }

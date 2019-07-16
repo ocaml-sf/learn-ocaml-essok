@@ -1,13 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '../core';
-import { ProfileSettingsComponent } from './profile-settings.component';
+import { ProfileSettingsComponent} from './profile-settings.component';
+import { ProfileSettingsResolver } from './profile-settings-resolver.service';
 
 const routes: Routes = [
   {
-    path: '',
+    path: ':username',
     component: ProfileSettingsComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    resolve: {
+      profile: ProfileSettingsResolver
+    },
   }
 ];
 

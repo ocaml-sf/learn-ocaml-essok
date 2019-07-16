@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-md-10 offset-md-1 col-xs-12">
 
-        <h1 class="text-xs-center">Your Settings</h1>
+        <h1 class="text-xs-center">Settings</h1>
 
         <app-list-errors [errors]="errors"></app-list-errors>
         <form [formGroup]="profileSettingsForm" (ngSubmit)="submitForm()">
@@ -50,23 +50,37 @@
         <!-- Line break for logout button -->
         <hr />
         <div class="col-md-12 offset-md-0 col-xs-12">
-          <div class="danger">
+          <div class="warning" *ngIf="!userToModify.authorized && user.admin">
+            <h2>Warning ZONE</h2>
+            <p>ACTIVATE THE ACCOUNT:</p>
+            <p>If the form satisfies you, you can activate the account then the user would create and manage its server
+            </p>
+            <p>Otherwise you can delete the account in the Dangerous ZONE and ask the user to make a more accurate form.
+              </p>
+            <button class="btn btn-outline-warning" (click)="activateAccount()">
+              Click here to activate the account
+            </button>
+            <br />
+            <br />
+          </div>
+          <hr />
+          <div class="danger" *ngIf="userToModify.authorized || user.admin">
             <h2>Dangerous ZONE</h2>
-            <p>TO RESET YOUR PASSWORD :</p>
+            <p>RESET PASSWORD :</p>
             <button class="btn btn-outline-danger" routerLink="/reset-password" routerLinkActive="active">
-              Click here to reset your password.
+              Click here to reset your password
             </button>
             <br />
             <br />
-            <p>TO DISABLE YOUR ACCOUNT :</p> 
+            <p>DISABLE ACCOUNT :</p>
             <button class="btn btn-outline-danger" routerLink="/disable-account" routerLinkActive="active">
-              Click here to disable your account.
+              Click here to disable your account
             </button>
             <br />
             <br />
-            <p>TO DELETE YOUR ACCOUNT :</p>
+            <p>DELETE ACCOUNT :</p>
             <button class="btn btn-outline-danger" routerLink="/delete-account" routerLinkActive="active">
-              Click here to delete your account.
+              Click here to delete your account
             </button>
           </div>
         </div>
