@@ -113,17 +113,15 @@ router.put('/:server', auth.required, function (req, res, next) {
 router.post('/disable/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+      if (!user.active) { return res.sendStatus(401); }
+      if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
       var eventEmitter = new events.EventEmitter();
 
       var createHandler = function () {
-        req.server.createNamespacedPersistentVolumeClaim().then((response) => {
-          console.log('my response' + response);
-          req.server.createkubelink();
-        });
-        eventEmitter.emit('kube_disable');
+        req.server.createPersistentVolumeAndLinkKube(eventEmitter, req.server);
+        eventEmitter.emit('kube_creation');
+
       }
       var deleteHandler = function () {
         req.server.removekubelink(eventEmitter, req.server);
@@ -131,6 +129,10 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
       }
       eventEmitter.on('kube_deletion', deleteHandler);
       eventEmitter.on('volume_creation', createHandler);
+
+      eventEmitter.on('kube_creation', function () {
+        return res.sendStatus(204);
+      });
 
       eventEmitter.on('volume_deletion', function () {
         req.server.deleteNamespacedPersistentVolumeClaim();

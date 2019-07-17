@@ -264,8 +264,7 @@ ServerSchema.methods.deleteNamespacedDeployment = function () {
   );
 };
 
-ServerSchema.methods.listPersistentVolume = function () {
-  server = this;
+ServerSchema.methods.listPersistentVolume = function (server) {
   return new Promise(function (resolve, reject) {
     k8sApi.listPersistentVolume().then((response) => {
       response.body.items.forEach(element => {
@@ -274,7 +273,6 @@ ServerSchema.methods.listPersistentVolume = function () {
           console.log('Volume ' + server.slug + ' Bound ' + element.spec.cinder.volumeID);
           server.volume = element.spec.cinder.volumeID;
           console.log('volume recu  = ' + server.volume);
-          server.save();
           return resolve(server);
         }
 
@@ -288,7 +286,7 @@ ServerSchema.methods.listPersistentVolume = function () {
   });
 };
 
-ServerSchema.methods.createNamespacedPersistentVolumeClaim = function () {
+ServerSchema.methods.createPersistentVolumeAndLinkKube = function (eventEmitter, server) {
 
   var pvc = {
     apiVersion: 'v1',
@@ -311,81 +309,41 @@ ServerSchema.methods.createNamespacedPersistentVolumeClaim = function () {
     }
   };
 
-  server = this;
-  var volumeID;
-  return k8sApi.createNamespacedPersistentVolumeClaim('default', pvc)
+  var serverCreated = false;
+  k8sApi.createNamespacedPersistentVolumeClaim('default', pvc)
     .then((response) => {
-      console.log('Volume ' + this.slug + ' claimed');
+      console.log('Volume ' + server.slug + ' claimed');
       k8sApi.listNamespacedPersistentVolumeClaim('default');
-      console.log('before pause');
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5000);
-      console.log('after pause');
-
-      // var p = new Promise(function (resolve, reject) {
-      //   return resolve(server);
-      // })
-      return k8sApi.listNamespacedPersistentVolumeClaim('default').then((response) => {
-        console.log('listNamespacedPersistentVolumeClaim ' + response);
-        response.body.items.forEach(element => {
-          if (element.metadata.name === this.slug) {
-            console.log('item found ' + element);
-            status = element.status.phase;
-            console.log('status found ' + status);
-            if (element.status.phase !== 'Bound') {
-              console.log('before pause');
-              Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5000);
-              console.log('after pause');
-              return k8sApi.listNamespacedPersistentVolumeClaim('default').then((response) => {
-                console.log('listNamespacedPersistentVolumeClaim ' + response);
-                response.body.items.forEach(element => {
-                  if (element.metadata.name === this.slug) {
-                    console.log('item found ' + element);
-                    status = element.status.phase;
-                    console.log('status found ' + status);
-                    if (element.status.phase !== 'Bound') {
-                      console.log('abandon');
-                    } else {
-                      return server.listPersistentVolume().then((response) => {
-                        console.log('after bonding' + response);
-                        server.volume = response.volume;
-                        volumeID = response.volume;
-                      });
-                    }
-                  }
-                },
-                  (err) => {
-                    console.log('Error!: ' + err);
-                  },
-                )
-              })
-            } else {
-              return server.listPersistentVolume().then((response) => {
-                console.log('after bonding' + response);
-                server.volume = response.volume;
-                volumeID = response.volume;
-              });
+      var serverInCreation = setInterval(function () {
+        k8sApi.listNamespacedPersistentVolumeClaim('default').then((response) => {
+          response.body.items.forEach(element => {
+            if (element.metadata.name === server.slug) {
+              console.log('item found ' + element);
+              status = element.status.phase;
+              console.log('status found ' + status);
+              if (element.status.phase === 'Bound') {
+                serverCreated = true;
+              }
             }
+          });
+          if (serverCreated === true) {
+            console.log('status bound found !');
+            server.listPersistentVolume(server).then((response) => {
+              console.log('after bonding' + response);
+              server.volume = response.volume;
+              clearInterval(serverInCreation);
+              server.createkubelink();
+              server.active = !server.active;
+              server.save();
+            }, (err) => {
+              console.log('Error!: ' + err);
+            });
           }
-        },
-          (err) => {
-            console.log('Error!: ' + err);
-          },
-        )
-
-      });
-    },
-
-
-      (err) => {
-        console.log('Error!: ' + err);
-      },
-    )
-    // .then((response) => {
-    //   return new Promise(function (resolve, reject) {
-    //     return resolve(volumeID);
-    //   })
-    // });
-
+        }, (err) => {
+          console.log('Error!: ' + err);
+        });
+      }, 2000);
+    });
 };
 
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {

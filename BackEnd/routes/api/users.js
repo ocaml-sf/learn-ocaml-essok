@@ -163,34 +163,34 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
     if (!user) { return res.sendStatus(401); }
     if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401); }
 
+    if (!req.body.user.email) {
+      return res.status(422).json({ errors: { email: "can't be blank" } });
+    }
+
+    if (req.body.user.email !== user.email) {
+      return res.status(422).json({ errors: { email: "does not correspond" } });
+    }
+
+    if (!req.body.user.password) {
+      return res.status(422).json({ errors: { password: "can't be blank" } });
+    }
+
+    if (!user.validPassword(req.body.user.password)) {
+      return res.status(422).json({ errors: { password: "does not correspond" } });
+    }
+
+    if (!req.body.disable.password_verification) {
+      return res.status(422).json({ errors: { password: "can't be blank" } });
+    }
+
+    if (req.body.user.password !== req.body.disable.password_verification) {
+      return res.status(422).json({ errors: { password: "verification mismatch" } });
+    }
+    if (!req.body.disable.username_verification) {
+      return res.status(422).json({ errors: { username: "can't be blank" } });
+    }
+
     if (!user.isAdmin()) {
-
-      if (!req.body.user.email) {
-        return res.status(422).json({ errors: { email: "can't be blank" } });
-      }
-
-      if (req.body.user.email !== user.email) {
-        return res.status(422).json({ errors: { email: "does not correspond" } });
-      }
-
-      if (!req.body.user.password) {
-        return res.status(422).json({ errors: { password: "can't be blank" } });
-      }
-
-      if (!user.validPassword(req.body.user.password)) {
-        return res.status(422).json({ errors: { password: "does not correspond" } });
-      }
-
-      if (!req.body.disable.password_verification) {
-        return res.status(422).json({ errors: { password: "can't be blank" } });
-      }
-
-      if (req.body.user.password !== req.body.disable.password_verification) {
-        return res.status(422).json({ errors: { password: "verification mismatch" } });
-      }
-      if (!req.body.disable.username_verification) {
-        return res.status(422).json({ errors: { username: "can't be blank" } });
-      }
       if (req.body.disable.username_verification !== user.username) {
         return res.status(422).json({ errors: { username: "verification mismatch" } });
       }
@@ -202,7 +202,7 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
 
       author = results[0];
 
-      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
+      user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
 
         servers.map(function (server) {
@@ -302,7 +302,7 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
       author = results[0];
       console.log('author = ' + author);
 
-      user.findAllServersOfAnUser(req.query.limit, req.query.offset, author, req.payload).then(function (results) {
+      user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
         console.log('author = ' + author);
 

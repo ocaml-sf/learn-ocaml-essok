@@ -44,7 +44,7 @@ export class ServerSettingsComponent implements OnInit {
   ngOnInit() {
     this.loadData();
     this.uploadPrepare();
-    this.router.navigateByUrl('/server/server-settings/' + this.server.slug);
+    this.router.navigateByUrl('/server-settings/' + this.server.slug);
   }
 
   loadData() {
