@@ -14,7 +14,7 @@ var UserSchema = new mongoose.Schema({
   description: String,
   place: String,
   goal: String,
-  admin: { type: Boolean, default: false },
+  admin: { type: Boolean, default: true },
   active: { type: Boolean, default: true },
   authorized: { type: Boolean, default: false },
   image: String,
@@ -116,8 +116,6 @@ UserSchema.methods.findAllServersOfAnUser = function (query_, author, payload) {
   }
   else {
     query.author = payload.id;
-    // we'll see
-    //query.active = true;
   }
   return Promise.all([
     mongoose.model('Server').find(query)

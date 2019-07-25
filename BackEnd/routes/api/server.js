@@ -54,8 +54,9 @@ router.post('/', auth.required, function (req, res, next) {
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
     var server = new Server(req.body.server);
     server.author = user;
+
     return server.save().then(function () {
-      console.log(server.author);
+      server.createSwiftContainer();
       return res.json({ server: server.toJSONFor(user) });
     });
   }).catch(next);
@@ -119,25 +120,27 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
       var eventEmitter = new events.EventEmitter();
 
       var createHandler = function () {
-        req.server.createPersistentVolumeAndLinkKube(eventEmitter, req.server);
-        eventEmitter.emit('kube_creation');
-
+        req.server.createPersistentVolumeAndLinkKube(req.server);
+        eventEmitter.emit('VolumeCreatedAndKubeLinked');
       }
+
+      eventEmitter.on('VolumeCreatedAndKubeLinked', function () {
+        return res.sendStatus(204);
+      });
+
+      eventEmitter.on('volume_creation', createHandler);
+
       var deleteHandler = function () {
         req.server.removekubelink(eventEmitter, req.server);
         eventEmitter.emit('volume_deletion');
       }
-      eventEmitter.on('kube_deletion', deleteHandler);
-      eventEmitter.on('volume_creation', createHandler);
-
-      eventEmitter.on('kube_creation', function () {
-        return res.sendStatus(204);
-      });
 
       eventEmitter.on('volume_deletion', function () {
         req.server.deleteNamespacedPersistentVolumeClaim();
         eventEmitter.emit('kube_disable');
       });
+
+      eventEmitter.on('kube_deletion', deleteHandler);
 
       eventEmitter.on('kube_disable', function () {
         req.server.active = !req.server.active;
@@ -171,8 +174,13 @@ router.delete('/:server', auth.required, function (req, res, next) {
       var eventEmitter = new events.EventEmitter();
       var deleteHandler = function () {
         req.server.removekubelink(eventEmitter, req.server);
-        eventEmitter.emit('kube_unlinked');
+        eventEmitter.emit('volume_deletion');
       }
+      eventEmitter.on('volume_deletion', function () {
+        req.server.deleteNamespacedPersistentVolumeClaim();
+        req.server.destroySwiftContainer();
+        eventEmitter.emit('kube_unlinked');
+      });
       eventEmitter.on('kube_deletion', deleteHandler);
       eventEmitter.on('kube_unlinked', function () {
         return req.server.remove().then(function () {

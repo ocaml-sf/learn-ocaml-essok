@@ -19,11 +19,11 @@ let storage = multer.diskStorage({
 });
 let upload = multer({ storage: storage });
 
-router.get('/', auth.optional, function (req, res) {
+router.get('/', auth.required, function (req, res) {
   res.end('file catcher example');
 });
 
-router.post('/', upload.single('file'), function (req, res) {
+router.post('/', auth.required, upload.single('file'), function (req, res) {
   if (!req.file) {
     console.log("No file received");
     return res.send({

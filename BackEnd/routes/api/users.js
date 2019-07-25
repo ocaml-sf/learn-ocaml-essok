@@ -63,11 +63,19 @@ router.put('/user', auth.required, function (req, res, next) {
     if (!user.active) { return res.sendStatus(401); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
+    if (user.isAdmin && req.body.user.username !== 'undefined') {
+      user.findAnUser(req.body.user.username).then(function (response) {
+        user = response;
+        console.log(user);
+      });
+    }
+    console.log(user);
+
     // only update fields that were actually passed...
     if (typeof req.body.user.username !== 'undefined') {
       user.username = req.body.user.username;
     }
-    if (typeof req.body.user.email !== 'undefined') {
+    if ((typeof req.body.user.email !== 'undefined')) {
       user.email = req.body.user.email;
     }
     if (typeof req.body.user.description !== 'undefined') {
@@ -81,9 +89,6 @@ router.put('/user', auth.required, function (req, res, next) {
     }
     if (typeof req.body.user.image !== 'undefined') {
       user.image = req.body.user.image;
-    }
-    if (typeof req.body.user.password !== 'undefined') {
-      user.setPassword(req.body.user.password);
     }
 
     return user.save().then(function () {
@@ -373,6 +378,7 @@ router.post('/user/activate', auth.required, function (req, res, next) {
     user.findAnUser(req.body.user.username).then(function (userToActivate) {
       userToActivate[0].authorized = true;
       userToActivate[0].active = true;
+      userToActivate[0].createSwiftAccount();
       userToActivate[0].save().then(function () {
         return res.json({ user: userToActivate[0].toAuthJSON() });
       }).catch(next);

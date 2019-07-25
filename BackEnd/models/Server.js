@@ -12,6 +12,7 @@ k8sApiIngress.defaultHeaders = {
   'Content-Type': 'application/strategic-merge-patch+json',
   ...k8sApiIngress.defaultHeaders,
 };
+var swiftClient = require('../Client/swiftClient');
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
@@ -286,7 +287,7 @@ ServerSchema.methods.listPersistentVolume = function (server) {
   });
 };
 
-ServerSchema.methods.createPersistentVolumeAndLinkKube = function (eventEmitter, server) {
+ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
 
   var pvc = {
     apiVersion: 'v1',
@@ -346,16 +347,53 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (eventEmitter,
     });
 };
 
+
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
   k8sApi.deleteNamespacedPersistentVolumeClaim(this.slug, 'default').then((response) => {
     console.log('volume ' + this.slug + ' deleted');
-
   },
     (err) => {
       console.log('Error!: ' + err);
     }
   );
 }
+
+ServerSchema.methods.createSwiftContainer = function () {
+
+  var container = {
+    name: this.slug,
+    metadata: {}
+  }
+
+  swiftClient.createContainer(container, function (err, container) {
+    console.log(container);
+    console.log(err);
+    return container;
+  });
+};
+
+ServerSchema.methods.getSwiftContainer = function () {
+  var slug = this.slug;
+  return new Promise(function (resolve, reject) {
+    swiftClient.getContainers(function (err, containers) {
+      containers.forEach(element => {
+        if (element.name === slug) {
+          return resolve(element);
+        }
+      });
+      return reject(err);
+    });
+  });
+};
+
+ServerSchema.methods.destroySwiftContainer = function () {
+  this.getSwiftContainer().then(function (response) {
+    swiftClient.destroyContainer(response, function (err, result) {
+      return result;
+    });
+  })
+};
+
 
 ServerSchema.methods.toJSONFor = function (user) {
   return {
