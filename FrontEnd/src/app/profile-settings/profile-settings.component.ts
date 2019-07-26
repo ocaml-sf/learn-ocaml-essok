@@ -12,6 +12,7 @@ import { User, UserService, ProfilesService, Profile } from '../core';
 export class ProfileSettingsComponent implements OnInit {
   user: User = {} as User;
   userToModify: User = {} as User;
+  userBase: User = {} as User;
   profileSettingsForm: FormGroup;
   errors: Object = {};
   isSubmitting = false;
@@ -28,6 +29,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileSettingsForm = this.fb.group({
       image: '',
       username: '',
+      old_username: '',
       email: '',
       password: '',
       description: '',
@@ -51,7 +53,10 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileService
       .getUser(this.profile.username)
       .subscribe(
-        userTM => Object.assign(this.userToModify, userTM),
+        userTM => {
+          Object.assign(this.userToModify, userTM);
+          Object.assign(this.userBase, userTM);
+        },
         err => {
           this.errors = err;
         }
@@ -68,7 +73,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.updateUser(this.profileSettingsForm.value);
 
     this.userService
-      .update(this.userToModify)
+      .update(this.userToModify, this.userBase)
       .subscribe(
         updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
         err => {

@@ -63,37 +63,44 @@ router.put('/user', auth.required, function (req, res, next) {
     if (!user.active) { return res.sendStatus(401); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
-    if (user.isAdmin && req.body.user.username !== 'undefined') {
-      user.findAnUser(req.body.user.username).then(function (response) {
-        user = response;
-        console.log(user);
+    var userToMdify = 'undefined';
+
+    if (user.isAdmin() && (req.body.userBase.username !== 'undefined')) {
+      User.find({ username: req.body.userBase.username }).then(function (response) {
+        userToMdify = response[0];
       });
     }
-    console.log(user);
-
-    // only update fields that were actually passed...
-    if (typeof req.body.user.username !== 'undefined') {
-      user.username = req.body.user.username;
-    }
-    if ((typeof req.body.user.email !== 'undefined')) {
-      user.email = req.body.user.email;
-    }
-    if (typeof req.body.user.description !== 'undefined') {
-      user.description = req.body.user.description;
-    }
-    if (typeof req.body.user.place !== 'undefined') {
-      user.place = req.body.user.place;
-    }
-    if (typeof req.body.user.goal !== 'undefined') {
-      user.goal = req.body.user.goal;
-    }
-    if (typeof req.body.user.image !== 'undefined') {
-      user.image = req.body.user.image;
+    else {
+      userToMdify = user;
     }
 
-    return user.save().then(function () {
-      return res.json({ user: user.toAuthJSON() });
-    });
+    var userInChange = setInterval(function () {
+      if (userToMdify !== 'undefined') {
+        // only update fields that were actually passed...
+        if (typeof req.body.user.username !== 'undefined') {
+          userToMdify.username = req.body.user.username;
+        }
+        if ((typeof req.body.user.email !== 'undefined')) {
+          userToMdify.email = req.body.user.email;
+        }
+        if (typeof req.body.user.description !== 'undefined') {
+          userToMdify.description = req.body.user.description;
+        }
+        if (typeof req.body.user.place !== 'undefined') {
+          userToMdify.place = req.body.user.place;
+        }
+        if (typeof req.body.user.goal !== 'undefined') {
+          userToMdify.goal = req.body.user.goal;
+        }
+        if (typeof req.body.user.image !== 'undefined') {
+          userToMdify.image = req.body.user.image;
+        }
+        clearInterval(userInChange);
+        return userToMdify.save().then(function () {
+          return res.json({ user: userToMdify.toAuthJSON() });
+        });
+      }
+    }, 300);
   }).catch(next);
 });
 
