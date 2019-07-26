@@ -385,7 +385,6 @@ router.post('/user/activate', auth.required, function (req, res, next) {
     user.findAnUser(req.body.user.username).then(function (userToActivate) {
       userToActivate[0].authorized = true;
       userToActivate[0].active = true;
-      userToActivate[0].createSwiftAccount();
       userToActivate[0].save().then(function () {
         return res.json({ user: userToActivate[0].toAuthJSON() });
       }).catch(next);

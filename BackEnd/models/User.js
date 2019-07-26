@@ -14,7 +14,7 @@ var UserSchema = new mongoose.Schema({
   description: String,
   place: String,
   goal: String,
-  admin: { type: Boolean, default: true },
+  admin: { type: Boolean, default: false },
   active: { type: Boolean, default: true },
   authorized: { type: Boolean, default: false },
   image: String,

@@ -13,6 +13,7 @@ k8sApiIngress.defaultHeaders = {
   ...k8sApiIngress.defaultHeaders,
 };
 var swiftClient = require('../Client/swiftClient');
+var cinderClient = require('../Client/cinderClient');
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
@@ -333,6 +334,7 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
               console.log('after bonding' + response);
               server.volume = response.volume;
               clearInterval(serverInCreation);
+
               server.createkubelink();
               server.active = !server.active;
               server.save();
@@ -347,6 +349,22 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
     });
 };
 
+
+ServerSchema.methods.importBackup = function () {
+  cinderClient.createSnapshot({
+    name: 'volumeName', // required
+    description: 'my volume',  // required
+    volumeId: this.volume, // required, volume id of the new snapshot
+    force: true // optional, defaults to false. force creation of the snapshot
+  }, function (err, snapshot) {
+    console.log('errcreation ' + err);
+    console.log('snapshot ' + snapshot);
+  })
+  cinderClient.getSnapshots(false, function (err, snapshots) {
+    console.log('snapshots ' + snapshots);
+    console.log('errget ' + err);
+  })
+};
 
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
   k8sApi.deleteNamespacedPersistentVolumeClaim(this.slug, 'default').then((response) => {

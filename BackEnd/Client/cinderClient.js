@@ -1,6 +1,6 @@
 var openstack = require('pkgcloud').providers.openstack;
 
-var swiftClient = openstack.storage.createClient({
+var cinderClient = openstack.blockstorage.createClient({
     provider: 'openstack',
     username: 'sF37vT4pNz2n',
     password: '9CeaNjTUBa9Yb6SCy6XxA7xFMHmc9ZZh',
@@ -8,4 +8,4 @@ var swiftClient = openstack.storage.createClient({
     region: 'GRA5'
 });
 
-module.exports = swiftClient;
+module.exports = cinderClient;

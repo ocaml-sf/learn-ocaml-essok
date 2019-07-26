@@ -29,7 +29,7 @@ router.get('/', auth.required, function (req, res, next) {
     user.findAnUser(author).then(function (results) {
 
       author = results[0];
-
+      console.log(author);
       user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
         var serversCount = results[1];
@@ -57,6 +57,7 @@ router.post('/', auth.required, function (req, res, next) {
 
     return server.save().then(function () {
       server.createSwiftContainer();
+      // server.importBackup();
       return res.json({ server: server.toJSONFor(user) });
     });
   }).catch(next);
