@@ -1,11 +1,12 @@
-var openstack = require('pkgcloud').providers.openstack;
+var openstack = require('pkgcloud');
+var OS = require('./OS');
 
 var swiftClient = openstack.storage.createClient({
-    provider: 'openstack',
-    username: 'sF37vT4pNz2n',
-    password: '9CeaNjTUBa9Yb6SCy6XxA7xFMHmc9ZZh',
-    authUrl: 'https://auth.cloud.ovh.net/',
-    region: 'GRA5'
+    provider: OS.provider,
+    username: OS.username,
+    password: OS.password,
+    authUrl: OS.authUrl,
+    region: OS.region
 });
 
 module.exports = swiftClient;

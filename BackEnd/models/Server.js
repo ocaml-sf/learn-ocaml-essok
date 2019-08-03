@@ -13,7 +13,6 @@ k8sApiIngress.defaultHeaders = {
   ...k8sApiIngress.defaultHeaders,
 };
 var swiftClient = require('../Client/swiftClient');
-var cinderClient = require('../Client/cinderClient');
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
@@ -335,6 +334,7 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
               server.volume = response.volume;
               clearInterval(serverInCreation);
 
+
               server.createkubelink();
               server.active = !server.active;
               server.save();
@@ -350,6 +350,79 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
 };
 
 
+ServerSchema.methods.upload = function () {
+
+
+  var deployment = {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: slugged,
+      labels: {
+        app: slugged
+      }
+    },
+    spec: {
+      replicas: 1,
+      selector: {
+        matchLabels: {
+          app: slugged
+        }
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: slugged
+          }
+        },
+        spec: {
+          containers: [
+            {
+              name: 'upload-' + this.slug,
+              image: 'python',
+              env: [{
+                name: OS_AUTH_TOKEN,
+                value: 'token' // todo
+              },
+              {
+                name: OS_STORAGE_URL,
+                value: swiftClient.config.authUrl // todo
+              }
+              ],
+              volumeMounts: [
+                {
+                  name: slugged,
+                  mountPath: '/volume/'
+                },
+              ],
+              command: [
+                '/bin/sh',
+              ],
+              args: [
+                '-c '
+              ]
+            }
+          ],
+          securityContext: {
+            fsGroup: 1000
+          },
+          volumes: [
+            {
+              name: slugged,
+              cinder: {
+                volumeID: this.volume,
+                fsType: 'ext4'
+              }
+            }
+          ]
+        }
+      }
+    }
+  };
+
+  this.createNamespacedDeployment(deployment);
+
+};
 ServerSchema.methods.importBackup = function () {
   cinderClient.createSnapshot({
     name: 'volumeName', // required
@@ -382,7 +455,6 @@ ServerSchema.methods.createSwiftContainer = function () {
     name: this.slug,
     metadata: {}
   }
-
   swiftClient.createContainer(container, function (err, container) {
     console.log(container);
     console.log(err);
@@ -424,8 +496,6 @@ ServerSchema.methods.toJSONFor = function (user) {
     author: this.author.toProfileJSONFor(user),
     active: this.active,
     volume: this.volume,
-    vue: 'Arborescence de la vue',
-
   };
 };
 

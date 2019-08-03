@@ -34,13 +34,12 @@ if (!isProduction) {
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/essok3');
+  mongoose.connect('mongodb://localhost/essok');
   mongoose.set('debug', true);
 }
 
 require('./models/User');
 require('./models/Server');
-require('./models/Vue');
 require('./config/passport');
 
 /// catch 404 and forward to error handler
