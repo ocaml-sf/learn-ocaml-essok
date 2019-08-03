@@ -24,6 +24,7 @@ router.get('/', auth.required, function (req, res) {
 });
 
 router.post('/', auth.required, upload.single('file'), function (req, res) {
+  console.log(req);
   if (!req.file) {
     console.log("No file received");
     return res.send({

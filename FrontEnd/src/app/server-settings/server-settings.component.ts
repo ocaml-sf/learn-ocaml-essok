@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Server, ServersService } from '../core';
-import { FileUploader, FileSelectDirective } from 'ng2-file-upload/ng2-file-upload';
+import { Server, ServersService, ApiService, JwtService } from '../core';
+import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
 
 const URL = 'http://localhost:3000/api/uploads';
 
@@ -17,7 +17,12 @@ export class ServerSettingsComponent implements OnInit {
   errors: Object = {};
   uploadErrors: string;
   isSubmitting = false;
-  uploader: FileUploader = new FileUploader({ url: URL });
+  headersConfig = {
+
+
+
+  };
+  uploader: FileUploader;
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
   isDeleting = false;
@@ -30,6 +35,7 @@ export class ServerSettingsComponent implements OnInit {
     private route: ActivatedRoute,
     private serversService: ServersService,
     private fb: FormBuilder,
+    private jwtService: JwtService,
 
   ) {
     // create form group using the form builder
@@ -39,6 +45,14 @@ export class ServerSettingsComponent implements OnInit {
       url: '',
       file: '',
     });
+
+    const token = this.jwtService.getToken();
+    this.uploader = new FileUploader(
+      {
+        url: URL,
+        authToken: `Token ${token}`
+      }
+    );
   }
 
   ngOnInit() {
