@@ -9,6 +9,9 @@ import { ListErrorsComponent } from './list-errors.component';
 import { ShowAuthedDirective } from './show-authed.directive';
 import { ShowAdminDirective } from './show-admin.directive';
 import { UserListComponent, UserPreviewComponent } from './user-helpers';
+import { MatProgressBarModule, MatListModule, MatDialogModule, MatButtonModule } from '@angular/material';
+import { } from '@angular/platform-browser/animations';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   imports: [
@@ -16,7 +19,12 @@ import { UserListComponent, UserPreviewComponent } from './user-helpers';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    RouterModule
+    RouterModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatListModule,
+    FlexLayoutModule,
+    MatProgressBarModule
   ],
   declarations: [
     ServerListComponent,
@@ -42,7 +50,12 @@ import { UserListComponent, UserPreviewComponent } from './user-helpers';
     ListErrorsComponent,
     RouterModule,
     ShowAuthedDirective,
-    ShowAdminDirective
+    ShowAdminDirective,
+    MatButtonModule,
+    MatDialogModule,
+    MatListModule,
+    FlexLayoutModule,
+    MatProgressBarModule
   ]
 })
 export class SharedModule { }

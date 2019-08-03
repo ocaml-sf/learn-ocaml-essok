@@ -7,32 +7,31 @@ import { AdminUsersComponent } from './admin-users.component';
 import { AdminResolver } from './admin-resolver.service';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: AdminComponent,
-        canActivate: [AuthGuard],
-        resolve: {
-            isAdmin: AdminResolver
-        },
-        children: [{
-            path: '',
-            component: AdminUsersComponent,
-            outlet: 'user',
-            data: { isAuthorized: true }
-        },
-        {
-            path: '',
-            component: AdminServersComponent,
-            outlet: 'server'
-        },
-        ]
+  {
+    path: '',
+    component: AdminComponent,
+    canActivate: [AuthGuard],
+    resolve: {
+      isAdmin: AdminResolver
     },
+    children: [{
+      path: '',
+      component: AdminUsersComponent,
+      outlet: 'user',
+    },
+    {
+      path: '',
+      component: AdminServersComponent,
+      outlet: 'server'
+    },
+    ]
+  },
 
 
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
 })
 export class AdminRoutingModule { }
