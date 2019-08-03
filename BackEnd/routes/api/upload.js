@@ -1,5 +1,6 @@
 /*eslint-disable*/
 var router = require('express').Router();
+var mongoose = require('mongoose');
 var multer = require('multer');
 var unzip = require('unzip');
 var fs = require('fs');
@@ -7,6 +8,8 @@ var auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
 var destPath = '';
+var User = mongoose.model('User');
+var Server = mongoose.model('Server');
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -23,29 +26,41 @@ router.get('/', auth.required, function (req, res) {
   res.end('file catcher example');
 });
 
-router.post('/', auth.required, upload.single('file'), function (req, res) {
-  console.log(req);
-  if (!req.file) {
-    console.log("No file received");
-    return res.send({
-      success: false
-    });
+router.post('/', auth.required, upload.single('file'), function (req, res, next) {
+  console.log(req.body);
 
-  } else {
-    console.log('file received');
-    if (req.file.mimetype == 'application/zip') {
-      fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dirPath }));
-      console.log('file extracted');
-      return res.send({
-        success: true
-      });
-    }
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401);}
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
-    console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-    return res.status(422).json({ errors: { file: "must be an .zip archive" } });
+    Server.findOne({ slug: req.body.slug })
+      .populate('author')
+      .then(function (server) {
+        if (!server) { return res.sendStatus(404); }
+        if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
 
-  }
+        if (!req.file) {
+          console.log("No file received");
+          return res.send({
+            success: false
+          });
 
+        } else {
+
+          console.log('file received');
+          if (req.file.mimetype == 'application/zip') {
+            fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dirPath }));
+            console.log('file extracted');
+            return res.send({
+              success: true
+            });
+          }
+
+          console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
+          return res.status(422).json({ errors: { file: "must be an .zip archive" } });
+        }
+      }).catch(next);
+  }).catch(next);
 });
 
 module.exports = router;

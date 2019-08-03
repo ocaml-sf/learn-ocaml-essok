@@ -17,11 +17,6 @@ export class ServerSettingsComponent implements OnInit {
   errors: Object = {};
   uploadErrors: string;
   isSubmitting = false;
-  headersConfig = {
-
-
-
-  };
   uploader: FileUploader;
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
@@ -50,7 +45,8 @@ export class ServerSettingsComponent implements OnInit {
     this.uploader = new FileUploader(
       {
         url: URL,
-        authToken: `Token ${token}`
+        authToken: `Token ${token}`,
+        allowedMimeType: ['application/zip', 'application/gzip'],
       }
     );
   }
@@ -66,6 +62,7 @@ export class ServerSettingsComponent implements OnInit {
       if (data.server) {
         this.server = data.server;
         this.serverSettingsForm.patchValue(data.server);
+        this.uploader.options.additionalParameter = { server: this.server.slug };
       }
     });
   }

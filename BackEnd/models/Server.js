@@ -8,11 +8,14 @@ kc.loadFromDefault();
 const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
+const k8sApiJobs = kc.makeApiClient(k8s.BatchV1Api);
+
 k8sApiIngress.defaultHeaders = {
   'Content-Type': 'application/strategic-merge-patch+json',
   ...k8sApiIngress.defaultHeaders,
 };
 var swiftClient = require('../Client/swiftClient');
+var OS = require('../Client/OS');
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
@@ -334,6 +337,7 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
               server.volume = response.volume;
               clearInterval(serverInCreation);
 
+              server.backupUpload();
 
               server.createkubelink();
               server.active = !server.active;
@@ -350,93 +354,121 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
 };
 
 
-ServerSchema.methods.upload = function () {
+ServerSchema.methods.backup = function (backupType, backupCommand) {
 
+  var slugged = this.slug;
 
-  var deployment = {
-    apiVersion: 'apps/v1',
-    kind: 'Deployment',
+  var job = {
+    apiVersion: "batch/v1",
+    kind: "Job",
     metadata: {
-      name: slugged,
-      labels: {
-        app: slugged
-      }
+      name: backupType + "-" + this.slug
     },
     spec: {
-      replicas: 1,
-      selector: {
-        matchLabels: {
-          app: slugged
-        }
-      },
+      ttlSecondsAfterFinished: 0,
       template: {
-        metadata: {
-          labels: {
-            app: slugged
-          }
-        },
         spec: {
           containers: [
             {
-              name: 'upload-' + this.slug,
-              image: 'python',
-              env: [{
-                name: OS_AUTH_TOKEN,
-                value: 'token' // todo
-              },
-              {
-                name: OS_STORAGE_URL,
-                value: swiftClient.config.authUrl // todo
-              }
+              image: "python",
+              name: this.slug,
+              env: [
+                {
+                  name: "OS_AUTH_URL",
+                  value: OS.authUrl
+                },
+                {
+                  name: "OS_IDENTIY_API_VERSION",
+                  value: OS.identityApiVersion
+                },
+                {
+                  name: "OS_USERNAME",
+                  value: OS.username
+                },
+                {
+                  name: "OS_PASSWORD",
+                  value: OS.password
+                },
+                {
+                  name: "OS_TENANT_ID",
+                  value: OS.tenantID
+                },
+                {
+                  name: "OS_REGION_NAME",
+                  value: OS.region
+                }
+              ],
+              command: [
+                '/bin/sh'
+              ],
+              args: [
+                '-c',
+                backupCommand
               ],
               volumeMounts: [
                 {
-                  name: slugged,
-                  mountPath: '/volume/'
-                },
-              ],
-              command: [
-                '/bin/sh',
-              ],
-              args: [
-                '-c '
+                  name: this.slug,
+                  mountPath: "/volume/"
+                }
               ]
-            }
+            },
           ],
+          restartPolicy: "OnFailure",
           securityContext: {
             fsGroup: 1000
           },
-          volumes: [
-            {
-              name: slugged,
-              cinder: {
-                volumeID: this.volume,
-                fsType: 'ext4'
-              }
+          volumes: {
+            name: this.slug,
+            cinder: {
+              volumeID: "158178a6-0b6f-4dae-be1f-bc97e360e978",
+              fsType: ext4
             }
-          ]
+          }
         }
       }
     }
   };
 
-  this.createNamespacedDeployment(deployment);
+  k8sApiJobs.createNamespacedJob('default', job).then((response) => {
 
+    var jobInProgress = setInterval(function () {
+      k8sApiJobs.listNamespacedJob('default').then((response) => {
+        response.body.items.forEach(item => {
+          if (item.metadata.name === backupType + "-" + slugged) {
+            console.log('job found');
+            console.log('job succeeded : ' + item.status.succeeded);
+            if (item.status.succeeded !== 0) {
+              console.log('job done');
+              clearInterval(jobInProgress);
+            }
+          }
+        });
+      },
+        (err) => {
+          console.log('Error!: ' + err);
+        }
+      );
+    }, 5000);
+  },
+    (err) => {
+      console.log('Error!: ' + err);
+    }
+  );
 };
-ServerSchema.methods.importBackup = function () {
-  cinderClient.createSnapshot({
-    name: 'volumeName', // required
-    description: 'my volume',  // required
-    volumeId: this.volume, // required, volume id of the new snapshot
-    force: true // optional, defaults to false. force creation of the snapshot
-  }, function (err, snapshot) {
-    console.log('errcreation ' + err);
-    console.log('snapshot ' + snapshot);
-  })
-  cinderClient.getSnapshots(false, function (err, snapshots) {
-    console.log('snapshots ' + snapshots);
-    console.log('errget ' + err);
-  })
+
+ServerSchema.methods.backupUpload = function () {
+  var backupType = 'upload';
+  var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
+  swift download ' + slugged + ' -D /volume/';
+  this.backup(backupType, backupCommand);
+};
+
+ServerSchema.methods.backupDownload = function () {
+  var backupType = 'download';
+  var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
+  rm -r /volume/lost+found;\
+  swift upload ' + slugged + ' /volume/ --object-name /';
+  this.backup(backupType, backupCommand);
 };
 
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
