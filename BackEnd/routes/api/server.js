@@ -36,7 +36,9 @@ router.get('/', auth.required, function (req, res, next) {
 
         return res.json({
           servers: servers.map(function (server) {
-            return server.toJSONFor(author);
+            if (!server.processing)
+              return server.toJSONFor(author);
+            else serversCount -= 1;
           }),
           serversCount: serversCount
         });
@@ -76,8 +78,12 @@ router.get('/:server', auth.required, function (req, res, next) {
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
     if ((user.username !== server.author.username) && (!user.isAdmin())) { return res.sendStatus(401); }
-
-    return res.json({ server });
+    if (!server.processing) {
+      return res.json({ server });
+    }
+    else {
+      return res.sendStatus(401);
+    }
   }).catch(next);
 });
 
@@ -88,7 +94,7 @@ router.put('/:server', auth.required, function (req, res, next) {
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
 
     if (req.server.author._id.toString() === req.payload.id.toString()) {
-      if (req.server.active) { return res.sendStatus(401); }
+      if (req.server.active || req.server.processing) { return res.sendStatus(401); }
 
       if (typeof req.body.server.title !== 'undefined') {
         req.server.title = req.body.server.title;
@@ -117,6 +123,7 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
       if (!user.active) { return res.sendStatus(401); }
       if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+      if (req.server.processing) { return res.sendStatus(401); }
 
       var eventEmitter = new events.EventEmitter();
 
@@ -145,7 +152,7 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 
       eventEmitter.on('kube_disable', function () {
         req.server.active = !req.server.active;
-
+        req.server.processing = false;
         req.server.save().then(function () {
           return res.sendStatus(204);
         });
@@ -153,8 +160,10 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 
 
       if (req.server.active) {
+        req.server.processing = true;
         eventEmitter.emit('kube_deletion');
       } else {
+        req.server.processing = true;
         eventEmitter.emit('volume_creation');
       }
     } else {
@@ -169,6 +178,7 @@ router.delete('/:server', auth.required, function (req, res, next) {
     if (!user) { return res.sendStatus(401); }
     if (!user.active) { return res.sendStatus(401); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (req.server.processing) { return res.sendStatus(401); }
 
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 

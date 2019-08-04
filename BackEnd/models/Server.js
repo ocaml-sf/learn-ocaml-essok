@@ -25,6 +25,7 @@ var ServerSchema = new mongoose.Schema({
   vue: String,
   volume: String,
   active: { type: Boolean, default: false },
+  processing: { type: Boolean, default: false },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
@@ -337,9 +338,16 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
               server.volume = response.volume;
               clearInterval(serverInCreation);
 
-              server.backupUpload();
+              server.backupUpload().then((response) => {
+                server.createkubelink();
 
-              server.createkubelink();
+              },
+                (err) => {
+                  console.log(err);
+                  // abort all
+                }
+              );
+
               server.active = !server.active;
               server.save();
             }, (err) => {
@@ -429,46 +437,51 @@ ServerSchema.methods.backup = function (backupType, backupCommand) {
     }
   };
 
-  k8sApiJobs.createNamespacedJob('default', job).then((response) => {
+  return new Promise(function (resolve, reject) {
+    k8sApiJobs.createNamespacedJob('default', job).then((response) => {
 
-    var jobInProgress = setInterval(function () {
-      k8sApiJobs.listNamespacedJob('default').then((response) => {
-        response.body.items.forEach(item => {
-          if (item.metadata.name === backupType + "-" + slugged) {
-            console.log('job found');
-            console.log('job succeeded : ' + item.status.succeeded);
-            if (item.status.succeeded !== 0) {
-              console.log('job done');
-              clearInterval(jobInProgress);
+      var jobInProgress = setInterval(function () {
+        k8sApiJobs.listNamespacedJob('default').then((response) => {
+          response.body.items.forEach(item => {
+            if (item.metadata.name === backupType + "-" + slugged) {
+              console.log('job found');
+              console.log('job succeeded : ' + item.status.succeeded);
+              if (item.status.succeeded !== 0) {
+                console.log('job done');
+                clearInterval(jobInProgress);
+                resolve('success');
+              }
             }
+          });
+        },
+          (err) => {
+            console.log('Error!: ' + err);
+            reject(err);
           }
-        });
-      },
-        (err) => {
-          console.log('Error!: ' + err);
-        }
-      );
-    }, 5000);
-  },
-    (err) => {
-      console.log('Error!: ' + err);
-    }
-  );
+        );
+      }, 5000);
+    },
+      (err) => {
+        console.log('Error!: ' + err);
+        reject(err);
+      }
+    );
+  });
 };
 
 ServerSchema.methods.backupUpload = function () {
   var backupType = 'upload';
   var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
-  swift download ' + slugged + ' -D /volume/';
-  this.backup(backupType, backupCommand);
+  swift download ' + this.slug + ' -D /volume/';
+  return this.backup(backupType, backupCommand);
 };
 
 ServerSchema.methods.backupDownload = function () {
   var backupType = 'download';
   var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
   rm -r /volume/lost+found;\
-  swift upload ' + slugged + ' /volume/ --object-name /';
-  this.backup(backupType, backupCommand);
+  swift upload ' + this.slug + ' /volume/ --object-name /';
+  return this.backup(backupType, backupCommand);
 };
 
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
@@ -492,6 +505,22 @@ ServerSchema.methods.createSwiftContainer = function () {
     console.log(err);
     return container;
   });
+};
+
+//may be useful one day
+ServerSchema.methods.isProcessing = function () {
+
+  server = this;
+  return new Promise(function (resolve, reject) {
+
+    var processInProgress = setInterval(function () {
+      if (server.processing === false) {
+        clearInterval(processInProgress);
+        resolve('ok');
+      }
+    }, 2000);
+  });
+
 };
 
 ServerSchema.methods.getSwiftContainer = function () {
@@ -528,6 +557,7 @@ ServerSchema.methods.toJSONFor = function (user) {
     author: this.author.toProfileJSONFor(user),
     active: this.active,
     volume: this.volume,
+    processing: this.processing
   };
 };
 
