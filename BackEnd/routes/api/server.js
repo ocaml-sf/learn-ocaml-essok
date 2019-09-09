@@ -133,15 +133,23 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
       }
 
       eventEmitter.on('VolumeCreatedAndKubeLinked', function () {
-        return res.sendStatus(204);
+        req.server.processing = false;
+        req.server.save().then(function () {
+          return res.sendStatus(204);
+        });
       });
 
       eventEmitter.on('volume_creation', createHandler);
 
       var deleteHandler = function () {
         req.server.removekubelink(eventEmitter, req.server);
-        eventEmitter.emit('volume_deletion');
+        eventEmitter.emit('backup');
       }
+
+      eventEmitter.on('backup', function () {
+        req.server.backupDownload(req.server.volume);
+        eventEmitter.emit('volume_deletion');
+      });
 
       eventEmitter.on('volume_deletion', function () {
         req.server.deleteNamespacedPersistentVolumeClaim();
@@ -161,10 +169,14 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 
       if (req.server.active) {
         req.server.processing = true;
-        eventEmitter.emit('kube_deletion');
+        req.server.save().then(function () {
+          eventEmitter.emit('kube_deletion');
+        });
       } else {
         req.server.processing = true;
-        eventEmitter.emit('volume_creation');
+        req.server.save().then(function () {
+          eventEmitter.emit('volume_creation');
+        });
       }
     } else {
       return res.sendStatus(403);
@@ -187,6 +199,7 @@ router.delete('/:server', auth.required, function (req, res, next) {
         req.server.removekubelink(eventEmitter, req.server);
         eventEmitter.emit('volume_deletion');
       }
+
       eventEmitter.on('volume_deletion', function () {
         req.server.deleteNamespacedPersistentVolumeClaim();
         req.server.destroySwiftContainer();

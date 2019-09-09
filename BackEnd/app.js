@@ -34,7 +34,7 @@ if (!isProduction) {
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/essok');
+  mongoose.connect('mongodb://localhost/essok2');
   mongoose.set('debug', true);
 }
 

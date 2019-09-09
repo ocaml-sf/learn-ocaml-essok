@@ -33,6 +33,15 @@
         </form>
         <!-- Line break for logout button -->
         <hr />
+        <div>
+          <h3>
+          Using Link <br/>
+          <a href="#" (click)="download()">Download Employee Data</a>
+        </h3>
+
+        <h3>Using Button</h3>
+        <input type="button" (click)="download()" value="Download Employee Data"/>
+      </div>
         <div class="container">
           <div class="row">
             <div class="col-md-3">
@@ -135,7 +144,7 @@
               (click)="disableServer()">
               <i class="ion-settings"></i> Enable my Server
             </button>
-            
+
             <br />
             <br />
             <p>TO DELETE YOUR SERVER :</p>

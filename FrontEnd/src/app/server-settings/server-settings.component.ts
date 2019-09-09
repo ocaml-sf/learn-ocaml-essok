@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Server, ServersService, ApiService, JwtService } from '../core';
 import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
+// import { FileService } from '../core/services/file.service';
 
 const URL = 'http://localhost:3000/api/uploads';
 
@@ -31,7 +32,7 @@ export class ServerSettingsComponent implements OnInit {
     private serversService: ServersService,
     private fb: FormBuilder,
     private jwtService: JwtService,
-
+    // private fileService: FileService
   ) {
     // create form group using the form builder
     this.serverSettingsForm = this.fb.group({
@@ -132,4 +133,14 @@ export class ServerSettingsComponent implements OnInit {
   understandDelete() {
     this.isChecked = !this.isChecked;
   }
+  // download() {
+  //   this.fileService.downloadFile().subscribe(response => {
+  //     // let blob:any = new Blob([response.blob()], { type: 'text/json; charset=utf-8' });
+  //     // const url= window.URL.createObjectURL(blob);
+  //     // window.open(url);
+  //     window.location.href = response.url;
+  //     // fileSaver.saveAs(blob, 'employees.json');
+  //   }, error => console.log('Error downloading the file'),
+  //     () => console.log('File downloaded successfully'));
+  // }
 }

@@ -212,7 +212,7 @@ ServerSchema.methods.createkubelink = function () {
   this.createNamespacedService(service);
 
   var rule = {
-    host: this.author.username + '.' + slugged + '.learnocaml.org',
+    host: this.author.username + '.' + slugged + '.learnocaml.site', //.org
     http: {
       paths: [{
         backend: {
@@ -261,7 +261,7 @@ ServerSchema.methods.deleteNamespacedService = function () {
 
 ServerSchema.methods.deleteNamespacedDeployment = function () {
   k8sApiDeploy.deleteNamespacedDeployment(this.slug, 'default').then((response) => {
-    console.log('delete depoyment ok');
+    console.log('delete deployment ok');
   },
     (err) => {
       console.log('Error!: ' + err);
@@ -315,6 +315,7 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
   };
 
   var serverCreated = false;
+  console.log('server state : ' + this.processing);
   k8sApi.createNamespacedPersistentVolumeClaim('default', pvc)
     .then((response) => {
       console.log('Volume ' + server.slug + ' claimed');
@@ -338,7 +339,7 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
               server.volume = response.volume;
               clearInterval(serverInCreation);
 
-              server.backupUpload().then((response) => {
+              server.backupUpload(response.volume).then((response) => {
                 server.createkubelink();
 
               },
@@ -362,15 +363,15 @@ ServerSchema.methods.createPersistentVolumeAndLinkKube = function (server) {
 };
 
 
-ServerSchema.methods.backup = function (backupType, backupCommand) {
+ServerSchema.methods.backup = function (backupType, backupCommand, volume) {
 
   var slugged = this.slug;
-
+  console.log('volume in backup : ' + volume);
   var job = {
-    apiVersion: "batch/v1",
-    kind: "Job",
+    apiVersion: 'batch/v1',
+    kind: 'Job',
     metadata: {
-      name: backupType + "-" + this.slug
+      name: backupType + '-' + this.slug
     },
     spec: {
       ttlSecondsAfterFinished: 0,
@@ -378,31 +379,31 @@ ServerSchema.methods.backup = function (backupType, backupCommand) {
         spec: {
           containers: [
             {
-              image: "python",
+              image: 'python',
               name: this.slug,
               env: [
                 {
-                  name: "OS_AUTH_URL",
+                  name: 'OS_AUTH_URL',
                   value: OS.authUrl
                 },
                 {
-                  name: "OS_IDENTIY_API_VERSION",
+                  name: 'OS_IDENTIY_API_VERSION',
                   value: OS.identityApiVersion
                 },
                 {
-                  name: "OS_USERNAME",
+                  name: 'OS_USERNAME',
                   value: OS.username
                 },
                 {
-                  name: "OS_PASSWORD",
+                  name: 'OS_PASSWORD',
                   value: OS.password
                 },
                 {
-                  name: "OS_TENANT_ID",
+                  name: 'OS_TENANT_ID',
                   value: OS.tenantID
                 },
                 {
-                  name: "OS_REGION_NAME",
+                  name: 'OS_REGION_NAME',
                   value: OS.region
                 }
               ],
@@ -416,22 +417,24 @@ ServerSchema.methods.backup = function (backupType, backupCommand) {
               volumeMounts: [
                 {
                   name: this.slug,
-                  mountPath: "/volume/"
+                  mountPath: '/volume/'
                 }
               ]
             },
           ],
-          restartPolicy: "OnFailure",
+          restartPolicy: 'OnFailure',
           securityContext: {
             fsGroup: 1000
           },
-          volumes: {
-            name: this.slug,
-            cinder: {
-              volumeID: "158178a6-0b6f-4dae-be1f-bc97e360e978",
-              fsType: ext4
+          volumes: [
+            {
+              name: this.slug,
+              cinder: {
+                volumeID: volume,
+                fsType: 'ext4'
+              }
             }
-          }
+          ]
         }
       }
     }
@@ -446,8 +449,10 @@ ServerSchema.methods.backup = function (backupType, backupCommand) {
             if (item.metadata.name === backupType + "-" + slugged) {
               console.log('job found');
               console.log('job succeeded : ' + item.status.succeeded);
-              if (item.status.succeeded !== 0) {
+              if (item.status.succeeded !== undefined) {
                 console.log('job done');
+                k8sApiJobs.deleteNamespacedJob(backupType + '-' + slugged, 'default');
+                console.log('jobs deleted')
                 clearInterval(jobInProgress);
                 resolve('success');
               }
@@ -455,36 +460,39 @@ ServerSchema.methods.backup = function (backupType, backupCommand) {
           });
         },
           (err) => {
-            console.log('Error!: ' + err);
+            console.log('Error!: ListnamespacedJobs ' + err);
             reject(err);
           }
         );
       }, 5000);
     },
       (err) => {
-        console.log('Error!: ' + err);
+        console.log('Error!: CreateNamespacedJobs ' + err);
         reject(err);
       }
     );
   });
 };
 
-ServerSchema.methods.backupUpload = function () {
+ServerSchema.methods.backupUpload = function (volume) {
   var backupType = 'upload';
-  var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
-  swift download ' + this.slug + ' -D /volume/';
-  return this.backup(backupType, backupCommand);
+  var backupCommand = 'pip install --no-cache python-swiftclient python-keystoneclient;' +
+    'swift download ' + this.slug + ' -D /volume/';
+  console.log('asking for upload');
+  return this.backup(backupType, backupCommand, volume);
 };
 
-ServerSchema.methods.backupDownload = function () {
+ServerSchema.methods.backupDownload = function (volume) {
   var backupType = 'download';
-  var backupCommand = 'pit install --no-cache python-swiftclient python-keystoneclient;\
-  rm -r /volume/lost+found;\
-  swift upload ' + this.slug + ' /volume/ --object-name /';
-  return this.backup(backupType, backupCommand);
+  var backupCommand = 'pip install --no-cache python-swiftclient python-keystoneclient;' +
+    'rm -rf /volume/lost+found;' + 'swift upload ' + this.slug + ' /volume/ --object-name /';
+  console.log('asking for download');
+  return this.backup(backupType, backupCommand, volume);
 };
 
 ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
+
+  console.log('server state : ' + this.processing);
   k8sApi.deleteNamespacedPersistentVolumeClaim(this.slug, 'default').then((response) => {
     console.log('volume ' + this.slug + ' deleted');
   },
@@ -492,6 +500,7 @@ ServerSchema.methods.deleteNamespacedPersistentVolumeClaim = function () {
       console.log('Error!: ' + err);
     }
   );
+
 }
 
 ServerSchema.methods.createSwiftContainer = function () {
