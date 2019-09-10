@@ -5,6 +5,8 @@
 //     authUrl: '',
 //     region: '',
 //     objectStoreUrl: ''
+//     identityApiVersion: '',
+//     tenantID: '',
 // };
 
 // module.exports = OS;

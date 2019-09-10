@@ -30,7 +30,7 @@ router.get('/', auth.required, function (req, res) {
   res.end('file catcher example');
 });
 
-router.post('/', auth.required, upload.single('file'), function (req, res, next) {
+router.post('/check', auth.required, upload.single('file'), function (req, res, next) {
   console.log(req.body.server);
 
   User.findById(req.payload.id).then(function (user) {
@@ -53,17 +53,66 @@ router.post('/', auth.required, upload.single('file'), function (req, res, next)
         } else {
 
           var eventEmitter = new events.EventEmitter();
+
           var uploadHandler = function () {
             if (req.file.mimetype === 'application/zip') {
-              // fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dirPath }));
-              eventEmitter.emit('fileTared');
+              // create a repository with the name of the user
+              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dirPath })); // modify the path of extraction
+              eventEmitter.emit('desarchived');
             }
           }
+
+          eventEmitter.on('desarchived', function () {
+            // check the name of the files in the repository and send them to the Frontend
+            server.processing = false;
+            return res.send({
+              success: true
+            });
+          });
+
           eventEmitter.on('file_uploading', uploadHandler);
 
+          if (req.file.mimetype === 'application/zip') {
+            console.log('file received');
+            eventEmitter.emit('file_uploading');
+          }
 
-          eventEmitter.on('fileTared', function () {
-            var path = dirPath + destPath;
+          else {
+            console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
+            return res.status(422).json({ errors: { file: "must be an .zip archive" } });
+          }
+        }
+      }).catch(next);
+  }).catch(next);
+});
+
+
+router.post('/send', auth.required, function (req, res, next) {
+  console.log(req.body.server);
+
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+
+    Server.findOne({ slug: req.body.server })
+      .populate('author')
+      .then(function (server) {
+        if (!server) { return res.sendStatus(404); }
+        if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
+        if (server.processing) { return res.sendStatus(401); }
+
+        if (!req.name || req.name === undefined) {
+          console.log("No name received");
+          return res.send({
+            success: false
+          });
+
+        } else {
+
+          var eventEmitter = new events.EventEmitter();
+
+          var uploadHandler = function () {
+            var path = dirPath + destPath; //modify 
 
             var readStream = fs.createReadStream(path);
             var writeStream = swiftClient.upload({
@@ -85,32 +134,29 @@ router.post('/', auth.required, upload.single('file'), function (req, res, next)
 
             readStream.pipe(writeStream);
 
-          });
+          }
+          eventEmitter.on('file_uploading', uploadHandler);
+
 
           eventEmitter.on('fileUploaded', function () {
-            server.processing = false;
+            // server.processing = false;
             return res.send({
               success: true
             });
           });
 
           eventEmitter.on('fileFailedUploaded', function () {
-            server.processing = false;
+            // server.processing = false;
             return res.send({
               success: false
             });
           });
 
-          if (req.file.mimetype === 'application/zip') {
-            server.processing = true;
-            console.log('file received');
-            eventEmitter.emit('file_uploading');
-          }
 
-          else {
-            console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-            return res.status(422).json({ errors: { file: "must be an .zip archive" } });
-          }
+          // server.processing = true;
+          // console.log('file received');
+          eventEmitter.emit('file_uploading');
+
         }
       }).catch(next);
   }).catch(next);
