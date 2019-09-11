@@ -4,8 +4,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Server, ServersService, ApiService, JwtService } from '../core';
 import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
 // import { FileService } from '../core/services/file.service';
+import { map } from 'rxjs/operators';
 
-const URL = 'http://localhost:3000/api/uploads';
+const URL = 'http://localhost:3000/api/uploads/check';
 
 @Component({
   selector: 'app-server-settings-page',
@@ -17,6 +18,7 @@ export class ServerSettingsComponent implements OnInit {
   serverSettingsForm: FormGroup;
   errors: Object = {};
   uploadErrors: string;
+  tmp: string;
   isSubmitting = false;
   uploader: FileUploader;
   hasBaseDropZoneOver: boolean;
@@ -25,7 +27,7 @@ export class ServerSettingsComponent implements OnInit {
   isDisabled = false;
   isChecked = false;
   isAssuming = false;
-
+  exercises: any[];
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -47,7 +49,7 @@ export class ServerSettingsComponent implements OnInit {
       {
         url: URL,
         authToken: `Token ${token}`,
-        allowedMimeType: ['application/zip', 'application/gzip'],
+        allowedMimeType: ['application/zip'/*, 'application/gzip'*/],
       }
     );
   }
@@ -73,6 +75,9 @@ export class ServerSettingsComponent implements OnInit {
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
       console.log('FileUpload:uploaded:', item, status, response);
       this.uploadErrors = response;
+      this.tmp = response;
+      this.tmp = this.tmp.replace(",", "");
+      this.exercises = this.tmp.split("\"");
     };
   }
 
@@ -92,6 +97,7 @@ export class ServerSettingsComponent implements OnInit {
 
     // post the changes
     this.serversService.save(this.server).subscribe(
+      // add the popup
       server => this.router.navigateByUrl('/server/' + server.slug),
       err => {
         this.errors = err;

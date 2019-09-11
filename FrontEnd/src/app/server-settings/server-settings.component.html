@@ -135,6 +135,14 @@
             </div>
           </div>
         </div>
+        <div>
+          Exercises List : {{exercises}}
+          <!-- <ul>
+            <li *ngFor="let exercises_ of exercises; let i = index">
+              {{ i + 1 }} : {{ exercises }}
+            </li>
+          </ul> -->
+        </div>
         <hr />
         <div class="col-md-12 offset-md-0 col-xs-12">
           <div class="danger">
@@ -152,7 +160,8 @@
               <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my server's
               data and there are no way to have it back !
               <br />
-              <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and to DISABLE my server is
+              <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and to DISABLE my server
+              is
               NOT what I want
               <br />
               <br />

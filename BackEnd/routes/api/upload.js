@@ -20,7 +20,7 @@ let storage = multer.diskStorage({
     cb(null, dirPath);
   },
   filename: (req, file, cb) => {
-    destPath = file.fieldname + '-' + Date.now() + '.' + path.extname(file.originalname);
+    destPath = path.extname(file.originalname);
     cb(null, destPath);
   }
 });
@@ -53,33 +53,47 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
         } else {
 
           var eventEmitter = new events.EventEmitter();
+          var dir = './uploads/' + server.author.username + '/';
 
           var uploadHandler = function () {
             if (req.file.mimetype === 'application/zip') {
-              // create a repository with the name of the user
-              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dirPath })); // modify the path of extraction
+              if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+              }
+
+              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dir }));
+              console.log('extracted');
               eventEmitter.emit('desarchived');
             }
+
           }
+
 
           eventEmitter.on('desarchived', function () {
             // check the name of the files in the repository and send them to the Frontend
+
+            var files = fs.readdirSync(dir + 'exercises/');
+            console.log(files);
+            
             server.processing = false;
-            return res.send({
-              success: true
+            fs.unlinkSync(dirPath + destPath);
+
+            return res.json({
+              success: true,
+              name: files
             });
           });
 
           eventEmitter.on('file_uploading', uploadHandler);
 
-          if (req.file.mimetype === 'application/zip') {
+          if (req.file.mimetype === 'application/zip' && req.file.originalname === 'exercises.zip') {
             console.log('file received');
             eventEmitter.emit('file_uploading');
           }
 
           else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-            return res.status(422).json({ errors: { file: "must be an .zip archive" } });
+            return res.status(422).json({ errors: { file: "must be exercices.zip" } });
           }
         }
       }).catch(next);
