@@ -2,20 +2,16 @@
 var router = require('express').Router();
 var mongoose = require('mongoose');
 var multer = require('multer');
-var unzip = require('unzip');
 var fs = require('fs');
-var url = require('url');
 var auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
 var destPath = '';
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
-const { promisify } = require('util');
-const unlinkAsync = promisify(fs.unlink);
+var upload_functions = require('../../lib/upload_functions');
 var events = require('events');
 var swiftClient = require('../../Client/swiftClient');
-const http = require('http');
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -51,55 +47,30 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
           return res.send({
             success: false
           });
-
         } else {
-
-          var eventEmitter = new events.EventEmitter();
-          var dir = './uploads/' + server.author.username + '/';
-
-          var uploadHandler = function () {
-            if (req.file.mimetype === 'application/zip') {
-              if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir);
-              }
-
-              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dir })).end(function (err) {
-                console.log('extracted');
-                eventEmitter.emit('desarchived');
-              });
-            }
-          }
-
-
-          eventEmitter.on('desarchived', function () {
-            // check the name of the files in the repository and send them to the Frontend
-
-            var files = fs.readdirSync(dir + 'exercises/');
-            console.log(files);
-
-            files.forEach(element => {
-              if (element === 'index.json') {
-                fs.unlinkSync(dir + 'exercises/index.json');
-
-              }
-            });
-            server.processing = false;
-            fs.unlinkSync(dirPath + destPath);
-
-            return res.json({
-              success: true,
-              name: files
-            });
-          });
-
-          eventEmitter.on('file_uploading', uploadHandler);
-
+          var dest_path = './uploads/' + server.author.username + '/';
+          var source_path = dirPath + destPath;
           if (req.file.mimetype === 'application/zip' && req.file.originalname === 'exercises.zip') {
             console.log('file received');
-            eventEmitter.emit('file_uploading');
-          }
-
-          else {
+            upload_functions.desarchived(dest_path, source_path).then((response) => {
+              upload_functions.unlinkSync(source_path).then((response) => {
+                upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
+                  return res.json({
+                    success: true,
+                    name: files
+                  });
+                }, (err) => {
+                  console.log('Error checkFiles !: ' + err);
+                });
+              }, (err) => {
+                console.log('Error unlink !: ' + err);
+              });
+            },
+              (err) => {
+                console.log('Error desarchived !: ' + err);
+              },
+            );
+          } else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
             return res.status(422).json({ errors: { file: "must be exercises.zip found " + req.file.mimetype } });
           }
@@ -123,33 +94,34 @@ router.post('/url', auth.required, function (req, res, next) {
         console.log(req.body);
         var file_url = req.body.url.url + '/archive/master.zip';
         var DOWNLOAD_DIR = './downloads/';
+        var dest_path = './uploads/' + server.author.username + '/';
 
-        if (url.parse(file_url).host !== 'github.com') {
+        if (upload_functions.parse_url(file_url) !== 'github.com') {
           return res.status(422).json({ errors: { errors: ': URL invalid' } });
         }
-        // Function for downloading file using HTTP.get
-        var options = {
-          host: url.parse(file_url).host,
-          port: 80,
-          path: url.parse(file_url).pathname
-        };
-        console.log('host: ' + url.parse(file_url).host);
-        console.log('path: ' + url.parse(file_url).pathname);
 
-        var file_name = url.parse(file_url).pathname.split('/').pop();
-        var file = fs.createWriteStream(DOWNLOAD_DIR + file_name);
-
-        http.get(options, function (res) {
-          res.on('data', function (data) {
-            file.write(data);
-          }).on('end', function () {
-            file.end();
-            console.log(file_name + ' downloaded to ' + DOWNLOAD_DIR);
-          }).on('error', function (err) {
-            console.log(err);
-          })
+        upload_functions.download_from_url(file_url, DOWNLOAD_DIR).then((archive_path) => {
+          upload_functions.desarchived(dest_path, archive_path).then((response) => {
+            upload_functions.unlinkSync(archive_path).then((response) => {
+              upload_functions.checkFiles(dest_path + 'master/').then((files) => {
+                return res.json({
+                  success: true,
+                  name: files
+                });
+              }, (err) => {
+                console.log('Error checkFiles !: ' + err);
+              });
+            }, (err) => {
+              console.log('Error unlink !: ' + err);
+            });
+          },
+            (err) => {
+              console.log('Error desarchived !: ' + err);
+            },
+          );
+        }, (err) => {
+          console.log('Error download from url !: ' + err);
         });
-
       }).catch(next);
   }).catch(next);
 });
@@ -169,14 +141,18 @@ router.post('/send', auth.required, function (req, res, next) {
         if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
         if (server.processing) { return res.sendStatus(401); }
 
-        if (!req.list || req.list === undefined) {
+        console.log(req.body);
+        console.log(req.body.list);
+        console.log(req.body.list[0]);
+        if (!req.body.list || req.body.list === undefined) {
           console.log("No name received");
 
-          return res.send({ errors: { file: ": No name received" + req.file.mimetype } });
+          return res.send({ errors: { file: ": No name received" } });
 
         } else {
           var dir = './uploads/' + server.author.username + '/';
-
+          var tabOfName = req.body.list;
+          console.log(typeof (tabOfName));
           var eventEmitter = new events.EventEmitter();
           var uploadHandler = function () {
 
@@ -184,14 +160,14 @@ router.post('/send', auth.required, function (req, res, next) {
             files.forEach(element => {
               var found = undefined;
               var tmp = undefined;
-              req.body.files.forEach(group => {
-
+              tabOfName.forEach(group => {
                 if ((tmp = group.find(function (name) {
                   return name === element;
                 })) !== undefined) {
                   found = tmp;
                 }
               });
+
               if (found === undefined) {
                 fs.unlinkSync(dir + 'exercises/' + element);
               }
@@ -202,23 +178,62 @@ router.post('/send', auth.required, function (req, res, next) {
 
           eventEmitter.on('filedeleted', function () {
 
-            fs.writeFile(dir + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n', function (err) {
+            fs.writeFile(dir + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n  {\n', function (err) {
               console.log(err);
             });
 
-            req.body.files.forEach(group => {
-              group.forEach(element => {
-                fs.appendFile(dir + 'exercises/index.json', ' This is my text.', function (err) {
-                  if (err) throw err;
-                  console.log('Updated!');
-                });
-              });
-            });
 
+            tabOfName = tabOfName.filter(group => group.length >= 2);
+            console.log(tabOfName);
+
+            var name = 1;
+            for (let i = 0; i < tabOfName.length; i++) {
+              var group = tabOfName[i];
+              for (let index = 0; index < group.length; index++) {
+
+                if (index === 0) {
+                  fs.appendFile(dir + 'exercises/index.json', '    "group-' + name + '":\n    { "title": "' + group[index] + '",\n      "exercises": [ \n', function (err) {
+                    if (err) throw err;
+                    console.log('Updated!');
+                  });
+                } else if (index === group.length - 1) {
+                  fs.appendFile(dir + 'exercises/index.json', '                     "' + group[index] + '" ] }', function (err) {
+                    if (err) throw err;
+                    console.log('Updated!');
+                  });
+                  if (i !== tabOfName.length - 1) {
+                    fs.appendFile(dir + 'exercises/index.json', ',\n', function (err) {
+                      if (err) throw err;
+                      console.log('Updated!');
+                    });
+                  }
+                  else {
+                    fs.appendFile(dir + 'exercises/index.json', '\n', function (err) {
+                      if (err) throw err;
+                      console.log('Updated!');
+                    });
+                  }
+                }
+                else {
+                  fs.appendFile(dir + 'exercises/index.json', '                     "' + group[index] + '",\n', function (err) {
+                    if (err) throw err;
+                    console.log('Updated!');
+                  });
+                }
+              }
+
+              name++;
+            };
+            fs.appendFile(dir + 'exercises/index.json', '} }', function (err) {
+              if (err) throw err;
+              console.log('Updated!');
+            });
 
             eventEmitter.emit('indexcreated');
           });
+
           eventEmitter.on('indexcreated', function () {
+            return res.status(422).json({ errors: { file: "index.json created" } });
             var path = dirPath + destPath; //modify
 
             var readStream = fs.createReadStream(path);

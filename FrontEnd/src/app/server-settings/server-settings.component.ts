@@ -28,6 +28,7 @@ export class ServerSettingsComponent implements OnInit {
   isChecked = false;
   isAssuming = false;
   exercises: any[];
+  groups: String[][];
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -150,4 +151,16 @@ export class ServerSettingsComponent implements OnInit {
   //   }, error => console.log('Error downloading the file'),
   //     () => console.log('File downloaded successfully'));
   // }
+
+  send() {
+    this.groups = [["name1", "exercices1", "exercice2"], ["name2", "exercice3"], ["name3"]];
+    this.serversService.send(this.server.slug, this.groups).subscribe(
+
+      data => data,
+      err => {
+        this.errors = err;
+        this.isSubmitting = false;
+      }
+    );
+  }
 }

@@ -45,12 +45,16 @@
         <h3>Using Button</h3>
         <input type="button" (click)="download()" value="Download Employee Data"/>
       </div> -->
-
+        <div>
+          <button class="btn btn-lg btn-primary pull-xs-right" (click)="send()">
+            Send names
+          </button>
+        </div>
         <div class="container">
           <div class="row">
             <div class="col-md-3">
               <h3>Select files</h3>
-<!--
+              <!--
               <div ng2FileDrop
                   [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
                   (fileOver)="fileOverBase($event)"
@@ -116,6 +120,7 @@
                 </tbody>
               </table>
               {{uploadErrors}}
+              <app-list-errors [errors]="errors"></app-list-errors>
               <div>
                 <div>
                   Queue progress:
