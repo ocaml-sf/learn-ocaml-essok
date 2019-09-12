@@ -38,10 +38,10 @@ export class ServerSettingsComponent implements OnInit {
   ) {
     // create form group using the form builder
     this.serverSettingsForm = this.fb.group({
-      title: '',
-      description: '',
+      // title: '',
+      // description: '',
       url: '',
-      file: '',
+      // file: '',
     });
 
     const token = this.jwtService.getToken();
@@ -64,7 +64,7 @@ export class ServerSettingsComponent implements OnInit {
     this.route.data.subscribe((data: { server: Server }) => {
       if (data.server) {
         this.server = data.server;
-        this.serverSettingsForm.patchValue(data.server);
+        // this.serverSettingsForm.patchValue(data.server);
         this.uploader.options.additionalParameter = { server: this.server.slug };
       }
     });
@@ -76,8 +76,8 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.uploadErrors = response;
       this.tmp = response;
-      this.tmp = this.tmp.replace(",", "");
-      this.exercises = this.tmp.split("\"");
+      // this.tmp = this.tmp.replace(",", "");
+      // this.exercises = this.tmp.split("\"");
     };
   }
 
@@ -93,12 +93,13 @@ export class ServerSettingsComponent implements OnInit {
     this.isSubmitting = true;
 
     // update the model
-    this.updateServer(this.serverSettingsForm.value);
+    // this.updateServer(this.serverSettingsForm.value);
 
     // post the changes
-    this.serversService.save(this.server).subscribe(
+    this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
       // add the popup
-      server => this.router.navigateByUrl('/server/' + server.slug),
+      // server => this.router.navigateByUrl('/server/' + server.slug),
+      data => data,
       err => {
         this.errors = err;
         this.isSubmitting = false;

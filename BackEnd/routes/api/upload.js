@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var unzip = require('unzip');
 var fs = require('fs');
+var url = require('url');
 var auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
@@ -14,6 +15,7 @@ const { promisify } = require('util');
 const unlinkAsync = promisify(fs.unlink);
 var events = require('events');
 var swiftClient = require('../../Client/swiftClient');
+const http = require('http');
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -61,11 +63,11 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                 fs.mkdirSync(dir);
               }
 
-              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dir }));
-              console.log('extracted');
-              eventEmitter.emit('desarchived');
+              fs.createReadStream(dirPath + destPath).pipe(unzip.Extract({ path: dir })).end(function (err) {
+                console.log('extracted');
+                eventEmitter.emit('desarchived');
+              });
             }
-
           }
 
 
@@ -74,7 +76,13 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
 
             var files = fs.readdirSync(dir + 'exercises/');
             console.log(files);
-            
+
+            files.forEach(element => {
+              if (element === 'index.json') {
+                fs.unlinkSync(dir + 'exercises/index.json');
+
+              }
+            });
             server.processing = false;
             fs.unlinkSync(dirPath + destPath);
 
@@ -93,9 +101,55 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
 
           else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-            return res.status(422).json({ errors: { file: "must be exercices.zip" } });
+            return res.status(422).json({ errors: { file: "must be exercises.zip found " + req.file.mimetype } });
           }
         }
+      }).catch(next);
+  }).catch(next);
+});
+
+router.post('/url', auth.required, function (req, res, next) {
+
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    Server.findOne({ slug: req.body.server })
+      .populate('author')
+      .then(function (server) {
+        if (!server) { return res.sendStatus(404); }
+        if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
+        if (server.processing) { return res.sendStatus(401); }
+
+        console.log(req.body);
+        var file_url = req.body.url.url + '/archive/master.zip';
+        var DOWNLOAD_DIR = './downloads/';
+
+        if (url.parse(file_url).host !== 'github.com') {
+          return res.status(422).json({ errors: { errors: ': URL invalid' } });
+        }
+        // Function for downloading file using HTTP.get
+        var options = {
+          host: url.parse(file_url).host,
+          port: 80,
+          path: url.parse(file_url).pathname
+        };
+        console.log('host: ' + url.parse(file_url).host);
+        console.log('path: ' + url.parse(file_url).pathname);
+
+        var file_name = url.parse(file_url).pathname.split('/').pop();
+        var file = fs.createWriteStream(DOWNLOAD_DIR + file_name);
+
+        http.get(options, function (res) {
+          res.on('data', function (data) {
+            file.write(data);
+          }).on('end', function () {
+            file.end();
+            console.log(file_name + ' downloaded to ' + DOWNLOAD_DIR);
+          }).on('error', function (err) {
+            console.log(err);
+          })
+        });
+
       }).catch(next);
   }).catch(next);
 });
@@ -115,18 +169,57 @@ router.post('/send', auth.required, function (req, res, next) {
         if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
         if (server.processing) { return res.sendStatus(401); }
 
-        if (!req.name || req.name === undefined) {
+        if (!req.list || req.list === undefined) {
           console.log("No name received");
-          return res.send({
-            success: false
-          });
+
+          return res.send({ errors: { file: ": No name received" + req.file.mimetype } });
 
         } else {
+          var dir = './uploads/' + server.author.username + '/';
 
           var eventEmitter = new events.EventEmitter();
-
           var uploadHandler = function () {
-            var path = dirPath + destPath; //modify 
+
+            var files = fs.readdirSync(dir + 'exercises/');
+            files.forEach(element => {
+              var found = undefined;
+              var tmp = undefined;
+              req.body.files.forEach(group => {
+
+                if ((tmp = group.find(function (name) {
+                  return name === element;
+                })) !== undefined) {
+                  found = tmp;
+                }
+              });
+              if (found === undefined) {
+                fs.unlinkSync(dir + 'exercises/' + element);
+              }
+            });
+
+            eventEmitter.emit('filedeleted');
+          }
+
+          eventEmitter.on('filedeleted', function () {
+
+            fs.writeFile(dir + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n', function (err) {
+              console.log(err);
+            });
+
+            req.body.files.forEach(group => {
+              group.forEach(element => {
+                fs.appendFile(dir + 'exercises/index.json', ' This is my text.', function (err) {
+                  if (err) throw err;
+                  console.log('Updated!');
+                });
+              });
+            });
+
+
+            eventEmitter.emit('indexcreated');
+          });
+          eventEmitter.on('indexcreated', function () {
+            var path = dirPath + destPath; //modify
 
             var readStream = fs.createReadStream(path);
             var writeStream = swiftClient.upload({
@@ -148,7 +241,8 @@ router.post('/send', auth.required, function (req, res, next) {
 
             readStream.pipe(writeStream);
 
-          }
+          });
+
           eventEmitter.on('file_uploading', uploadHandler);
 
 

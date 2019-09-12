@@ -10,7 +10,7 @@
         <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
           <fieldset [disabled]="isSubmitting">
 
-            <fieldset class="form-group">
+            <!-- <fieldset class="form-group">
               <input class="form-control form-control-lg" formControlName="title" type="text"
                 placeholder="Server Title" />
             </fieldset>
@@ -19,7 +19,7 @@
               <textarea class="form-control" formControlName="description" rows="8" type="text"
                 placeholder="What's this server about?">
                 </textarea>
-            </fieldset>
+            </fieldset> -->
 
             <fieldset class="form-group">
               <input class="form-control form-control-lg" type="url" placeholder="URL of server repository"
@@ -31,6 +31,9 @@
             </button>
           </fieldset>
         </form>
+
+
+
         <!-- Line break for logout button -->
         <hr />
         <!-- <div>
@@ -42,11 +45,12 @@
         <h3>Using Button</h3>
         <input type="button" (click)="download()" value="Download Employee Data"/>
       </div> -->
+
         <div class="container">
           <div class="row">
             <div class="col-md-3">
               <h3>Select files</h3>
-              <!--
+<!--
               <div ng2FileDrop
                   [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
                   (fileOver)="fileOverBase($event)"
@@ -61,8 +65,8 @@
                   [uploader]="uploader"
                   class="well my-drop-zone">
                   Another drop zone
-              </div>
--->
+              </div> -->
+
               Multiple
               <input type="file" name="archive" ng2FileSelect [uploader]="uploader" multiple /><br />
               Single
@@ -136,12 +140,15 @@
           </div>
         </div>
         <div>
+
           Exercises List : {{exercises}}
           <!-- <ul>
             <li *ngFor="let exercises_ of exercises; let i = index">
               {{ i + 1 }} : {{ exercises }}
             </li>
           </ul> -->
+
+
         </div>
         <hr />
         <div class="col-md-12 offset-md-0 col-xs-12">
