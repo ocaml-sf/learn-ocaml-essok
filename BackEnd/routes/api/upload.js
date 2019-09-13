@@ -146,7 +146,7 @@ router.post('/url', auth.required, function (req, res, next) {
               return res.status(422).json({ errors: { errors: err } });
             });
         },
-            (err) => {
+          (err) => {
             console.log('Error download from url !: ' + err);
             var message = upload_errors.wget_error(err.code) + err.message;
             return res.status(422).send({ errors: { message } });
@@ -168,13 +168,16 @@ router.post('/send', auth.required, function (req, res, next) {
         if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
         if (server.processing) { return res.sendStatus(401); }
         if (!req.body.list || req.body.list === undefined) {
-          return res.send({ errors: { file: ": No name received" } });
+          return res.status(422).send({ errors: { file: ": No name received" } });
         } else {
+          if (upload_errors.group_duplicate(req.body.list)) {
+            return res.status(422).send({ errors: { file: ": Error in group names, duplicate name" } });
+          }
           var dir = './uploads/' + server.author.username + '/';
           var tabOfName = req.body.list;
 
           upload_functions.checkFiles(dir + 'exercises/').then((files) => {
-            upload_functions.delete_useless_files(files, dir + 'exercises/').then((response) => {
+            upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/').then((response) => {
               upload_functions.create_indexJSON(dir, tabOfName).then((response) => {
                 return res.status(422).json({ errors: { file: "index.json created" } });
                 upload_functions.sendToSwift(dir, server.slug).then((success) => {

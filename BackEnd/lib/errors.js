@@ -19,6 +19,16 @@ var errors = {
                 break;
         }
         return message;
-    }
+    },
+
+    group_duplicate: function (files) {
+        for (let i = 0; i < files.length - 1; i++) {
+            for (let j = i + 1; j < files.length; j++) {
+                if (files[i][0] === files[j][0])
+                    return true;
+            }
+        }
+        return false;
+    },
 }
 module.exports = errors;
