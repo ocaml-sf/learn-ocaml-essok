@@ -12,7 +12,7 @@ var Server = mongoose.model('Server');
 var upload_functions = require('../../lib/upload_functions');
 var events = require('events');
 var swiftClient = require('../../Client/swiftClient');
-
+var upload_errors = require('../../lib/errors');
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, dirPath);
@@ -93,6 +93,12 @@ router.post('/url', auth.required, function (req, res, next) {
 
         console.log(req.body);
         var file_url = req.body.url.url + '/archive/master.zip';
+        var repo = req.body.url.url.split('/');
+        if ((repo[repo.length - 1] === "") || (repo[repo.length - 1] === undefined)) {
+          repo = repo[repo.length - 2];
+        } else {
+          repo = repo[repo.length - 1];
+        }
         var DOWNLOAD_DIR = './downloads/';
         var dest_path = './uploads/' + server.author.username + '/';
 
@@ -101,35 +107,56 @@ router.post('/url', auth.required, function (req, res, next) {
         }
 
         upload_functions.download_from_url(file_url, DOWNLOAD_DIR).then((archive_path) => {
-          upload_functions.desarchived(dest_path, archive_path).then((response) => {
-            upload_functions.unlinkSync(archive_path).then((response) => {
-              upload_functions.checkFiles(dest_path + 'master/').then((files) => {
-                return res.json({
-                  success: true,
-                  name: files
+          upload_functions.removeDir(dest_path).then((response) => {
+            upload_functions.createDir(dest_path).then((response) => {
+              upload_functions.desarchived(dest_path, archive_path).then((response) => {
+                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/').then((response) => {
+                  upload_functions.unlinkSync(archive_path).then((response) => {
+                    upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
+                      console.log(files);
+                      return res.json({
+                        success: true,
+                        name: files
+                      });
+                    }, (err) => {
+                      console.log('Error checkFiles !: ' + err);
+                      return res.status(422).json({ errors: { errors: err } });
+                    });
+                  }, (err) => {
+                    console.log('Error unlink !: ' + err);
+                    return res.status(422).json({ errors: { errors: err } });
+                  });
+                }, (err) => {
+                  console.log('Error renameDir !: ' + err);
+                  return res.status(422).json({ errors: { errors: err } });
                 });
-              }, (err) => {
-                console.log('Error checkFiles !: ' + err);
+              },
+                (err) => {
+                  console.log('Error desarchived !: ' + err);
+                  return res.status(422).json({ errors: { errors: err } });
+                });
+            },
+              (err) => {
+                console.log('Error createDir !: ' + err);
+                return res.status(422).json({ errors: { errors: err } });
               });
-            }, (err) => {
-              console.log('Error unlink !: ' + err);
-            });
           },
             (err) => {
-              console.log('Error desarchived !: ' + err);
-            },
-          );
-        }, (err) => {
-          console.log('Error download from url !: ' + err);
-        });
+              console.log('Error removeDir !: ' + err);
+              return res.status(422).json({ errors: { errors: err } });
+            });
+        },
+          (err) => {
+            console.log('Error download from url !: ' + err);
+            var message = upload_errors.wget_error(err.code) + err.message;
+            return res.status(422).send({ errors: { message } });
+          });
       }).catch(next);
   }).catch(next);
 });
 
 
 router.post('/send', auth.required, function (req, res, next) {
-  console.log(req.body.server);
-
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
@@ -140,145 +167,40 @@ router.post('/send', auth.required, function (req, res, next) {
         if (!server) { return res.sendStatus(404); }
         if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
         if (server.processing) { return res.sendStatus(401); }
-
-        console.log(req.body);
-        console.log(req.body.list);
-        console.log(req.body.list[0]);
         if (!req.body.list || req.body.list === undefined) {
-          console.log("No name received");
-
-          return res.send({ errors: { file: ": No name received" } });
-
+          return res.status(422).send({ errors: { file: ": No name received" } });
         } else {
+          if (upload_errors.group_duplicate(req.body.list)) {
+            return res.status(422).send({ errors: { file: ": Error in group names, duplicate name" } });
+          }
           var dir = './uploads/' + server.author.username + '/';
           var tabOfName = req.body.list;
-          console.log(typeof (tabOfName));
-          var eventEmitter = new events.EventEmitter();
-          var uploadHandler = function () {
 
-            var files = fs.readdirSync(dir + 'exercises/');
-            files.forEach(element => {
-              var found = undefined;
-              var tmp = undefined;
-              tabOfName.forEach(group => {
-                if ((tmp = group.find(function (name) {
-                  return name === element;
-                })) !== undefined) {
-                  found = tmp;
-                }
+          upload_functions.checkFiles(dir + 'exercises/').then((files) => {
+            upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/').then((response) => {
+              upload_functions.create_indexJSON(dir, tabOfName).then((response) => {
+                return res.status(422).json({ errors: { file: "index.json created" } });
+                upload_functions.sendToSwift(dir, server.slug).then((success) => {
+                  return res.send({
+                    success: true,
+                    message: success
+                  });
+                }, (err) => {
+                  console.log('Error sendToSwift !: ' + err);
+                  return res.status(422).json({ errors: { errors: err } });
+                });
+              }, (err) => {
+                console.log('Error create index.json !: ' + err);
+                return res.status(422).json({ errors: { errors: err } });
               });
-
-              if (found === undefined) {
-                fs.unlinkSync(dir + 'exercises/' + element);
-              }
+            }, (err) => {
+              console.log('Error delete useless file !: ' + err);
+              return res.status(422).json({ errors: { errors: err } });
             });
-
-            eventEmitter.emit('filedeleted');
-          }
-
-          eventEmitter.on('filedeleted', function () {
-
-            fs.writeFile(dir + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n  {\n', function (err) {
-              console.log(err);
-            });
-
-
-            tabOfName = tabOfName.filter(group => group.length >= 2);
-            console.log(tabOfName);
-
-            var name = 1;
-            for (let i = 0; i < tabOfName.length; i++) {
-              var group = tabOfName[i];
-              for (let index = 0; index < group.length; index++) {
-
-                if (index === 0) {
-                  fs.appendFile(dir + 'exercises/index.json', '    "group-' + name + '":\n    { "title": "' + group[index] + '",\n      "exercises": [ \n', function (err) {
-                    if (err) throw err;
-                    console.log('Updated!');
-                  });
-                } else if (index === group.length - 1) {
-                  fs.appendFile(dir + 'exercises/index.json', '                     "' + group[index] + '" ] }', function (err) {
-                    if (err) throw err;
-                    console.log('Updated!');
-                  });
-                  if (i !== tabOfName.length - 1) {
-                    fs.appendFile(dir + 'exercises/index.json', ',\n', function (err) {
-                      if (err) throw err;
-                      console.log('Updated!');
-                    });
-                  }
-                  else {
-                    fs.appendFile(dir + 'exercises/index.json', '\n', function (err) {
-                      if (err) throw err;
-                      console.log('Updated!');
-                    });
-                  }
-                }
-                else {
-                  fs.appendFile(dir + 'exercises/index.json', '                     "' + group[index] + '",\n', function (err) {
-                    if (err) throw err;
-                    console.log('Updated!');
-                  });
-                }
-              }
-
-              name++;
-            };
-            fs.appendFile(dir + 'exercises/index.json', '} }', function (err) {
-              if (err) throw err;
-              console.log('Updated!');
-            });
-
-            eventEmitter.emit('indexcreated');
+          }, (err) => {
+            console.log('Error checkfiles !: ' + err);
+            return res.status(422).json({ errors: { errors: err } });
           });
-
-          eventEmitter.on('indexcreated', function () {
-            return res.status(422).json({ errors: { file: "index.json created" } });
-            var path = dirPath + destPath; //modify
-
-            var readStream = fs.createReadStream(path);
-            var writeStream = swiftClient.upload({
-              container: server.slug,
-              remote: destPath
-            });
-
-            writeStream.on('error', function (err) {
-              // handle your error case
-              console.log(err);
-              eventEmitter.emit('fileFailedUploaded');
-            });
-
-            writeStream.on('success', function (file) {
-              // success, file will be a File model
-              console.log('file uploaded on swift :' + JSON.stringify(file));
-              eventEmitter.emit('fileUploaded');
-            });
-
-            readStream.pipe(writeStream);
-
-          });
-
-          eventEmitter.on('file_uploading', uploadHandler);
-
-
-          eventEmitter.on('fileUploaded', function () {
-            // server.processing = false;
-            return res.send({
-              success: true
-            });
-          });
-
-          eventEmitter.on('fileFailedUploaded', function () {
-            // server.processing = false;
-            return res.send({
-              success: false
-            });
-          });
-
-
-          // server.processing = true;
-          // console.log('file received');
-          eventEmitter.emit('file_uploading');
 
         }
       }).catch(next);
