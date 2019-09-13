@@ -29,6 +29,7 @@ export class ServerSettingsComponent implements OnInit {
   isAssuming = false;
   exercises: any[];
   groups: String[][];
+  useless: String[];
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -100,7 +101,7 @@ export class ServerSettingsComponent implements OnInit {
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
       // add the popup
       // server => this.router.navigateByUrl('/server/' + server.slug),
-      data => data,
+      data => this.uploadErrors = data,
       err => {
         this.errors = err;
         this.isSubmitting = false;
@@ -153,8 +154,8 @@ export class ServerSettingsComponent implements OnInit {
   // }
 
   send() {
-    this.groups = [["name1", "exercices1", "exercice2"], ["name2", "exercice3"], ["name3"]];
-    this.serversService.send(this.server.slug, this.groups).subscribe(
+    this.groups = [['name1', 'exercices1', 'exercice2'], ['name2', 'exercice3'], ['name3']];
+    this.serversService.send(this.server.slug, this.useless, this.groups).subscribe(
 
       data => data,
       err => {
