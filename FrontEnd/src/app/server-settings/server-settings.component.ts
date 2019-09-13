@@ -5,7 +5,7 @@ import { Server, ServersService, ApiService, JwtService } from '../core';
 import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
 // import { FileService } from '../core/services/file.service';
 import { map } from 'rxjs/operators';
-import {CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 const URL = 'http://localhost:3000/api/uploads/check';
 
@@ -30,12 +30,12 @@ export class ServerSettingsComponent implements OnInit {
   isAssuming = false;
   exercises: any[];
   idIndex = 3;
-  exercisesList = ['ex1','ex2'];
+  exercisesList = ['ex1', 'ex2'];
   groups: String[][];
-  groupsList = [{id: 'group1', title: 'group1', exercises: ['ex3', 'ex4']},
-                {id: 'group2', title: 'group2', exercises: ['ex5']}];
+  groupsList = [{ id: 'group1', title: 'group1', exercises: ['ex3', 'ex4'] },
+  { id: 'group2', title: 'group2', exercises: ['ex5'] }];
   allExercisesID = ['exercises-list', 'create-group',
-                       ...this.groupsList.map(group => group.id)];
+    ...this.groupsList.map(group => group.id)];
   useless: String[];
   constructor(
     private router: Router,
@@ -173,47 +173,47 @@ export class ServerSettingsComponent implements OnInit {
     );
   }
 
-  dropExercise(event : CdkDragDrop<string[]>) {
-    var previousContainer = event.previousContainer;
+  dropExercise(event: CdkDragDrop<string[]>) {
+    const previousContainer = event.previousContainer;
     if (previousContainer === event.container) {
-      moveItemInArray(event.container.data, 
-                      event.previousIndex, 
-                      event.currentIndex);
+      moveItemInArray(event.container.data,
+        event.previousIndex,
+        event.currentIndex);
     } else {
       transferArrayItem(previousContainer.data,
-                        event.container.data,
-                        event.previousIndex,
-                        event.currentIndex);
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex);
     }
     this.deleteGroupCheck(previousContainer.id, previousContainer.data);
   }
 
-  dropGroup(event : CdkDragDrop<string[]>) {
+  dropGroup(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.groupsList,
-                    event.previousIndex, event.currentIndex);
+      event.previousIndex, event.currentIndex);
     console.log(this.groupsList);
   }
 
-  createGroup(event : CdkDragDrop<string[]>) {
-    var title = 'group' + (this.idIndex++);
-    var newGroup = {id: title, title: title, exercises: []};
-    var previousContainer = event.previousContainer;
+  createGroup(event: CdkDragDrop<string[]>) {
+    const title = 'group' + (this.idIndex++);
+    const newGroup = { id: title, title: title, exercises: [] };
+    const previousContainer = event.previousContainer;
 
     this.groupsList.push(newGroup);
     this.allExercisesID.push(title);
     console.log(this.groupsList);
     console.log(this.allExercisesID);
     transferArrayItem(event.previousContainer.data,
-                      newGroup.exercises,
-                      event.previousIndex,
-                      0);
+      newGroup.exercises,
+      event.previousIndex,
+      0);
     this.deleteGroupCheck(previousContainer.id, previousContainer.data);
   }
 
   deleteGroupCheck(id, data) {
-    if (id != 'exercises-list' && data.length == 0) {
-      this.groupsList = this.groupsList.filter(group => group.id != id);
-      this.allExercisesID = this.allExercisesID.filter(iId => iId != id);
+    if (id !== 'exercises-list' && data.length === 0) {
+      this.groupsList = this.groupsList.filter(group => group.id !== id);
+      this.allExercisesID = this.allExercisesID.filter(iId => iId !== id);
       console.log(this.groupsList);
       console.log(this.allExercisesID);
     }
