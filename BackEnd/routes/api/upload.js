@@ -107,43 +107,50 @@ router.post('/url', auth.required, function (req, res, next) {
         }
 
         upload_functions.download_from_url(file_url, DOWNLOAD_DIR).then((archive_path) => {
-          upload_functions.desarchived(dest_path, archive_path).then((response) => {
-            upload_functions.removeDir(dest_path + 'exercises/').then((response) => {
-              upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/').then((response) => {
-                upload_functions.unlinkSync(archive_path).then((response) => {
-                  upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
-                    console.log(files);
-                    return res.json({
-                      success: true,
-                      name: files
+          upload_functions.removeDir(dest_path).then((response) => {
+            upload_functions.createDir(dest_path).then((response) => {
+              upload_functions.desarchived(dest_path, archive_path).then((response) => {
+                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/').then((response) => {
+                  upload_functions.unlinkSync(archive_path).then((response) => {
+                    upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
+                      console.log(files);
+                      return res.json({
+                        success: true,
+                        name: files
+                      });
+                    }, (err) => {
+                      console.log('Error checkFiles !: ' + err);
+                      return res.status(422).json({ errors: { errors: err } });
                     });
                   }, (err) => {
-                    console.log('Error checkFiles !: ' + err);
+                    console.log('Error unlink !: ' + err);
                     return res.status(422).json({ errors: { errors: err } });
                   });
                 }, (err) => {
-                  console.log('Error unlink !: ' + err);
+                  console.log('Error renameDir !: ' + err);
                   return res.status(422).json({ errors: { errors: err } });
                 });
-              }, (err) => {
-                console.log('Error renameDir !: ' + err);
+              },
+                (err) => {
+                  console.log('Error desarchived !: ' + err);
+                  return res.status(422).json({ errors: { errors: err } });
+                });
+            },
+              (err) => {
+                console.log('Error createDir !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
-            }, (err) => {
+          },
+            (err) => {
               console.log('Error removeDir !: ' + err);
               return res.status(422).json({ errors: { errors: err } });
             });
-          },
+        },
             (err) => {
-              console.log('Error desarchived !: ' + err);
-              return res.status(422).json({ errors: { errors: err } });
-            },
-          );
-        }, (err) => {
-          console.log('Error download from url !: ' + err);
-          var message = upload_errors.wget_error(err.code) + err.message;
-          return res.status(422).send({ errors: { message } });
-        });
+            console.log('Error download from url !: ' + err);
+            var message = upload_errors.wget_error(err.code) + err.message;
+            return res.status(422).send({ errors: { message } });
+          });
       }).catch(next);
   }).catch(next);
 });

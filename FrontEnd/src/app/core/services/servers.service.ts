@@ -59,6 +59,6 @@ export class ServersService {
   }
 
   send(slug, useless, list) {
-    return this.apiService.post('/uploads/send', { server: slug, list, useless });
+    return this.apiService.post('/uploads/send', { server: slug, useless, list });
   }
 }

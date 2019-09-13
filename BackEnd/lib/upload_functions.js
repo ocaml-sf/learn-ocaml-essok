@@ -8,9 +8,6 @@ var rimraf = require("rimraf");
 var upload_functions = {
     desarchived: function (dest_path, source_path) {
         return new Promise(function (resolve, reject) {
-            if (!fs.existsSync(dest_path)) {
-                fs.mkdirSync(dest_path);
-            }
 
             fs.createReadStream(source_path).pipe(unzipper.Extract({ path: dest_path }))
                 .on('close', function (err) {
@@ -58,6 +55,9 @@ var upload_functions = {
 
     delete_useless_files: function (useless, path) {
         return new Promise(function (resolve, reject) {
+            if (useless === [] || useless === undefined || useless === null) {
+                return resolve('nothing to delete');
+            }
             useless.forEach(element => {
                 rimraf(path + element, function (err) {
                     if (err) return reject(err);
@@ -134,10 +134,13 @@ var upload_functions = {
     },
     removeDir: function (path) {
         return new Promise(function (resolve, reject) {
-            rimraf(path, function (err) {
-                if (err) return reject(err);
-            })
-            return resolve('removed');
+            if (fs.existsSync(path)) {
+                rimraf(path, function (err) {
+                    if (err) return reject(err);
+                    return resolve('removed');
+                });
+            }
+            else { return resolve('removed'); }
         });
     },
     renameDir: function (oldPath, newPath) {
@@ -148,7 +151,16 @@ var upload_functions = {
             return resolve('renamed');
         })
     },
-
+    createDir: function (path) {
+        return new Promise(function (resolve, reject) {
+            return fs.mkdir(path, function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve('created');
+            });
+        });
+    },
 
 };
 

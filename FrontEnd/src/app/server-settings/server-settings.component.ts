@@ -155,6 +155,7 @@ export class ServerSettingsComponent implements OnInit {
 
   send() {
     this.groups = [['name1', 'exercices1', 'exercice2'], ['name2', 'exercice3'], ['name3']];
+    this.useless = [];
     this.serversService.send(this.server.slug, this.useless, this.groups).subscribe(
 
       data => data,
