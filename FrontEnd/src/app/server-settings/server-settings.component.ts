@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Server, ServersService, ApiService, JwtService } from '../core';
+import { Server, ServersService, ApiService, JwtService, ExercisesList } from '../core';
 import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
 // import { FileService } from '../core/services/file.service';
 import { map } from 'rxjs/operators';
@@ -30,13 +30,12 @@ export class ServerSettingsComponent implements OnInit {
   isAssuming = false;
   exercises: any[];
   idIndex = 3;
-  exercisesList = ['ex1', 'ex2'];
+  exercisesList = [];
   groups: String[][];
-  groupsList = [{ id: 'group1', title: 'group1', exercises: ['ex3', 'ex4'] },
-  { id: 'group2', title: 'group2', exercises: ['ex5'] }];
+  groupsList = [];
   allExercisesID = ['exercises-list', 'create-group',
     ...this.groupsList.map(group => group.id)];
-  useless: String[];
+  useless: ExercisesList = {} as ExercisesList;
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -82,11 +81,10 @@ export class ServerSettingsComponent implements OnInit {
   uploadPrepare() {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-      console.log('FileUpload:uploaded:', item, status, response);
-      this.uploadErrors = response;
-      this.tmp = response;
-      // this.tmp = this.tmp.replace(",", "");
-      // this.exercises = this.tmp.split("\"");
+      // console.log('FileUpload:uploaded:', item, status, response);
+      this.useless = JSON.parse(response);
+      this.exercisesList = this.useless.name;
+
     };
   }
 
@@ -161,10 +159,11 @@ export class ServerSettingsComponent implements OnInit {
   // }
 
   send() {
-    this.groups = [['name1', 'exercices1', 'exercice2'], ['name2', 'exercice3'], ['name3']];
-    this.useless = [];
-    this.serversService.send(this.server.slug, this.useless, this.groups).subscribe(
-
+    this.groups = [[]];
+    this.groupsList.forEach(element => {
+      this.groups.push([element.title].concat(element.exercises));
+    });
+    this.serversService.send(this.server.slug, this.exercisesList, this.groups).subscribe(
       data => data,
       err => {
         this.errors = err;

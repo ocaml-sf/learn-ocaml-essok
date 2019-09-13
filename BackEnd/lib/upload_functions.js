@@ -53,6 +53,7 @@ var upload_functions = {
         });
     },
 
+    // to modify
     delete_useless_files: function (useless, path) {
         return new Promise(function (resolve, reject) {
             if (useless === [] || useless === undefined || useless === null) {
@@ -111,8 +112,8 @@ var upload_functions = {
             };
             fs.appendFile(path + 'exercises/index.json', '} }', function (err) {
                 if (err) return reject(err);
+                return resolve(path + 'exercises/index.json');
             });
-            return resolve(path + 'exercises/index.json');
         });
     },
     sendToSwift: function (path, slug) {

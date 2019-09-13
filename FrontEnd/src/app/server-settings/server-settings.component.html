@@ -27,7 +27,7 @@
             </fieldset>
 
             <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
-              Update Server
+              Charge URL's exercises
             </button>
           </fieldset>
         </form>
@@ -45,11 +45,6 @@
         <h3>Using Button</h3>
         <input type="button" (click)="download()" value="Download Employee Data"/>
       </div> -->
-        <div>
-          <button class="btn btn-lg btn-primary pull-xs-right" (click)="send()">
-            Send names
-          </button>
-        </div>
         <div class="container">
           <div class="row">
             <div class="col-md-3">
@@ -147,15 +142,9 @@
         <div class="drag-drop-container">
           <div class="exercises-container">
             <h4>Exercises List:</h4>
-            <div id="exercises-list"
-                 class="exercises-list"
-                 cdkDropList
-                 [cdkDropListData]="exercisesList"
-                 [cdkDropListConnectedTo]="allExercisesID"
-                 (cdkDropListDropped)="dropExercise($event)">
-              <div class="exercise-box"
-                   *ngFor="let exercise of exercisesList"
-                   cdkDrag>
+            <div id="exercises-list" class="exercises-list" cdkDropList [cdkDropListData]="exercisesList"
+              [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
+              <div class="exercise-box" *ngFor="let exercise of exercisesList" cdkDrag>
                 <div class="custom-placeholder" *cdkDragPlaceholder></div>
                 {{exercise}}
               </div>
@@ -163,44 +152,35 @@
           </div>
           <cdk-virtual-scroll-viewport itemSize="50" class="groups-container">
             <h4>Groups List:</h4>
-            <div class="groups-list"
-                   cdkDropList
-                   (cdkDropListDropped)="dropGroup($event)">
-              <div class="group-box"
-                   *ngFor="let group of groupsList;"
-                   cdkDragLockAxis="y"
-                   cdkDrag>
-                <div class="group-title"
-                    contenteditable="true"
-                    ng-model="group.title">
+            <div class="groups-list" cdkDropList (cdkDropListDropped)="dropGroup($event)">
+              <div class="group-box" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
+                <div class="group-title" contenteditable="true" ng-model="group.title">
                   {{group.title}}
                 </div>
-                <div id="{{group.id}}"
-                     class="group-exercises-list"
-                     cdkDropList
-                     cdkDropListOrientation="horizontal"
-                     [cdkDropListData]="group.exercises"
-                     [cdkDropListConnectedTo]="allExercisesID"
-                     (cdkDropListDropped)="dropExercise($event)">
-                  <div class="group-exercise-box"
-                       *ngFor="let exercise of group.exercises"
-                       cdkDrag>
+                <div id="{{group.id}}" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
+                  [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
+                  (cdkDropListDropped)="dropExercise($event)">
+                  <div class="group-exercise-box" *ngFor="let exercise of group.exercises" cdkDrag>
                     <div class="custom-placeholder" *cdkDragPlaceholder></div>
                     {{exercise}}
                   </div>
                 </div>
               </div>
-              <div id="create-group"
-                   class="group-exercises-list"
-                   cdkDropList
-                   cdkDropListOrientation="horizontal"
-                   (cdkDropListDropped)="createGroup($event, $index)">
+              <div id="create-group" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
+                (cdkDropListDropped)="createGroup($event, $index)">
                 Drop an exercise here to create a new group
               </div>
             </div>
           </cdk-virtual-scroll-viewport>
-
         </div>
+        <br />
+        <div>
+          <button class="btn btn-lg btn-primary pull-xs-right" (click)="send()">
+            Send names
+          </button>
+        </div>
+        <br />
+        <br />
         <hr />
         <div class="col-md-12 offset-md-0 col-xs-12">
           <div class="danger">

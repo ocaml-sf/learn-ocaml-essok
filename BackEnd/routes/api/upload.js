@@ -1,18 +1,15 @@
 /*eslint-disable*/
-var router = require('express').Router();
-var mongoose = require('mongoose');
-var multer = require('multer');
-var fs = require('fs');
-var auth = require('../auth');
+const router = require('express').Router();
+const mongoose = require('mongoose');
+const multer = require('multer');
+const auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
 var destPath = '';
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
-var upload_functions = require('../../lib/upload_functions');
-var events = require('events');
-var swiftClient = require('../../Client/swiftClient');
-var upload_errors = require('../../lib/errors');
+const upload_functions = require('../../lib/upload_functions');
+const upload_errors = require('../../lib/errors');
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, dirPath);
@@ -56,7 +53,6 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
               upload_functions.unlinkSync(source_path).then((response) => {
                 upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
                   return res.json({
-                    success: true,
                     name: files
                   });
                 }, (err) => {
@@ -115,7 +111,6 @@ router.post('/url', auth.required, function (req, res, next) {
                     upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
                       console.log(files);
                       return res.json({
-                        success: true,
                         name: files
                       });
                     }, (err) => {
