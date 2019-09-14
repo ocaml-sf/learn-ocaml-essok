@@ -10,6 +10,37 @@ function asyncFunction(item, cb) {
         cb();
     }, 100);
 }
+
+function create_IndexJSON_head() {
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(path + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n  {\n', function (err) {
+            if (err) return reject(err);
+        });
+    });
+}
+
+function addFileInTabOfName(element, tmp) {
+    return new Promise(function (resolve, reject) {
+        var new_group = [];
+        for (let i = 0; i < element.length; i++) {
+            if (i === 0) {
+                new_group.push(element[i]);
+            }
+            else {
+                if (tmp.includes(element[i])) {
+                    console.log(tmp + ' contains : ' + element[i] + ' so it will be push in ' + new_group);
+                    new_group.push(element[i]);
+                    console.log('new_group : ' + new_group);
+                }
+                if (i == element.length - 1) {
+                    console.log('finally new_group : ' + new_group);
+                    return resolve(new_group);
+                }
+            }
+        }
+    });
+}
+
 function file_to_delete(path, element, useless, tabOfName) {
     return new Promise(function (resolve, reject) {
         fs.stat(path + element, function (err, stat) {
@@ -60,6 +91,10 @@ function deleteDir(tab_of_dir) {
     return new Promise(function (resolve, reject) {
         var tmp = tab_of_dir.length;
         console.log('tmp.length : ' + tmp);
+        if (tmp === 0) {
+            console.log('no more file to delete');
+            return resolve();
+        }
         for (let i = 0; i < tab_of_dir.length; i++) {
             rimraf(tab_of_dir[i], function (err) {
                 if (err) return reject(err);
@@ -174,44 +209,32 @@ var upload_functions = {
             var tmp = fs.readdirSync(path);
             var new_tabOfName = [[]];
 
-            function callback(new_tabOfName) { return resolve(new_tabOfName); }
-
             tabOfName.forEach((element, index, array) => {
-                var new_group = [];
                 asyncFunction(element, () => {
-                    for (let i = 0; i < element.length; i++) {
-                        if (i === 0) {
-                            new_group.push(element[0]);
+                    addFileInTabOfName(element, tmp).then((response) => {
+                        if (response) {
+                            console.log('new group in new_tab_of_name : ' + response);
+                            new_tabOfName.push(response);
+                            console.log('new_tab_of_name : ' + new_tabOfName);
                         }
-                        else {
-                            if (tmp.includes(element[i])) {
-                                console.log(tmp + ' contains : ' + element + ' so it will be push in ' + new_tabOfName);
-                                new_group.push(element[i]);
-                            }
-                            if (i == element.length - 1) {
-                                new_tabOfName.push(new_group);
-                            }
+                        nameProcessed++;
+                        if (nameProcessed === array.length) {
+                            console.log('new_tabOfName before filter : ' + new_tabOfName);
+                            new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
+                            console.log('new_tabOfName after filter : ' + new_tabOfName);
+                            return resolve(new_tabOfName);
                         }
-                    }
-                    nameProcessed++;
-                    if (nameProcessed === array.length) {
-                        console.log('new_tabOfName before filter : ' + tabOfName);
-                        new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
-                        console.log('new_tabOfName after filter : ' + tabOfName);
-                        return resolve(new_tabOfName);
-                    }
+                    },
+                        (err) => {
+                            console.log('Error file_to_delete !: ' + err);
+                            return reject(err);
+                        });
                 });
             });
         });
     },
 
-    create_IndexJSON_head: function () {
-        return new Promise(function (resolve, reject) {
-            fs.writeFile(path + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n  {\n', function (err) {
-                if (err) return reject(err);
-            });
-        });
-    },
+
     create_indexJSON: function (path, tabOfName) {
         return new Promise(function (resolve, reject) {
 
