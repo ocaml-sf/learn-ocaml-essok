@@ -3,6 +3,7 @@ var unzipper = require('unzipper');
 var url = require('url');
 var child_process = require('child_process');
 var rimraf = require("rimraf");
+const swiftClient = require('../Client/swiftClient');
 
 function asyncFunction(item, cb) {
     setTimeout(() => {
@@ -286,23 +287,27 @@ var upload_functions = {
         });
     },
 
+    //to modify
     sendToSwift: function (path, slug) {
         return new Promise(function (resolve, reject) {
 
-            var readStream = fs.createReadStream(path);
+            var readStream = fs.createReadStream(path); // Q: what if path is a directory ? A: a bug we must resolve
             var writeStream = swiftClient.upload({
                 container: slug,
                 remote: 'exercises'
             });
             writeStream.on('error', function (err) {
+                console.log('error in upload : ' + err);
                 return reject(err);
             });
             writeStream.on('success', function (file) {
+                console.log('fileUploaded successful : ' + file);
                 return resolve('fileUploaded successful : ' + file);
             });
             readStream.pipe(writeStream);
         });
     },
+
     removeDir: function (path) {
         return new Promise(function (resolve, reject) {
             if (fs.existsSync(path)) {
