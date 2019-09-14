@@ -11,11 +11,44 @@ function asyncFunction(item, cb) {
     }, 100);
 }
 
-function create_IndexJSON_head() {
+function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
-        fs.writeFile(path + 'exercises/index.json', '{ "learnocaml_version": "1",\n  "groups":\n  {\n', function (err) {
-            if (err) return reject(err);
-        });
+        return resolve('{ "learnocaml_version": "1",\n  "groups":\n  {\n');
+    });
+}
+
+function create_IndexJSON_body(tabOfName) {
+    return new Promise(function (resolve, reject) {
+        var body = "";
+        for (let i = 0; i < tabOfName.length; i++) {
+            var group = tabOfName[i];
+            for (let index = 0; index < group.length; index++) {
+                if (index === 0) {
+                    body += '    "group-' + i + '":\n    { "title": "' + group[index] + '",\n      "exercises": [\n';
+
+                } else if (index === group.length - 1) {
+                    body += '                     "' + group[index] + '" ] }';
+                    if (i !== tabOfName.length - 1) {
+                        body += ',\n';
+                    }
+                    else {
+                        body += '\n';
+                        if (i === tabOfName.length - 1) {
+                            return resolve(body);
+                        }
+                    }
+                }
+                else {
+                    body += '                     "' + group[index] + '",\n';
+                }
+            }
+        };
+    });
+}
+
+function create_IndexJSON_footer() {
+    return new Promise(function (resolve, reject) {
+        return resolve('} }');
     });
 }
 
@@ -234,52 +267,25 @@ var upload_functions = {
         });
     },
 
-
     create_indexJSON: function (path, tabOfName) {
         return new Promise(function (resolve, reject) {
-
-            var name = 1;
-            for (let i = 0; i < tabOfName.length; i++) {
-                var group = tabOfName[i];
-                for (let index = 0; index < group.length; index++) {
-                    if (index === 0) {
-                        fs.appendFile(path + 'exercises/index.json', '    "group-' + name + '":\n    { "title": "' + group[index] + '",\n      "exercises": [\n',
-                            function (err) {
-                                if (err) return reject(err);
-                            });
-                    } else if (index === group.length - 1) {
-                        fs.appendFile(path + 'exercises/index.json', '                     "' + group[index] + '" ] }',
-                            function (err) {
-                                if (err) return reject(err);
-                            });
-                        if (i !== tabOfName.length - 1) {
-                            fs.appendFile(path + 'exercises/index.json', ',\n',
-                                function (err) {
-                                    if (err) return reject(err);
-                                });
-                        }
-                        else {
-                            fs.appendFile(path + 'exercises/index.json', '\n',
-                                function (err) {
-                                    if (err) return reject(err);
-                                });
-                        }
-                    }
-                    else {
-                        fs.appendFile(path + 'exercises/index.json', '                     "' + group[index] + '",\n',
-                            function (err) {
-                                if (err) return reject(err);
-                            });
-                    }
-                }
-                name++;
-            };
-            fs.appendFile(path + 'exercises/index.json', '} }', function (err) {
-                if (err) return reject(err);
-                return resolve(path + 'exercises/index.json');
-            });
+            create_IndexJSON_header().then((header) => {
+                console.log('header created : \n' + header);
+                create_IndexJSON_body(tabOfName).then((body) => {
+                    console.log('body created : \n' + body);
+                    create_IndexJSON_footer().then((footer) => {
+                        console.log('footer created : \n' + footer);
+                        fs.appendFile(path, header + body + footer, function (err) {
+                            if (err) return reject(err);
+                            console.log('index.json : ' + header + body + footer);
+                            return resolve(path + 'exercises/index.json');
+                        });
+                    })
+                })
+            })
         });
     },
+
     sendToSwift: function (path, slug) {
         return new Promise(function (resolve, reject) {
 

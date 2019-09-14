@@ -186,7 +186,7 @@ router.post('/send', auth.required, function (req, res, next) {
           upload_functions.checkFiles(dir + 'exercises/').then((files) => {
             upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/', tabOfName, files).then((tabOfName_bis) => {
               upload_functions.create_new_tabOfName(dir + 'exercises/', tabOfName_bis).then((new_tabOfName) => {
-                upload_functions.create_indexJSON(dir, new_tabOfName).then((response) => {
+                upload_functions.create_indexJSON(dir + 'exercises/index.json', new_tabOfName).then((response) => {
                   return res.status(422).json({ errors: { file: "index.json created" } });
                   upload_functions.sendToSwift(dir, server.slug).then((success) => {
                     return res.send({
