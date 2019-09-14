@@ -84,7 +84,7 @@ export class ServerSettingsComponent implements OnInit {
       // console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
-
+      this.groupsList = [];
     };
   }
 
