@@ -140,7 +140,7 @@
           </div>
         </div>
         <div class="drag-drop-container">
-          <div class="exercises-container">
+          <cdk-virtual-scroll-viewport itemSize="50" class="exercises-container">
             <h4>Exercises List:</h4>
             <div id="exercises-list" class="exercises-list" cdkDropList [cdkDropListData]="exercisesList"
               [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
@@ -149,7 +149,7 @@
                 {{exercise}}
               </div>
             </div>
-          </div>
+          </cdk-virtual-scroll-viewport>
           <cdk-virtual-scroll-viewport itemSize="50" class="groups-container">
             <h4>Groups List:</h4>
             <div class="groups-list" cdkDropList (cdkDropListDropped)="dropGroup($event)">
