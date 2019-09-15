@@ -4,6 +4,7 @@ var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
 var events = require('events');
+const server_functions = require('../../lib/server_functions');
 
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
@@ -56,12 +57,15 @@ router.post('/', auth.required, function (req, res, next) {
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
     var server = new Server(req.body.server);
     server.author = user;
-
     return server.save().then(function () {
-      server.createSwiftContainer();
-      // server.importBackup();
-      return res.json({ server: server.toJSONFor(user) });
+      server_functions.createSwiftContainer(server.slug).then((response) => {
+        console.log('swift created');
+        return res.json({ server: server.toJSONFor(user) });
+      }, (err) => {
+        return res.status(422).send({ errors: { err } });
+      });
     });
+
   }).catch(next);
 });
 
@@ -125,57 +129,32 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
       if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
       if (req.server.processing) { return res.sendStatus(401); }
 
-      var eventEmitter = new events.EventEmitter();
-
-      var createHandler = function () {
-        req.server.createPersistentVolumeAndLinkKube(req.server);
-        eventEmitter.emit('VolumeCreatedAndKubeLinked');
-      }
-
-      eventEmitter.on('VolumeCreatedAndKubeLinked', function () {
-        req.server.processing = false;
-        req.server.save().then(function () {
-          return res.sendStatus(204);
-        });
-      });
-
-      eventEmitter.on('volume_creation', createHandler);
-
-      var deleteHandler = function () {
-        req.server.removekubelink(eventEmitter, req.server);
-        eventEmitter.emit('backup');
-      }
-
-      eventEmitter.on('backup', function () {
-        req.server.backupDownload(req.server.volume);
-        eventEmitter.emit('volume_deletion');
-      });
-
-      eventEmitter.on('volume_deletion', function () {
-        req.server.deleteNamespacedPersistentVolumeClaim();
-        eventEmitter.emit('kube_disable');
-      });
-
-      eventEmitter.on('kube_deletion', deleteHandler);
-
-      eventEmitter.on('kube_disable', function () {
-        req.server.active = !req.server.active;
-        req.server.processing = false;
-        req.server.save().then(function () {
-          return res.sendStatus(204);
-        });
-      });
-
+      var slug = req.server.slug;
+      var username = req.server.author.username;
+      var namespace = 'default';
 
       if (req.server.active) {
         req.server.processing = true;
-        req.server.save().then(function () {
-          eventEmitter.emit('kube_deletion');
+        console.log('shut_off');
+        server_functions.shut_off(slug, namespace, req.server.volume).then((response) => {
+          req.server.active = !req.server.active;
+          req.server.processing = false;
+          req.server.save().then(function () {
+            return res.sendStatus(204);
+          });
+        }, (err) => {
+          return res.status(422).send({ errors: { err } });
         });
       } else {
         req.server.processing = true;
-        req.server.save().then(function () {
-          eventEmitter.emit('volume_creation');
+        console.log('shut_on');
+        server_functions.shut_on(slug, username, namespace).then((response) => {
+          req.server.processing = false;
+          req.server.save().then(function () {
+            return res.sendStatus(204);
+          });
+        }, (err) => {
+          return res.status(422).send({ errors: { err } });
         });
       }
     } else {
@@ -194,26 +173,18 @@ router.delete('/:server', auth.required, function (req, res, next) {
 
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
-      var eventEmitter = new events.EventEmitter();
-      var deleteHandler = function () {
-        req.server.removekubelink(eventEmitter, req.server);
-        eventEmitter.emit('volume_deletion');
-      }
-
-      eventEmitter.on('volume_deletion', function () {
-        req.server.deleteNamespacedPersistentVolumeClaim();
-        req.server.destroySwiftContainer();
-        eventEmitter.emit('kube_unlinked');
-      });
-      eventEmitter.on('kube_deletion', deleteHandler);
-      eventEmitter.on('kube_unlinked', function () {
+      var slug = req.server.slug;
+      var namespace = 'default';
+      console.log('asking for a deletion');
+      console.log('slug : ' + slug);
+      console.log('namespace : ' + namespace);
+      server_functions.delete(slug, namespace).then((response) => {
         return req.server.remove().then(function () {
           return res.sendStatus(204);
         });
+      }, (err) => {
+        return res.status(422).send({ errors: { err } });
       });
-
-      eventEmitter.emit('kube_deletion');
-
     } else {
       return res.sendStatus(403);
     }

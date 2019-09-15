@@ -4,6 +4,7 @@ var url = require('url');
 var child_process = require('child_process');
 var rimraf = require("rimraf");
 const swiftClient = require('../Client/swiftClient');
+const read = require('fs-readdir-recursive');
 
 function asyncFunction(item, cb) {
     setTimeout(() => {
@@ -144,47 +145,234 @@ function deleteDir(tab_of_dir) {
     });
 }
 
-var upload_functions = {
-    desarchived: function (dest_path, source_path) {
-        return new Promise(function (resolve, reject) {
+function _desarchived(dest_path, source_path) {
+    return new Promise(function (resolve, reject) {
 
-            fs.createReadStream(source_path).pipe(unzipper.Extract({ path: dest_path }))
-                .on('close', function (err) {
-                    if (err) return reject(err);
-                    return resolve(dest_path);
-                })
-                .on('error', function (err) {
+        fs.createReadStream(source_path).pipe(unzipper.Extract({ path: dest_path }))
+            .on('close', function (err) {
+                if (err) return reject(err);
+                return resolve(dest_path);
+            })
+            .on('error', function (err) {
+                return reject(err);
+            });
+    });
+}
+
+function _checkFiles(path) {
+    return new Promise(function (resolve, reject) {
+        if (fs.existsSync(path)) {
+            fs.readdir(path, function (err, files) {
+                if (err) return reject(err);
+                else if (!files.length) {
+                    return reject('File not found');
+                }
+                else return resolve(files);
+            })
+        } else {
+            return reject('File not found');
+        }
+    });
+}
+
+function _unlinkSync(path) {
+    return new Promise(function (resolve, reject) {
+        if (fs.existsSync(path)) {
+            fs.unlink(path, function (err) {
+                if (err) return reject(err);
+                return resolve('deleted');
+            })
+        } else {
+            return resolve('deleted');
+        }
+    });
+}
+
+function _download_from_url(file_url, dest_path) {
+    return new Promise(function (resolve, reject) {
+
+        var file_name = url.parse(file_url).pathname.split('/').pop();
+        var wget = 'wget -P ' + dest_path + ' ' + file_url;
+
+        child_process.exec(wget, function (err, stdout, stderr) {
+            if (err) return reject(err);
+            return resolve(dest_path + file_name);
+        });
+    });
+}
+
+function _delete_useless_files(useless, path, tabOfName, files) {
+    return new Promise(function (resolve, reject) {
+        if (useless === [] || useless === undefined || useless === null) {
+            return resolve('nothing to delete');
+        }
+        console.log('tabOfName before filter : ' + tabOfName);
+        tabOfName = tabOfName.filter(group => group.length >= 2);
+        console.log('tabOfName after filter : ' + tabOfName);
+
+        var tmp = [];
+        var itemsProcessed = 0;
+        files.forEach((element, index, array) => {
+            asyncFunction(element, () => {
+                file_to_delete(path, element, useless, tabOfName).then((response) => {
+                    if (response) {
+                        console.log(response + ' added in tmp');
+                        tmp.push(response);
+                    }
+                    itemsProcessed++;
+                    if (itemsProcessed === array.length) {
+                        console.log('tmp : ' + tmp);
+                        deleteDir(tmp).then((response) => {
+                            console.log('all file deleted');
+                            return resolve(tabOfName);
+                        })
+                    }
+                }, (err) => {
+                    console.log('Error file_to_delete !: ' + err);
                     return reject(err);
                 });
+            });
         });
-    },
-    checkFiles: function (path) {
-        return new Promise(function (resolve, reject) {
-            if (fs.existsSync(path)) {
-                fs.readdir(path, function (err, files) {
-                    if (err) return reject(err);
-                    else if (!files.length) {
-                        return reject('File not found');
+    });
+}
+
+function _create_new_tabOfName(path, tabOfName) {
+    return new Promise(function (resolve, reject) {
+
+        var nameProcessed = 0;
+        var tmp = fs.readdirSync(path);
+        var new_tabOfName = [[]];
+
+        tabOfName.forEach((element, index, array) => {
+            asyncFunction(element, () => {
+                addFileInTabOfName(element, tmp).then((response) => {
+                    if (response) {
+                        console.log('new group in new_tab_of_name : ' + response);
+                        new_tabOfName.push(response);
+                        console.log('new_tab_of_name : ' + new_tabOfName);
                     }
-                    else return resolve(files);
-                })
-            } else {
-                return reject('File not found');
-            }
+                    nameProcessed++;
+                    if (nameProcessed === array.length) {
+                        console.log('new_tabOfName before filter : ' + new_tabOfName);
+                        new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
+                        console.log('new_tabOfName after filter : ' + new_tabOfName);
+                        if (!new_tabOfName.length) {
+                            return reject(': No correct files found for index.json');
+                        }
+                        else return resolve(new_tabOfName);
+                    }
+                },
+                    (err) => {
+                        console.log('Error file_to_delete !: ' + err);
+                        return reject(err);
+                    });
+            });
         });
+    });
+}
+
+function _create_indexJSON(path, tabOfName) {
+    return new Promise(function (resolve, reject) {
+        create_IndexJSON_header().then((header) => {
+            console.log('header created : \n' + header);
+            create_IndexJSON_body(tabOfName).then((body) => {
+                console.log('body created : \n' + body);
+                create_IndexJSON_footer().then((footer) => {
+                    console.log('footer created : \n' + footer);
+                    fs.appendFile(path, header + body + footer, function (err) {
+                        if (err) return reject(err);
+                        console.log('index.json : ' + header + body + footer);
+                        return resolve(path + 'exercises/index.json');
+                    });
+                })
+            })
+        })
+    });
+}
+
+function _sendToSwift(path, slug) {
+    return new Promise(function (resolve, reject) {
+        var nameProcessed = 0;
+        console.log(read(path));
+        read(path).forEach((element, index, array) => {
+            asyncFunction(element, () => {
+                var readStream = fs.createReadStream(path + element);
+                var writeStream = swiftClient.upload({
+                    container: slug,
+                    remote: path + element,
+                });
+                writeStream.on('error', function (err) {
+                    console.log('error in upload : ' + err);
+                    return reject(err);
+                });
+                writeStream.on('success', function (file) {
+                    console.log('fileUploaded successful : ' + file);
+                    nameProcessed++;
+                    if (nameProcessed === array.length) {
+                        console.log('All file have been uploaded successfully, you can launch your server now !');
+                        return resolve('fileUploaded successful : ' + array);
+                    }
+                });
+                readStream.pipe(writeStream);
+            });
+        });
+    });
+}
+
+function _removeDir(path) {
+    return new Promise(function (resolve, reject) {
+        if (fs.existsSync(path)) {
+            rimraf(path, function (err) {
+                if (err) return reject(err);
+                return resolve('removed');
+            });
+        }
+        else { return resolve('removed'); }
+    });
+}
+
+function _renameDir(oldPath, newPath, unknown) {
+    return new Promise(function (resolve, reject) {
+        if (unknown) {
+            fs.readdir(oldPath, function (err, files) {
+                if (err) return reject(err);
+                else {
+                    fs.rename(oldPath + files[0], newPath, function (err) {
+                        if (err) return reject(err);
+                        return resolve('renamed');
+                    })
+                }
+            })
+        } else {
+            fs.rename(oldPath, newPath, function (err) {
+                if (err) return reject(err);
+                return resolve('renamed');
+            })
+        }
+
+    })
+}
+
+function _createDir(path) {
+    return new Promise(function (resolve, reject) {
+        return fs.mkdir(path, function (err) {
+            if (err) return reject(err);
+            return resolve('created');
+        });
+    });
+}
+
+var upload_functions = {
+    desarchived: function (dest_path, source_path) {
+        return _desarchived(dest_path, source_path);
+    },
+
+    checkFiles: function (path) {
+        return _checkFiles(path);
     },
 
     unlinkSync: function (path) {
-        return new Promise(function (resolve, reject) {
-            if (fs.existsSync(path)) {
-                fs.unlink(path, function (err) {
-                    if (err) return reject(err);
-                    return resolve('deleted');
-                })
-            } else {
-                return resolve('deleted');
-            }
-        });
+        return _unlinkSync(path);
     },
 
     parse_url: function (file_url) {
@@ -192,167 +380,33 @@ var upload_functions = {
     },
 
     download_from_url: function (file_url, dest_path) {
-        return new Promise(function (resolve, reject) {
-
-            var file_name = url.parse(file_url).pathname.split('/').pop();
-            var wget = 'wget -P ' + dest_path + ' ' + file_url;
-
-            child_process.exec(wget, function (err, stdout, stderr) {
-                if (err) return reject(err);
-                return resolve(dest_path + file_name);
-            });
-        });
+        return _download_from_url(file_url, dest_path);
     },
 
     delete_useless_files: function (useless, path, tabOfName, files) {
-        return new Promise(function (resolve, reject) {
-            if (useless === [] || useless === undefined || useless === null) {
-                return resolve('nothing to delete');
-            }
-            console.log('tabOfName before filter : ' + tabOfName);
-            tabOfName = tabOfName.filter(group => group.length >= 2);
-            console.log('tabOfName after filter : ' + tabOfName);
-
-            var tmp = [];
-            var itemsProcessed = 0;
-            files.forEach((element, index, array) => {
-                asyncFunction(element, () => {
-                    file_to_delete(path, element, useless, tabOfName).then((response) => {
-                        if (response) {
-                            console.log(response + ' added in tmp');
-                            tmp.push(response);
-                        }
-                        itemsProcessed++;
-                        if (itemsProcessed === array.length) {
-                            console.log('tmp : ' + tmp);
-                            deleteDir(tmp).then((response) => {
-                                console.log('all file deleted');
-                                return resolve(tabOfName);
-                            })
-                        }
-                    }, (err) => {
-                        console.log('Error file_to_delete !: ' + err);
-                        return reject(err);
-                    });
-                });
-            });
-        });
+        return _delete_useless_files(useless, path, tabOfName, files);
     },
 
     create_new_tabOfName: function (path, tabOfName) {
-        return new Promise(function (resolve, reject) {
-
-            var nameProcessed = 0;
-            var tmp = fs.readdirSync(path);
-            var new_tabOfName = [[]];
-
-            tabOfName.forEach((element, index, array) => {
-                asyncFunction(element, () => {
-                    addFileInTabOfName(element, tmp).then((response) => {
-                        if (response) {
-                            console.log('new group in new_tab_of_name : ' + response);
-                            new_tabOfName.push(response);
-                            console.log('new_tab_of_name : ' + new_tabOfName);
-                        }
-                        nameProcessed++;
-                        if (nameProcessed === array.length) {
-                            console.log('new_tabOfName before filter : ' + new_tabOfName);
-                            new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
-                            console.log('new_tabOfName after filter : ' + new_tabOfName);
-                            if (!new_tabOfName.length) {
-                                return reject(': No correct files found for index.json');
-                            }
-                            else return resolve(new_tabOfName);
-                        }
-                    },
-                        (err) => {
-                            console.log('Error file_to_delete !: ' + err);
-                            return reject(err);
-                        });
-                });
-            });
-        });
+        return _create_new_tabOfName(path, tabOfName);
     },
 
     create_indexJSON: function (path, tabOfName) {
-        return new Promise(function (resolve, reject) {
-            create_IndexJSON_header().then((header) => {
-                console.log('header created : \n' + header);
-                create_IndexJSON_body(tabOfName).then((body) => {
-                    console.log('body created : \n' + body);
-                    create_IndexJSON_footer().then((footer) => {
-                        console.log('footer created : \n' + footer);
-                        fs.appendFile(path, header + body + footer, function (err) {
-                            if (err) return reject(err);
-                            console.log('index.json : ' + header + body + footer);
-                            return resolve(path + 'exercises/index.json');
-                        });
-                    })
-                })
-            })
-        });
+        return _create_indexJSON(path, tabOfName);
     },
 
-    //to modify
     sendToSwift: function (path, slug) {
-        return new Promise(function (resolve, reject) {
-
-            var readStream = fs.createReadStream(path); // Q: what if path is a directory ? A: a bug we must resolve
-            var writeStream = swiftClient.upload({
-                container: slug,
-                remote: 'exercises'
-            });
-            writeStream.on('error', function (err) {
-                console.log('error in upload : ' + err);
-                return reject(err);
-            });
-            writeStream.on('success', function (file) {
-                console.log('fileUploaded successful : ' + file);
-                return resolve('fileUploaded successful : ' + file);
-            });
-            readStream.pipe(writeStream);
-        });
+        return _sendToSwift(path, slug);
     },
 
     removeDir: function (path) {
-        return new Promise(function (resolve, reject) {
-            if (fs.existsSync(path)) {
-                rimraf(path, function (err) {
-                    if (err) return reject(err);
-                    return resolve('removed');
-                });
-            }
-            else { return resolve('removed'); }
-        });
+        return _removeDir(path);
     },
     renameDir: function (oldPath, newPath, unknown) {
-        return new Promise(function (resolve, reject) {
-            if (unknown) {
-                fs.readdir(oldPath, function (err, files) {
-                    if (err) return reject(err);
-                    else {
-                        fs.rename(oldPath + files[0], newPath, function (err) {
-                            if (err) return reject(err);
-                            return resolve('renamed');
-                        })
-                    }
-                })
-            } else {
-                fs.rename(oldPath, newPath, function (err) {
-                    if (err) return reject(err);
-                    return resolve('renamed');
-                })
-            }
-
-        })
+        return _renameDir(oldPath, newPath, unknown);
     },
     createDir: function (path) {
-        return new Promise(function (resolve, reject) {
-            return fs.mkdir(path, function (err) {
-                if (err) return reject(err);
-                return resolve('created');
-            });
-        });
+        return _createDir(path);
     },
 
 };
