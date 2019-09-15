@@ -34,9 +34,13 @@ We use [Yarn](https://yarnpkg.com) to manage the dependencies, so we strongly re
 make sure you have the lastest version of npm,
 then install ng : `sudo npm i ng -g`
 
-## Update your dependencies (npm only)
+## Install your dependencies
 
-Run `npm update` for a dev server.
+Run `npm install` in your FrontEnd and in your BackEnd.
+
+Or
+
+Run `yarn install` in your FrontEnd and in your BackEnd.
 
 ## Update your file BackEnd/Client/os.js
 
@@ -47,6 +51,11 @@ Rename it OS.js and fill the blank with your OVH config
 Verify the binding of all the settings with your env settings.
 
 For example : port of your mongodb docker/server.
+
+## Prepare your BackEnd
+
+Create two repositories at the root of your BackEnd : uploads and downloads
+`mkdir uploads && mkdir downloads`
 
 ## Run FrontEnd
 
