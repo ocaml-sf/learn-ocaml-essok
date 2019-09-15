@@ -299,7 +299,7 @@ function _sendToSwift(path, slug) {
                 var readStream = fs.createReadStream(path + element);
                 var writeStream = swiftClient.upload({
                     container: slug,
-                    remote: path + element,
+                    remote: '/repository/exercises/' + element,
                 });
                 writeStream.on('error', function (err) {
                     console.log('error in upload : ' + err);

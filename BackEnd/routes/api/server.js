@@ -136,8 +136,10 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
       if (req.server.active) {
         req.server.processing = true;
         console.log('shut_off');
-        server_functions.shut_off(slug, namespace, req.server.volume).then((response) => {
-          req.server.active = !req.server.active;
+        var volume = req.server.volume;
+        console.log('volume : ' + volume);
+        server_functions.shut_off(slug, namespace, volume).then((response) => {
+          req.server.active = false;
           req.server.processing = false;
           req.server.save().then(function () {
             return res.sendStatus(204);
@@ -150,6 +152,8 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
         console.log('shut_on');
         server_functions.shut_on(slug, username, namespace).then((response) => {
           req.server.processing = false;
+          req.server.volume = response;
+          req.server.active = true;
           req.server.save().then(function () {
             return res.sendStatus(204);
           });

@@ -468,10 +468,12 @@ function _backup(slug, backupType, backupCommand, volume, namespace) {
                         }
                     });
                 }, (err) => {
+                    console.log(err);
                     return reject(err);
                 });
             }, 5000);
         }, (err) => {
+            console.log(err);
             return reject(err);
         });
     });
@@ -518,9 +520,10 @@ function _createPersistentVolumeAndLinkKube(slug, username, namespace) {
                             clearInterval(serverInCreation);
                             _listPersistentVolume(slug).then((volume) => {
                                 _backupUpload(volume, slug, namespace).then((response) => {
-                                    _createkubelink(volume, slug, username).then((response) => {
+                                    console.log('backup ok');
+                                    _createkubelink(volume, slug, username, namespace).then((response) => {
                                         console.log('server shut on');
-                                        return resolve('done');
+                                        return resolve(volume);
                                     }, (err) => {
                                         return reject(err);
                                     });
