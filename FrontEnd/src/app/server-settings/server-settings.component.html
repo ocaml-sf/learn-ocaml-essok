@@ -195,7 +195,9 @@
                 LeanOCaml
                 instance !
               </div>
-              <div *ngIf="isDisabled"> Try to send some files !
+              <div *ngIf="isDisabled && !isSending"> Try to send some files !
+              </div>
+              <div *ngIf="isSending"> Your files are processing !
               </div>
               <button class="btn btn-lg btn-info" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
                 (click)="disableServer()">

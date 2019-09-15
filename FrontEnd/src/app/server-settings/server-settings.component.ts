@@ -28,6 +28,7 @@ export class ServerSettingsComponent implements OnInit {
   isDisabled = true;
   isChecked = false;
   isAssuming = false;
+  isSending = false;
   exercises: any[];
   idIndex = 3;
   exercisesList = [];
@@ -135,6 +136,7 @@ export class ServerSettingsComponent implements OnInit {
 
   disableServer() {
     this.isDisabled = true;
+    this.isSending = true;
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
@@ -168,7 +170,7 @@ export class ServerSettingsComponent implements OnInit {
     });
     this.serversService.send(this.server.slug, this.exercisesList, this.groups).subscribe(
       data => {
-      this.isDisabled = false;
+        this.isDisabled = false;
       },
       err => {
         this.errors = err;

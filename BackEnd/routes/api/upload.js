@@ -39,7 +39,12 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
       .populate('author')
       .then(function (server) {
         if (!server) { return res.sendStatus(404); }
-        if ((server.author !== user) && (!user.isAdmin())) { return res.sendStatus(401); }
+        if ((server.author.username !== user.username) && (!user.isAdmin())) {
+          console.log(server.author.username);
+          console.log(user.username);
+
+          return res.sendStatus(401);
+        }
         if (server.processing) { return res.sendStatus(401); }
 
         if (!req.file) {

@@ -170,18 +170,8 @@ function _checkFiles(path) {
                 else if (!files.length) {
                     return reject('File not found');
                 }
-                for (let i = 0; i < files.length - 1; i++) {
-                    for (let j = i + 1; j < files.length; j++) {
-                        if (files[i][0] === files[j][0]) {
-                            return reject(': Error in groups names, duplicate name');
-                        } else {
-                            if (i === files.length - 1) {
-                                return resolve(files);
-                            }
-                        }
-                    }
-                }
-            });
+                else return resolve(files);
+            })
         } else {
             return reject('File not found');
         }
