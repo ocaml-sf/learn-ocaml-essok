@@ -447,7 +447,8 @@ function _listPersistentVolume(slug) {
 
 function _backup(slug, backupType, backupCommand, volume, namespace) {
     return new Promise(function (resolve, reject) {
-        k8sApiJobs.createNamespacedJob(namespace, _createObjectJob(slug, backupType, backupCommand, volume)).then((response) => {
+        var job = _createObjectJob(slug, backupType, backupCommand, volume);
+        k8sApiJobs.createNamespacedJob(namespace, job).then((response) => {
             var jobInProgress = setInterval(function () {
                 k8sApiJobs.listNamespacedJob(namespace).then((response) => {
                     response.body.items.forEach(item => {
