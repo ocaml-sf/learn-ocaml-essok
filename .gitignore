@@ -85,7 +85,3 @@
 /BackEnd/.idea
 BackEnd/Client/OS.js
 BackEnd/downloads
-BackEnd/yarn.lock
-BackEnd/package-lock.json
-FrontEnd/yarn.lock
-FrontEnd/package-lock.json
