@@ -25,7 +25,7 @@ export class ServerSettingsComponent implements OnInit {
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
   isDeleting = false;
-  isDisabled = false;
+  isDisabled = true;
   isChecked = false;
   isAssuming = false;
   exercises: any[];
@@ -167,7 +167,9 @@ export class ServerSettingsComponent implements OnInit {
       this.groups.push([element.title].concat(element.exercises));
     });
     this.serversService.send(this.server.slug, this.exercisesList, this.groups).subscribe(
-      data => data,
+      data => {
+      this.isDisabled = false;
+      },
       err => {
         this.errors = err;
         this.isSubmitting = false;

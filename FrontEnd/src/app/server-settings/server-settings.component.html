@@ -65,10 +65,6 @@
                   class="well my-drop-zone">
                   Another drop zone
               </div> -->
-
-              Multiple
-              <input type="file" name="archive" ng2FileSelect [uploader]="uploader" multiple /><br />
-              Single
               <input type="file" name="archive" ng2FileSelect [uploader]="uploader" />
             </div>
             <div class="col-md-9" style="margin-bottom: 40px">
@@ -139,60 +135,82 @@
             </div>
           </div>
         </div>
+
         <div class="drag-drop-container">
-          <cdk-virtual-scroll-viewport itemSize="50" class="exercises-container">
-            <h4>Exercises List:</h4>
-            <div id="exercises-list" class="exercises-list" cdkDropList [cdkDropListData]="exercisesList"
-              [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
-              <div class="exercise-box" *ngFor="let exercise of exercisesList" cdkDrag>
-                <div class="custom-placeholder" *cdkDragPlaceholder></div>
-                {{exercise}}
-              </div>
-            </div>
-          </cdk-virtual-scroll-viewport>
-          <cdk-virtual-scroll-viewport itemSize="50" class="groups-container">
-            <h4>Groups List:</h4>
-            <div class="groups-list" cdkDropList (cdkDropListDropped)="dropGroup($event)">
-              <div class="group-box" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
-                <div class="group-title" contenteditable="true" ng-model="group.title">
-                  {{group.title}}
-                </div>
-                <div id="{{group.id}}" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
-                  [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
-                  (cdkDropListDropped)="dropExercise($event)">
-                  <div class="group-exercise-box" *ngFor="let exercise of group.exercises" cdkDrag>
+          <div class="row">
+            <div class="col-md-3">
+              <h4>Exercises List: </h4>
+              <cdk-virtual-scroll-viewport itemSize="50" class="exercises-container">
+
+                <div id="exercises-list" class="exercises-list" cdkDropList [cdkDropListData]="exercisesList"
+                  [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
+                  <div class="exercise-box" *ngFor="let exercise of exercisesList" cdkDrag>
                     <div class="custom-placeholder" *cdkDragPlaceholder></div>
                     {{exercise}}
                   </div>
                 </div>
-              </div>
-              <div id="create-group" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
-                (cdkDropListDropped)="createGroup($event, $index)">
-                Drop an exercise here to create a new group
-              </div>
+              </cdk-virtual-scroll-viewport>
             </div>
-          </cdk-virtual-scroll-viewport>
+            <div class="col-md-9">
+              <h4>Groups List: </h4>
+              <cdk-virtual-scroll-viewport itemSize="50" class="groups-container">
+                <div class="groups-list" cdkDropList (cdkDropListDropped)="dropGroup($event)">
+                  <div class="group-box" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
+                    <div class="group-title" contenteditable="true" ng-model="group.title">
+                      {{group.title}}
+                    </div>
+                    <div id="{{group.id}}" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
+                      [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
+                      (cdkDropListDropped)="dropExercise($event)">
+                      <div class="group-exercise-box" *ngFor="let exercise of group.exercises" cdkDrag>
+                        <div class="custom-placeholder" *cdkDragPlaceholder></div>
+                        {{exercise}}
+                      </div>
+                    </div>
+                  </div>
+                  <div id="create-group" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
+                    (cdkDropListDropped)="createGroup($event, $index)">
+                    Drop an exercise here to create a new group
+                  </div>
+                </div>
+              </cdk-virtual-scroll-viewport>
+            </div>
+          </div>
+
         </div>
+        <br />
         <br />
         <div>
           <button class="btn btn-lg btn-primary pull-xs-right" (click)="send()">
-            Send names
+            Send
           </button>
         </div>
         <br />
         <br />
         <hr />
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="activate_server">
+              <div *ngIf="!isDisabled"> Congratulation, the upload has been a success ! Now you can launch your
+                LeanOCaml
+                instance !
+              </div>
+              <div *ngIf="isDisabled"> Try to send some files !
+              </div>
+              <button class="btn btn-lg btn-info" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
+                (click)="disableServer()">
+                <i class="ion-settings"></i> Launch my LearnOCaml !
+              </button>
+            </div>
+          </div>
+        </div>
+        <br />
+        <br />
+
         <div class="col-md-12 offset-md-0 col-xs-12">
           <div class="danger">
             <h2>Dangerous ZONE</h2>
-            <p>TO DISABLE YOUR SERVER :</p>
-            <button class="btn btn-sm btn-outline-warning" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
-              (click)="disableServer()">
-              <i class="ion-settings"></i> Enable my Server
-            </button>
 
-            <br />
-            <br />
             <p>TO DELETE YOUR SERVER :</p>
             <form (ngSubmit)="deleteServer()">
               <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my server's

@@ -99,21 +99,24 @@ function file_to_delete(path, element, useless, tabOfName) {
 
                 }
                 else {
-                    tabOfName.forEach(group => {
-                        if (!group.includes(element)) {
-                            console.log('tabOfName : ' + tabOfName);
-                            console.log('group : ' + group);
-                            console.log('element : ' + element);
-                            console.log('tabOfName doesnt contains element : ' + element + ' in group ' + group);
-
-                            console.log(path + element + ' is not included in tabOfName file, so it will be deleted');
-                            return resolve(path + element);
-                        }
-                        else {
+                    var found = false;
+                    for (let i = 0; i < tabOfName.length; i++) {
+                        const group = tabOfName[i];
+                        if (group.includes(element)) {
                             console.log(path + element + ' is included in tabOfName file, possess an meta.json file and is not included in useless file, so it will be kept');
                             return resolve();
                         }
-                    })
+                        else {
+                            if (i === tabOfName.length - 1) {
+                                console.log('tabOfName : ' + tabOfName);
+                                console.log('group : ' + group);
+                                console.log('element : ' + element);
+                                console.log('tabOfName doesnt contains element : ' + element + ' in group ' + group);
+                                console.log(path + element + ' is not included in tabOfName file, so it will be deleted');
+                                return resolve(path + element);
+                            }
+                        }
+                    }
                 }
             }
             else {
