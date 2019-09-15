@@ -24,7 +24,8 @@ ServerSchema.pre('validate', function (next) {
 });
 
 ServerSchema.methods.slugify = function () {
-  this.slug = slug(this.title) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36);
+  // this.slug = slug(this.title) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36);
+  this.slug = slug(this.title);
 };
 
 ServerSchema.methods.toJSONFor = function (user) {

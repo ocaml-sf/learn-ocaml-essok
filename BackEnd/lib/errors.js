@@ -24,11 +24,17 @@ var errors = {
     group_duplicate: function (files) {
         for (let i = 0; i < files.length - 1; i++) {
             for (let j = i + 1; j < files.length; j++) {
-                if (files[i][0] === files[j][0])
+                if (files[i][0] === files[j][0]) {
                     return true;
+                } else {
+                    console.log('not found : ' + files[i][0] + ' ' + files[j][0]);
+                    if (i === files.length - 1) {
+                        return false;
+                    }
+                }
             }
         }
-        return false;
+
     },
 }
 module.exports = errors;

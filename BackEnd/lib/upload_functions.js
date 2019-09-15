@@ -170,8 +170,18 @@ function _checkFiles(path) {
                 else if (!files.length) {
                     return reject('File not found');
                 }
-                else return resolve(files);
-            })
+                for (let i = 0; i < files.length - 1; i++) {
+                    for (let j = i + 1; j < files.length; j++) {
+                        if (files[i][0] === files[j][0]) {
+                            return reject(': Error in groups names, duplicate name');
+                        } else {
+                            if (i === files.length - 1) {
+                                return resolve(files);
+                            }
+                        }
+                    }
+                }
+            });
         } else {
             return reject('File not found');
         }
@@ -227,7 +237,11 @@ function _delete_useless_files(useless, path, tabOfName, files) {
                         console.log('tmp : ' + tmp);
                         deleteDir(tmp).then((response) => {
                             console.log('all file deleted');
-                            return resolve(tabOfName);
+                            if (!tabOfName.length) {
+                                return reject('No file available');
+                            } else {
+                                return resolve(tabOfName);
+                            }
                         })
                     }
                 }, (err) => {
