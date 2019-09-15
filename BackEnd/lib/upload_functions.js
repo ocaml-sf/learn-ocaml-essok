@@ -163,7 +163,10 @@ var upload_functions = {
             if (fs.existsSync(path)) {
                 fs.readdir(path, function (err, files) {
                     if (err) return reject(err);
-                    return resolve(files);
+                    else if (!files.length) {
+                        return reject('File not found');
+                    }
+                    else return resolve(files);
                 })
             } else {
                 return reject('File not found');
@@ -256,7 +259,10 @@ var upload_functions = {
                             console.log('new_tabOfName before filter : ' + new_tabOfName);
                             new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
                             console.log('new_tabOfName after filter : ' + new_tabOfName);
-                            return resolve(new_tabOfName);
+                            if (!new_tabOfName.length) {
+                                return reject(': No correct files found for index.json');
+                            }
+                            else return resolve(new_tabOfName);
                         }
                     },
                         (err) => {
@@ -319,12 +325,24 @@ var upload_functions = {
             else { return resolve('removed'); }
         });
     },
-    renameDir: function (oldPath, newPath) {
+    renameDir: function (oldPath, newPath, unknown) {
         return new Promise(function (resolve, reject) {
-            fs.rename(oldPath, newPath, function (err) {
-                if (err) return reject(err);
-                return resolve('renamed');
-            })
+            if (unknown) {
+                fs.readdir(oldPath, function (err, files) {
+                    if (err) return reject(err);
+                    else {
+                        fs.rename(oldPath + files[0], newPath, function (err) {
+                            if (err) return reject(err);
+                            return resolve('renamed');
+                        })
+                    }
+                })
+            } else {
+                fs.rename(oldPath, newPath, function (err) {
+                    if (err) return reject(err);
+                    return resolve('renamed');
+                })
+            }
 
         })
     },

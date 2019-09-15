@@ -47,22 +47,29 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
         } else {
           var dest_path = './uploads/' + server.author.username + '/';
           var source_path = dirPath + destPath;
-          if (req.file.mimetype === 'application/zip' && req.file.originalname === 'exercises.zip') {
+          if (req.file.mimetype === 'application/zip') {
             console.log('file received');
             upload_functions.removeDir(dest_path).then((response) => {
               upload_functions.createDir(dest_path).then((response) => {
                 upload_functions.desarchived(dest_path, source_path).then((response) => {
-                  upload_functions.unlinkSync(source_path).then((response) => {
-                    upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
-                      return res.json({
-                        name: files
+                  upload_functions.renameDir(dest_path, dest_path + 'exercises/', true).then((response) => {
+                    upload_functions.unlinkSync(source_path).then((response) => {
+                      upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
+                        console.log(files);
+                        return res.json({
+                          name: files
+                        });
+                      }, (err) => {
+                        console.log('Error checkFiles !: ' + err);
                       });
                     }, (err) => {
-                      console.log('Error checkFiles !: ' + err);
+                      console.log('Error unlink !: ' + err);
                     });
-                  }, (err) => {
-                    console.log('Error unlink !: ' + err);
-                  });
+                  },
+                    (err) => {
+                      console.log('Error renameDir !: ' + err);
+                    },
+                  );
                 },
                   (err) => {
                     console.log('Error desarchived !: ' + err);
@@ -118,7 +125,7 @@ router.post('/url', auth.required, function (req, res, next) {
           upload_functions.removeDir(dest_path).then((response) => {
             upload_functions.createDir(dest_path).then((response) => {
               upload_functions.desarchived(dest_path, archive_path).then((response) => {
-                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/').then((response) => {
+                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/', false).then((response) => {
                   upload_functions.unlinkSync(archive_path).then((response) => {
                     upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
                       console.log(files);

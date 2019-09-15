@@ -81,7 +81,7 @@ export class ServerSettingsComponent implements OnInit {
   uploadPrepare() {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-      // console.log('FileUpload:uploaded:', item, status, response);
+      console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
       this.groupsList = [];
@@ -104,9 +104,12 @@ export class ServerSettingsComponent implements OnInit {
 
     // post the changes
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
-      // add the popup
-      // server => this.router.navigateByUrl('/server/' + server.slug),
-      data => this.uploadErrors = data,
+
+      data => {
+        this.useless = JSON.parse(JSON.stringify(data));
+        this.exercisesList = this.useless.name;
+        this.groupsList = [];
+      },
       err => {
         this.errors = err;
         this.isSubmitting = false;
