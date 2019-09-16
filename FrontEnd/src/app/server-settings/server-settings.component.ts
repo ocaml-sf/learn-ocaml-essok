@@ -30,7 +30,7 @@ export class ServerSettingsComponent implements OnInit {
   isAssuming = false;
   isSending = false;
   exercises: any[];
-  idIndex = 3;
+  idIndex = 1;
   exercisesList = [];
   groups: String[][];
   groupsList = [];
@@ -86,6 +86,7 @@ export class ServerSettingsComponent implements OnInit {
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
       this.groupsList = [];
+      this.idIndex = 1;
     };
   }
 
@@ -110,6 +111,8 @@ export class ServerSettingsComponent implements OnInit {
         this.useless = JSON.parse(JSON.stringify(data));
         this.exercisesList = this.useless.name;
         this.groupsList = [];
+        this.idIndex = 1;
+
       },
       err => {
         this.errors = err;
