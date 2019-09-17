@@ -156,9 +156,7 @@
               <cdk-virtual-scroll-viewport itemSize="50" class="groups-container">
                 <div class="groups-list" cdkDropList (cdkDropListDropped)="dropGroup($event)">
                   <div class="group-box" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
-                    <div class="group-title" contenteditable="true" ng-model="group.title">
-                      {{group.title}}
-                    </div>
+                    <input class="group-title" [(ngModel)]="group.title" />
                     <div id="{{group.id}}" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
                       [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
                       (cdkDropListDropped)="dropExercise($event)">
@@ -170,7 +168,7 @@
                   </div>
                   <div id="create-group" class="group-exercises-list" cdkDropList cdkDropListOrientation="horizontal"
                     (cdkDropListDropped)="createGroup($event, $index)">
-                    Drop an exercise here to create a new group
+                    Drop an exercise here to create a new group.
                   </div>
                 </div>
               </cdk-virtual-scroll-viewport>

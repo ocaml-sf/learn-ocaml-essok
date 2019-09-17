@@ -210,8 +210,6 @@ export class ServerSettingsComponent implements OnInit {
 
     this.groupsList.push(newGroup);
     this.allExercisesID.push(title);
-    console.log(this.groupsList);
-    console.log(this.allExercisesID);
     transferArrayItem(event.previousContainer.data,
       newGroup.exercises,
       event.previousIndex,
