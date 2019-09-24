@@ -11,12 +11,22 @@ function _readNamespace(namespace) {
     return k8sApi.readNamespace(namespace);
 };
 
+function _createObjectNamespace(_name) {
+    return namespace = {
+        metadata: {
+            name: _name,
+        },
+    };
+}
 var user_functions = {
-    createNamespace: function () {
-        return _createNamespace();
+    createNamespace: function (namespace) {
+        return _createNamespace(namespace);
     },
-    readNamespace: function () {
-        return _readNamespace();
+    readNamespace: function (namespace) {
+        return _readNamespace(namespace);
+    },
+    createObjectNamespace: function (name) {
+        return _createObjectNamespace(name);
     },
 }
 

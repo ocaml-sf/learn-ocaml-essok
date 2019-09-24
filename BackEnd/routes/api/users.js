@@ -350,14 +350,12 @@ router.post('/users', function (req, res, next) {
   user.goal = req.body.user.goal;
   user.setPassword(req.body.user.password);
 
-  var namespace = {
-    metadata: {
-      name: 'test',
-    },
-  };
+  // var namespace = user_functions.createObjectNamespace('default');
 
-  user.createNamespace(namespace);
-  user.readNamespace(namespace.metadata.name);
+  // user_functions.createNamespace(namespace).then((response) => {
+  //   user_functions.readNamespace(namespace.metadata.name);
+
+  // });
 
 
   user.save().then(function () {
