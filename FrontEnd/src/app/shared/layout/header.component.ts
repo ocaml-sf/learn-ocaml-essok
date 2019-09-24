@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { User, UserService } from '../../core';
 
@@ -8,6 +8,9 @@ import { User, UserService } from '../../core';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
+  @Input() ocamlsfPath : string = 'assets/ocamlsf-logo/';
+  smallLogoImg : string = 'small_logo.svg';
+
   constructor(
     private userService: UserService
   ) { }

@@ -1,11 +1,13 @@
 <nav class="navbar navbar-light">
   <div class="container">
-    <a class="navbar-brand" routerLink="/">Learn OCaml Essok</a>
+    <a class="navbar-brand" routerLink="/">
+      <img [src]="(ocamlsfPath + smallLogoImg)">
+    </a>
 
     <!-- Show this for logged out users -->
     <ul *appShowAuthed="false" class="nav navbar-nav pull-xs-right">
 
-      <li class="nav-item">
+      <li class="nav-item ">
         <a class="btn btn-outline-success" routerLink="/">
           Home
         </a>
