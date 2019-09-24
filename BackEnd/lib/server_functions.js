@@ -12,13 +12,7 @@ k8sApiIngress.defaultHeaders = {
 };
 var swiftClient = require('../Client/swiftClient');
 var OS = require('../Client/OS');
-
-function asyncFunction(item, cb) {
-    setTimeout(() => {
-        console.log('done with', item);
-        cb();
-    }, 100);
-}
+const global_functions = require('./global_functions');
 
 function _createNamespacedDeployment(deployment, namespace) {
     return k8sApiDeploy.createNamespacedDeployment(namespace, deployment);
@@ -426,7 +420,7 @@ function _listPersistentVolume(slug) {
         k8sApi.listPersistentVolume().then((response) => {
             var itemsProcessed = 0;
             response.body.items.forEach((element, index, array) => {
-                asyncFunction(element, () => {
+                global_functions.asyncFunction(element, () => {
                     if (element.spec.claimRef.name === slug) {
                         console.log('volumeID found : ' + element.spec.cinder.volumeID);
                         return resolve(element.spec.cinder.volumeID);
