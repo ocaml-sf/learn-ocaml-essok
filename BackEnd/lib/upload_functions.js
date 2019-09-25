@@ -5,13 +5,7 @@ var child_process = require('child_process');
 var rimraf = require("rimraf");
 const swiftClient = require('../Client/swiftClient');
 const read = require('fs-readdir-recursive');
-
-function asyncFunction(item, cb) {
-    setTimeout(() => {
-        console.log('done with', item);
-        cb();
-    }, 100);
-}
+const global_functions = require('./global_functions');
 
 function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
@@ -216,7 +210,7 @@ function _delete_useless_files(useless, path, tabOfName, files) {
         var tmp = [];
         var itemsProcessed = 0;
         files.forEach((element, index, array) => {
-            asyncFunction(element, () => {
+            global_functions.asyncFunction(element, () => {
                 file_to_delete(path, element, useless, tabOfName).then((response) => {
                     if (response) {
                         console.log(response + ' added in tmp');
@@ -251,7 +245,7 @@ function _create_new_tabOfName(path, tabOfName) {
         var new_tabOfName = [[]];
 
         tabOfName.forEach((element, index, array) => {
-            asyncFunction(element, () => {
+            global_functions.asyncFunction(element, () => {
                 addFileInTabOfName(element, tmp).then((response) => {
                     if (response) {
                         console.log('new group in new_tab_of_name : ' + response);
@@ -302,7 +296,7 @@ function _sendToSwift(path, slug) {
         var nameProcessed = 0;
         console.log(read(path));
         read(path).forEach((element, index, array) => {
-            asyncFunction(element, () => {
+            global_functions.asyncFunction(element, () => {
                 var readStream = fs.createReadStream(path + element);
                 var writeStream = swiftClient.upload({
                     container: slug,

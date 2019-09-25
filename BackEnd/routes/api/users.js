@@ -4,6 +4,9 @@ var passport = require('passport');
 var User = mongoose.model('User');
 var auth = require('../auth');
 var events = require('events');
+const user_functions = require('../../lib/user_functions');
+const server_functions = require('../../lib/server_functions');
+const global_functions = require('../../lib/global_functions');
 
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
@@ -216,54 +219,44 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
 
       user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
+        var itemsProcessed = 0;
 
-        servers.map(function (server) {
-          var eventEmitter = new events.EventEmitter();
+        servers.forEach((server, index, array) => {
+          global_functions.asyncFunction(server, () => {
 
-          eventEmitter.emit('kube_creation');
+            if (server.active && user.active) {
+              console.log('preparing shut_off');
+              var namespace = 'default';
 
-          var createHandler = function () {
-            server.createkubelink();
-            eventEmitter.emit('kube_disable');
-          }
-          var deleteHandler = function () {
-            server.removekubelink(eventEmitter, server);
-            eventEmitter.emit('kube_disable');
+              server_functions.shut_off(server.slug, namespace, server.volume).then((response) => {
+                server.active = false;
+                server.save();
 
-          }
-          eventEmitter.on('kube_deletion', deleteHandler);
-          eventEmitter.on('kube_creation', createHandler);
+              }, (err) => {
+                // return res.status(422).send({ errors: { err } });
+                console.log(err);
+              });
+            }
 
-          eventEmitter.on('kube_disable', function () {
-            server.active = !server.active;
-            server.save();
+            itemsProcessed++;
+            if (itemsProcessed === array.length) {
+
+              // add a waiting list (interval) for all servers
+
+              console.log('author = ' + author);
+              console.log('all servers are done');
+              author.active = !author.active;
+              console.log('user status up to date');
+              author.save();
+              if (!user.isAdmin()) {
+                return res.json({ user: author.toAuthJSON() });
+              }
+              else {
+                return res.json({ user: user.toAuthJSON() });
+              }
+            }
           });
-
-          if (server.active && user.active) {
-            eventEmitter.emit('kube_deletion');
-          } else if (!server.active && !user.active) {
-            eventEmitter.emit('kube_creation');
-          }
-          else {
-            //server in an abnormal state
-          }
-
         });
-        console.log('author = ' + author);
-
-        console.log('all servers are done');
-
-        author.active = !author.active;
-        console.log('user status up to date');
-
-
-        author.save();
-        if (!user.isAdmin()) {
-          return res.json({ user: author.toAuthJSON() });
-        }
-        else {
-          return res.json({ user: user.toAuthJSON() });
-        }
       });
     }).catch(next);
   }).catch(next);
@@ -317,37 +310,31 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
       user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
         console.log('author = ' + author);
-
-        servers.map(function (server) {
-          var eventEmitter = new events.EventEmitter();
-
-          var deleteHandler = function () {
-            server.removekubelink(eventEmitter, server);
-            eventEmitter.emit('kube_disable');
-            console.log('server' + server.title + 'delete');
-
-          }
-          eventEmitter.on('kube_deletion', deleteHandler);
-
-          eventEmitter.on('kube_disable', function () {
-            server.active = !server.active;
-            server.remove();
-            console.log('server deleted');
+        var namespace = 'default';
+        var itemsProcessed = 0;
+        servers.forEach((server, index, array) => {
+          global_functions.asyncFunction(server, () => {
+            console.log('asking for a deletion');
+            console.log('slug : ' + server.slug);
+            console.log('namespace : ' + namespace);
+            server_functions.delete(server.slug, namespace).then((response) => {
+              return req.server.remove();
+            });
+          }, (err) => {
+            console.log(err);
+            // return res.status(422).send({ errors: { err } });
           });
+          itemsProcessed++;
+          if (itemsProcessed === array.length) {
 
-          if (server.active) {
-            eventEmitter.emit('kube_deletion');
-          }
-          else {
-            server.remove();
-          }
+            // add a waiting list (interval) for all servers
 
+            console.log('all servers are done');
+            author.active = !author.active;
+            author.remove();
+            return res.sendStatus(204);
+          }
         });
-
-        console.log('all servers are done');
-        author.active = !author.active;
-        author.remove();
-        return res.sendStatus(204);
       });
     }).catch(next);
   }).catch(next);
@@ -363,14 +350,12 @@ router.post('/users', function (req, res, next) {
   user.goal = req.body.user.goal;
   user.setPassword(req.body.user.password);
 
-  var namespace = {
-    metadata: {
-      name: 'test',
-    },
-  };
+  // var namespace = user_functions.createObjectNamespace('default');
 
-  user.createNamespace(namespace);
-  user.readNamespace(namespace.metadata.name);
+  // user_functions.createNamespace(namespace).then((response) => {
+  //   user_functions.readNamespace(namespace.metadata.name);
+
+  // });
 
 
   user.save().then(function () {

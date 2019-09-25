@@ -3,10 +3,6 @@ var uniqueValidator = require('mongoose-unique-validator');
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 var secret = require('../config').secret;
-const k8s = require('@kubernetes/client-node');
-const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
-const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
 var UserSchema = new mongoose.Schema({
   username: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/^[a-zA-Z0-9]+$/, 'is invalid'], index: true },
@@ -48,28 +44,6 @@ UserSchema.methods.generateJWT = function () {
 
 UserSchema.methods.isAdmin = function () {
   return this.admin;
-};
-
-UserSchema.methods.createNamespace = function (namespace) {
-  k8sApi.createNamespace(namespace).then(
-    (response) => {
-      console.log('Created namespace');
-    },
-    (err) => {
-      console.log('Error!: ' + err);
-    },
-  );
-};
-
-UserSchema.methods.readNamespace = function (name) {
-  k8sApi.readNamespace(name).then(
-    (response) => {
-      console.log('Read namespace');
-    },
-    (err) => {
-      console.log('Error!: ' + err);
-    },
-  );
 };
 
 UserSchema.methods.findAllUsers = function (query, limit, offset) {
@@ -143,7 +117,7 @@ UserSchema.methods.toAuthJSON = function () {
   };
 }
 
-UserSchema.methods.toProfileJSONFor = function (user) {
+UserSchema.methods.toProfileJSONFor = function () {
   return {
     email: this.email,
     username: this.username,
