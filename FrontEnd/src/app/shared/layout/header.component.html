@@ -1,102 +1,102 @@
-<nav class="navbar navbar-light">
-  <div class="container">
-    <a class="navbar-brand" routerLink="/">
+<header style="margin-bottom: 1rem">
+  <nav class="navbar navbar-expand bg-sand justify-content-around">
+    <a href="https://ocaml-sf.org">
       <img src="assets/small_logo.svg">
     </a>
-
+  
     <!-- Show this for logged out users -->
-    <ul *appShowAuthed="false" class="nav navbar-nav pull-xs-right">
-
-      <li class="nav-item ">
-        <a class="btn btn-outline-success" routerLink="/">
+    <ul *appShowAuthed="false" class="navbar-nav">
+  
+      <li class="nav-item">
+        <button type="button" class="btn btn-outline-primary" routerLink="/">
           Home
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/login" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-secondary" routerLink="/login" routerLinkActive="active">
           Sign in
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/register" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-secondary" routerLink="/register" routerLinkActive="active">
           Sign up
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-success" routerLink="/contact" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-info" routerLink="/contact" routerLinkActive="active">
           Contacts
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-success" routerLink="/help" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-info" routerLink="/help" routerLinkActive="active">
           Help
-        </a>
+        </button>
       </li>
-
+  
     </ul>
-
+  
     <!-- Show this for logged in users -->
     <ul *appShowAuthed="true" class="nav navbar-nav pull-xs-right">
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-success" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <button type="button" class="btn btn-outline-primary" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           Home
-        </a>
+        </button>
       </li>
-
-      <li class="nav-item">
-        <a class="btn btn-outline-info" routerLink="/editor" routerLinkActive="active" *ngIf="currentUser.active && currentUser.authorized || currentUser.admin">
+  
+      <li class="nav-item" *ngIf="currentUser.active && currentUser.authorized || currentUser.admin">
+        <button type="button" class="btn btn-outline-secondary" routerLink="/editor" routerLinkActive="active">
           <i class="ion-compose"></i>&nbsp;New Server
-        </a>
+        </button>
       </li>
-
-      <li class="nav-item">
-        <a class="btn btn-outline-info" [routerLink]="['/profile-settings', currentUser.username]" routerLinkActive="active" *ngIf="currentUser.active && currentUser.authorized  || currentUser.admin">
+  
+      <li class="nav-item" *ngIf="currentUser.active && currentUser.authorized  || currentUser.admin">
+        <button type="button" class="btn btn-outline-secondary" [routerLink]="['/profile-settings', currentUser.username]" routerLinkActive="active">
           <i class="ion-gear-a"></i>&nbsp;Profile Settings
-        </a>
+        </button>
       </li>
-
-      <li class="nav-item">
-        <a class="btn btn-outline-warning" routerLink="/disable-account" routerLinkActive="active" *ngIf="!currentUser.active">
+  
+      <li class="nav-item" *ngIf="!currentUser.active">
+        <button type="button" class="btn btn-outline-warning" routerLink="/disable-account" routerLinkActive="active">
           <i class="ion-gear-a"></i>&nbsp;Activate your Account
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-info" [routerLink]="['/profile', currentUser.username]" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-info" [routerLink]="['/profile', currentUser.username]" routerLinkActive="active">
           <!-- <img [src]="currentUser.image" *ngIf="currentUser.image" class="user-pic" /> -->
           {{ currentUser.username }}
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-success" routerLink="/contact" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-info" routerLink="/contact" routerLinkActive="active">
           Contacts
-        </a>
+        </button>
       </li>
-
+  
       <li class="nav-item">
-        <a class="btn btn-outline-success" routerLink="/help" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-info" routerLink="/help" routerLinkActive="active">
           Help
-        </a>
+        </button>
       </li>
       <li class="nav-item" *appShowAdmin="true">
-        <a class="btn btn-outline-warning" routerLink="/admin" routerLinkActive="active">
+        <button type="button" class="btn btn-outline-warning" routerLink="/admin" routerLinkActive="active">
           Admin Panel
-        </a>
-
+        </button>
+  
       <li class="nav-item">
-        <a class="btn btn-outline-danger" (click)="logout()" routerLink="/" routerLinkActive="active"
+        <button type="button" class="btn btn-outline-danger" (click)="logout()" routerLink="/" routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }">
           Logout
-        </a>
+        </button>
       </li>
-
+  
     </ul>
-
-  </div>
-</nav>
+  
+  </nav>
+</header>

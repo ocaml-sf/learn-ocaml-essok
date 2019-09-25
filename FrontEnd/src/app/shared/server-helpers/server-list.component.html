@@ -3,18 +3,18 @@
   [server]="server">
 </app-server-preview>
 
-<div class="app-server-preview"
+<div class="list-group-item"
   [hidden]="!loading">
   Loading servers...
 </div>
 
-<div class="app-server-preview"
+<div class="list-group-item"
   [hidden]="loading || results.length">
   No servers are here... yet.
 </div>
 
 <nav [hidden]="loading || totalPages.length <= 1">
-  <ul class="pagination">
+  <ul class="pagination justify-content-center">
 
     <li class="page-item"
       [ngClass]="{'active': pageNumber === currentPage}"

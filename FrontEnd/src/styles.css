@@ -2,5 +2,20 @@
 @import '~@angular/material/prebuilt-themes/indigo-pink.css';
 @import 'ionicons/dist/css/ionicons.css';
 @import 'fonts/fonts.css';
-/*@import 'bootstrap/dist/css/bootstrap.css';*/
-@import url('//demo.productionready.io/main.css');
+@import 'bootstrap/dist/css/bootstrap.css';
+/*@import url('//demo.productionready.io/main.css');*/
+
+/* Wallpaper for the background */
+.bg-body {
+  background-image: url('assets/wallpaper.jpg');
+}
+
+/* Sand background for NavBar */
+.bg-sand {
+  background-color: #f6ebe3 !important;
+}
+
+/* Oasis Blue background for Banner */
+.bg-oasis-blue {
+  background-color: #3b55f2 !important;
+}
