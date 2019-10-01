@@ -5,7 +5,9 @@
 ## Install nodejs
 
 Make sure you have [nodejs](https://nodejs.org/en/)
-You can download it from the offical website or with aptitude : `sudo apt install nodejs`
+You can download it from the offical website or with aptitude :
+
+`sudo apt install nodejs`
 
 ## Install npm
 
