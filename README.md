@@ -21,7 +21,7 @@ You can download it from the offical website or with aptitude :
 
 upgrade to the latest version of npm :  
 
-`sudo npm i npm@latest -g` - make sure you have the permission
+`sudo npm i npm@latest -g` /make sure you have the permission/
 
 then install angular/cli : 
 
@@ -46,7 +46,7 @@ We use [Yarn](https://yarnpkg.com) to manage the dependencies, so we strongly re
 
 `sudo apt install yarn`
 
-, then run 
+Then run 
 
 `yarn install` 
 
@@ -59,7 +59,7 @@ After installing Kubectl we need to setup our config, so make this
 
 `mkdir ~/.kube`
 
-then put your kubernetes config file in this reposotory.
+Then put your kubernetes config file in this reposotory.
 Hopefully you can retrieve your config file from OVH go to your project pannel then search for your config setup in your project settings (down on the right pannel to find it) then download the config file, rename it as "config" (no extension, just config) then past it inside the .kube repository in your HOME.
 
 Tips : your OVH project administrator and/or your Kubernetes expert will help you a lot if this step is too harsh for you !
@@ -77,7 +77,7 @@ Run
 
 `npm install` 
 
-in your FrontEnd and in your BackEnd.
+In your FrontEnd and in your BackEnd.
 
 Or
 
@@ -85,7 +85,7 @@ Run
 
 `yarn install`
 
-in your FrontEnd and in your BackEnd.
+In your FrontEnd and in your BackEnd.
 
 ## Update your file BackEnd/Client/os.js
 
@@ -109,7 +109,7 @@ Run
 
 `ng serve`
 
-for a dev server.
+For a dev server.
 
 Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
@@ -119,7 +119,7 @@ Run
 
 `npm run dev`
 
-for a dev server.
+For a dev server.
 
 
 
@@ -131,4 +131,4 @@ Install OpenStack Swift Client locally to manage your disk with the command line
 
 `sudo apt install swift` 
 
-then follow the instructions and this helpful [guide](https://www.systutorials.com/docs/linux/man/1-swift/#lbAG)
+Then follow the instructions and this helpful [guide](https://www.systutorials.com/docs/linux/man/1-swift/#lbAG)
