@@ -29,6 +29,14 @@ Don't forget to start the service : `sudo service mongodb start`
 
 We use [Yarn](https://yarnpkg.com) to manage the dependencies, so we strongly recommend you to use it. you can install it from [Here](https://yarnpkg.com/en/docs/install) or from here : `sudo apt install yarn`, then run `yarn install` to resolve all dependencies (might take a minute).
 
+## Install Kubectl 
+
+Kubectl is the (Linux ?) Kubernetes command line client ! So go [there](https://kubernetes.io/docs/tasks/tools/install-kubectl) and may the force be with you !
+After installing Kubectl we need to setup our config, so make this `mkdir ~/.kube` then put your kubernetes config file in this reposotory.
+Hopefully you can retrieve your config file from OVH go to your project pannel then search for your config setup in your project settings (down on the right pannel to find it) then download the config file, rename it as "config" (no extension, just config) then past it inside the .kube repository in your HOME.
+
+Tips : your OVH project administrator and/or your Kubernetes expert will help you a lot if this step is too harsh for you !
+
 ## Install ng
 
 make sure you have the lastest version of npm,
@@ -65,3 +73,12 @@ Navigate to `http://localhost:4200/`. The app will automatically reload if you c
 ## Run Backend
 
 Run `npm run dev` for a dev server.
+
+
+
+## Optionnal steps : 
+
+## Install OpenStack Swift Client
+
+Install OpenStack Swift Client locally to manage your disk with the command line client.
+`sudo apt install swift` then follow the instructions and this helpful [guide](https://www.systutorials.com/docs/linux/man/1-swift/#lbAG)
