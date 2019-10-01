@@ -31,21 +31,21 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
   User.findById(req.payload.id).then(function (user) {
     if (!user) {
 
-      return res.sendStatus(401);
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
     }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
 
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
-        if (!server) { return res.sendStatus(404); }
+        if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
         if ((server.author.username !== user.username) && (!user.isAdmin())) {
           console.log(server.author.username);
           console.log(user.username);
 
-          return res.sendStatus(401);
+          return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
         }
-        if (server.processing) { return res.sendStatus(401); }
 
         if (!req.file) {
           console.log("No file received");
@@ -95,7 +95,7 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
               });
           } else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-            return res.status(422).json({ errors: { file: "must be exercises.zip found " + req.file.mimetype } });
+            return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
           }
         }
       }).catch(next);
@@ -105,14 +105,15 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
 router.post('/url', auth.required, function (req, res, next) {
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { console.log('file received'); return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { console.log('file received2'); return res.sendStatus(401); }
+    if (!user) { console.log('file received'); return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { console.log('file received2'); return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
+
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
-        if (!server) { return res.sendStatus(404); }
-        if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401); }
-        if (server.processing) { console.log('file received4'); return res.sendStatus(401); }
+        if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+        if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
         console.log(req.body);
         var file_url = req.body.url.url + '/archive/master.zip';
@@ -180,15 +181,15 @@ router.post('/url', auth.required, function (req, res, next) {
 
 router.post('/send', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
 
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
-        if (!server) { return res.sendStatus(404); }
-        if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401); }
-        if (server.processing) { return res.sendStatus(401); }
+        if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
+        if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
 
         var dir = './uploads/' + server.author.username + '/';
@@ -201,38 +202,44 @@ router.post('/send', auth.required, function (req, res, next) {
         if (upload_errors.group_duplicate(tabOfName)) {
           return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
         }
+        user.startProcessing().then(() => {
+          console.log('user.processing : ' + user.processing);
+          upload_functions.checkFiles(dir + 'exercises/').then((files) => {
+            upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/', tabOfName, files).then((tabOfName_bis) => {
+              upload_functions.create_new_tabOfName(dir + 'exercises/', tabOfName_bis).then((new_tabOfName) => {
+                upload_functions.create_indexJSON(dir + 'exercises/index.json', new_tabOfName).then((response) => {
+                  // return res.status(422).json({ errors: { file: "index.json created" } });
+                  upload_functions.sendToSwift(dir + 'exercises/', server.slug).then((success) => {
+                    user.endProcessing().then(() => {
+                      console.log('user.processing : ' + user.processing);
 
-        upload_functions.checkFiles(dir + 'exercises/').then((files) => {
-          upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/', tabOfName, files).then((tabOfName_bis) => {
-            upload_functions.create_new_tabOfName(dir + 'exercises/', tabOfName_bis).then((new_tabOfName) => {
-              upload_functions.create_indexJSON(dir + 'exercises/index.json', new_tabOfName).then((response) => {
-                // return res.status(422).json({ errors: { file: "index.json created" } });
-                upload_functions.sendToSwift(dir + 'exercises/', server.slug).then((success) => {
-                  return res.send({
-                    success: true,
-                    message: success
+                      return res.send({
+                        success: true,
+                        message: success
+                      });
+                    });
+
+                  }, (err) => {
+                    console.log('Error sendToSwift !: ' + err);
+                    return res.status(422).json({ errors: { errors: err } });
                   });
                 }, (err) => {
-                  console.log('Error sendToSwift !: ' + err);
+                  console.log('Error create index.json !: ' + err);
                   return res.status(422).json({ errors: { errors: err } });
                 });
               }, (err) => {
-                console.log('Error create index.json !: ' + err);
+                console.log('Error create newTabOfName !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
             }, (err) => {
-              console.log('Error create newTabOfName !: ' + err);
+              console.log('Error delete useless file !: ' + err);
               return res.status(422).json({ errors: { errors: err } });
             });
           }, (err) => {
-            console.log('Error delete useless file !: ' + err);
+            console.log('Error checkfiles !: ' + err);
             return res.status(422).json({ errors: { errors: err } });
           });
-        }, (err) => {
-          console.log('Error checkfiles !: ' + err);
-          return res.status(422).json({ errors: { errors: err } });
         });
-
 
       }).catch(next);
   }).catch(next);

@@ -11,7 +11,7 @@ router.param('server', function (req, res, next, slug) {
   Server.findOne({ slug: slug })
     .populate('author')
     .then(function (server) {
-      if (!server) { return res.sendStatus(404); }
+      if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
 
       req.server = server;
 
@@ -22,10 +22,10 @@ router.param('server', function (req, res, next, slug) {
 router.get('/', auth.required, function (req, res, next) {
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
-    if ((user.username !== req.query.author) && !user.isAdmin()) { return res.sendStatus(401); }
+    if ((user.username !== req.query.author) && !user.isAdmin()) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     var author = req.query.author;
     user.findAnUser(author).then(function (results) {
 
@@ -37,9 +37,7 @@ router.get('/', auth.required, function (req, res, next) {
 
         return res.json({
           servers: servers.map(function (server) {
-            if (!server.processing)
-              return server.toJSONFor(author);
-            else serversCount -= 1;
+            return server.toJSONFor(author);
           }),
           serversCount: serversCount
         });
@@ -52,9 +50,9 @@ router.get('/', auth.required, function (req, res, next) {
 
 router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     var server = new Server(req.body.server);
     server.author = user;
     return server.save().then(function () {
@@ -78,27 +76,22 @@ router.get('/:server', auth.required, function (req, res, next) {
   ]).then(function (results) {
     var user = results[0];
     var server = req.server.toJSONFor(user);
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
-    if ((user.username !== server.author.username) && (!user.isAdmin())) { return res.sendStatus(401); }
-    if (!server.processing) {
-      return res.json({ server });
-    }
-    else {
-      return res.sendStatus(401);
-    }
+    if ((user.username !== server.author.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    return res.json({ server });
+
   }).catch(next);
 });
 
 // update server
 router.put('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
-
+    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
     if (req.server.author._id.toString() === req.payload.id.toString()) {
-      if (req.server.active || req.server.processing) { return res.sendStatus(401); }
 
       if (typeof req.body.server.title !== 'undefined') {
         req.server.title = req.body.server.title;
@@ -116,7 +109,7 @@ router.put('/:server', auth.required, function (req, res, next) {
         return res.json({ server: server.toJSONFor(user) });
       }).catch(next);
     } else {
-      return res.sendStatus(403);
+      return res.sendStatus(403).json({ errors: { errors: 'Unauthorized' } });
     }
   });
 });
@@ -125,40 +118,48 @@ router.put('/:server', auth.required, function (req, res, next) {
 router.post('/disable/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
-      if (!user.active) { return res.sendStatus(401); }
-      if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
-      if (req.server.processing) { return res.sendStatus(401); }
+      if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+      if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+      if (user.processing) { return res.sendStatus(401); }
 
       var slug = req.server.slug;
       var username = req.server.author.username;
       var namespace = 'default';
 
       if (req.server.active) {
-        req.server.processing = true;
         console.log('shut_off');
         var volume = req.server.volume;
         console.log('volume : ' + volume);
-        server_functions.shut_off(slug, namespace, volume).then((response) => {
-          req.server.active = false;
-          req.server.processing = false;
-          req.server.save().then(function () {
-            return res.sendStatus(204);
+        user.startProcessing().then(() => {
+          console.log('user.processing : ' + user.processing);
+          server_functions.shut_off(slug, namespace, volume).then((response) => {
+            user.endProcessing().then(() => {
+              console.log('user.processing : ' + user.processing);
+              req.server.active = false;
+              req.server.save().then(function () {
+                return res.sendStatus(204);
+              });
+            });
+          }, (err) => {
+            return res.status(422).send({ errors: { err } });
           });
-        }, (err) => {
-          return res.status(422).send({ errors: { err } });
         });
       } else {
-        req.server.processing = true;
         console.log('shut_on');
-        server_functions.shut_on(slug, username, namespace).then((response) => {
-          req.server.processing = false;
-          req.server.volume = response;
-          req.server.active = true;
-          req.server.save().then(function () {
-            return res.sendStatus(204);
+        user.startProcessing().then(() => {
+          console.log('user.processing : ' + user.processing);
+          server_functions.shut_on(slug, username, namespace).then((response) => {
+            user.endProcessing().then(() => {
+              console.log('user.processing : ' + user.processing);
+              req.server.volume = response;
+              req.server.active = true;
+              req.server.save().then(function () {
+                return res.sendStatus(204);
+              });
+            });
+          }, (err) => {
+            return res.status(422).send({ errors: { err } });
           });
-        }, (err) => {
-          return res.status(422).send({ errors: { err } });
         });
       }
     } else {
@@ -170,10 +171,10 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 // delete server
 router.delete('/:server', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
-    if (req.server.processing) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
 
     if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
@@ -182,12 +183,16 @@ router.delete('/:server', auth.required, function (req, res, next) {
       console.log('asking for a deletion');
       console.log('slug : ' + slug);
       console.log('namespace : ' + namespace);
-      server_functions.delete(slug, namespace).then((response) => {
-        return req.server.remove().then(function () {
-          return res.sendStatus(204);
+      user.startProcessing().then(() => {
+        server_functions.delete(slug, namespace).then((response) => {
+          user.endProcessing().then(() => {
+            return req.server.remove().then(function () {
+              return res.sendStatus(204);
+            });
+          });
+        }, (err) => {
+          return res.status(422).send({ errors: { err } });
         });
-      }, (err) => {
-        return res.status(422).send({ errors: { err } });
       });
     } else {
       return res.sendStatus(403);

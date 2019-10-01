@@ -15,6 +15,7 @@ var UserSchema = new mongoose.Schema({
   authorized: { type: Boolean, default: false },
   image: String,
   hash: String,
+  processing: { type: Boolean, default: false },
   salt: String
 }, { timestamps: true });
 
@@ -44,6 +45,30 @@ UserSchema.methods.generateJWT = function () {
 
 UserSchema.methods.isAdmin = function () {
   return this.admin;
+};
+
+UserSchema.methods.startProcessing = function () {
+  var user = this;
+  return new Promise(function (resolve, reject) {
+    user.processing = true;
+    if (user.processing === true) {
+      user.save().then(() => {
+        return resolve(true);
+      })
+    }
+  });
+};
+
+UserSchema.methods.endProcessing = function () {
+  var user = this;
+  return new Promise(function (resolve, reject) {
+    user.processing = false;
+    if (user.processing === false) {
+      user.save().then(() => {
+        return resolve(true);
+      })
+    }
+  });
 };
 
 UserSchema.methods.findAllUsers = function (query, limit, offset) {
@@ -113,6 +138,7 @@ UserSchema.methods.toAuthJSON = function () {
     admin: this.admin,
     image: this.image,
     active: this.active,
+    processing: this.processing,
     authorized: this.authorized,
   };
 }
@@ -126,6 +152,7 @@ UserSchema.methods.toProfileJSONFor = function () {
     goal: this.goal,
     active: this.active,
     authorized: this.authorized,
+    processing: this.processing,
     image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
   };
 };
