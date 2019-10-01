@@ -10,7 +10,7 @@ const global_functions = require('../../lib/global_functions');
 
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
     return res.json({ user: user.toAuthJSON() });
   }).catch(next);
@@ -42,7 +42,7 @@ router.get('/users', auth.required, function (req, res, next) {
   }
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.isAdmin()) {
 
       return user.findAllUsers(query, limit, offset).then(function (results) {
@@ -55,16 +55,16 @@ router.get('/users', auth.required, function (req, res, next) {
         });
       });
     } else {
-      return res.sendStatus(403);
+      return res.sendStatus(403).json({ errors: { errors: 'Unauthorized' } });
     }
   }).catch(next);
 });
 
 router.put('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
     var userToMdify = 'undefined';
 
@@ -80,9 +80,9 @@ router.put('/user', auth.required, function (req, res, next) {
     var userInChange = setInterval(function () {
       if (userToMdify !== 'undefined') {
         // only update fields that were actually passed...
-        if (typeof req.body.user.username !== 'undefined') {
-          userToMdify.username = req.body.user.username;
-        }
+        // if (typeof req.body.user.username !== 'undefined') { // may be useless
+        //   userToMdify.username = req.body.user.username;
+        // }
         if ((typeof req.body.user.email !== 'undefined')) {
           userToMdify.email = req.body.user.email;
         }
@@ -143,10 +143,10 @@ router.post('/reset-password', auth.required, function (req, res, next) {
   }
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
-    if (!user.active) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401); }
+    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
     if (!req.body.user.email) {
       return res.status(422).json({ errors: { email: "can't be blank" } });
@@ -175,8 +175,9 @@ router.post('/reset-password', auth.required, function (req, res, next) {
 //disable or enable an user
 router.post('/users/disable/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
 
     if (!req.body.user.email) {
       return res.status(422).json({ errors: { email: "can't be blank" } });
@@ -267,6 +268,7 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401); }
+    if (user.processing) { return res.sendStatus(401); }
 
     if (!req.body.user.email) {
       return res.status(422).json({ errors: { email: "can't be blank" } });
@@ -312,13 +314,15 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
         console.log('author = ' + author);
         var namespace = 'default';
         var itemsProcessed = 0;
+        var itemToDelete = servers.length;
         servers.forEach((server, index, array) => {
           global_functions.asyncFunction(server, () => {
             console.log('asking for a deletion');
             console.log('slug : ' + server.slug);
             console.log('namespace : ' + namespace);
             server_functions.delete(server.slug, namespace).then((response) => {
-              return req.server.remove();
+              itemToDelete--;
+              server.remove();
             });
           }, (err) => {
             console.log(err);
@@ -326,13 +330,18 @@ router.post('/users/delete/', auth.required, function (req, res, next) {
           });
           itemsProcessed++;
           if (itemsProcessed === array.length) {
-
+            var userInChange = setInterval(function () {
+              if (itemToDelete === 0) {
+                clearInterval(userInChange);
+                console.log('all servers are done');
+                author.remove();
+                return res.sendStatus(204);
+              }
+              console.log('itemToDelete : ' + itemToDelete);
+            }, 5000);
             // add a waiting list (interval) for all servers
 
-            console.log('all servers are done');
-            author.active = !author.active;
-            author.remove();
-            return res.sendStatus(204);
+
           }
         });
       });
