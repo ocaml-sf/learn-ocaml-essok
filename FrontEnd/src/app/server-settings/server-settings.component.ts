@@ -101,10 +101,6 @@ export class ServerSettingsComponent implements OnInit {
   submitForm() {
     this.isSubmitting = true;
 
-    // update the model
-    // this.updateServer(this.serverSettingsForm.value);
-
-    // post the changes
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
