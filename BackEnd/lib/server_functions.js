@@ -489,14 +489,13 @@ function _backupDownload(volume, slug, namespace) {
     return _backup(slug, backupType, backupCommand, volume, namespace);
 };
 
-function _createPersistentVolumeAndLinkKube(slug, username, namespace) {
+function _createNamespacedPersistentVolumeClaim(slug, namespace) {
+    var serverCreated = false;
+    var pvc = _createObjectPVC(slug, namespace);
     return new Promise(function (resolve, reject) {
-        var serverCreated = false;
-        var pvc = _createObjectPVC(slug, namespace);
         k8sApi.createNamespacedPersistentVolumeClaim(namespace, pvc)
             .then((response) => {
                 console.log('Volume ' + slug + ' claimed');
-                k8sApi.listNamespacedPersistentVolumeClaim(namespace);
                 var serverInCreation = setInterval(function () {
                     k8sApi.listNamespacedPersistentVolumeClaim(namespace).then((response) => {
                         response.body.items.forEach(element => {
@@ -506,33 +505,43 @@ function _createPersistentVolumeAndLinkKube(slug, username, namespace) {
                                 console.log('status found ' + status);
                                 if (element.status.phase === 'Bound') {
                                     serverCreated = true;
+                                    console.log('status bound found !');
+                                    clearInterval(serverInCreation);
+                                    return resolve('created');
                                 }
                             }
                         });
-                        if (serverCreated === true) {
-                            console.log('status bound found !');
-                            clearInterval(serverInCreation);
-                            _listPersistentVolume(slug).then((volume) => {
-                                _backupUpload(volume, slug, namespace).then((response) => {
-                                    console.log('backup ok');
-                                    _createkubelink(volume, slug, username, namespace).then((response) => {
-                                        console.log('server shut on');
-                                        return resolve(volume);
-                                    }, (err) => {
-                                        return reject(err);
-                                    });
-                                }, (err) => {
-                                    //abort all
-                                    return reject(err);
-                                });
-                            }, (err) => {
-                                return reject(err);
-                            });
-                        }
+                    });
+                }, 3000);
+            }, (err) => {
+                // Actually the only error is 'Already Claimed' so it's temporary put to okay until a better error biding, that need some time, so to fix ...
+                return resolve(err);
+            });
+    });
+}
+
+function _createPersistentVolumeAndLinkKube(slug, username, namespace) {
+    return new Promise(function (resolve, reject) {
+        var serverCreated = false;
+        var pvc = _createObjectPVC(slug, namespace);
+        _createNamespacedPersistentVolumeClaim(slug, namespace)
+            .then((response) => {
+                _listPersistentVolume(slug).then((volume) => {
+                    _backupUpload(volume, slug, namespace).then((response) => {
+                        console.log('backup ok');
+                        _createkubelink(volume, slug, username, namespace).then((response) => {
+                            console.log('server shut on');
+                            return resolve(volume);
+                        }, (err) => {
+                            return reject(err);
+                        });
                     }, (err) => {
+                        //abort all
                         return reject(err);
                     });
-                }, 2000);
+                }, (err) => {
+                    return reject(err);
+                });
             });
     });
 };

@@ -35,7 +35,6 @@ export class ServerComponent implements OnInit {
   }
 
   loadServer() {
-    // Retreive the prefetched server
     this.route.data.subscribe(
       (data: { server: Server }) => {
         this.server = data.server;
@@ -44,7 +43,6 @@ export class ServerComponent implements OnInit {
   }
 
   loadUser() {
-    // Load the current user's data
     this.userService.currentUser.subscribe(
       (userData: User) => {
         this.currentUser = userData;
@@ -61,7 +59,6 @@ export class ServerComponent implements OnInit {
 
   deleteServer() {
     this.isDeleting = true;
-
     this.serversService.destroy(this.server.slug)
       .subscribe(
         success => {
@@ -72,7 +69,6 @@ export class ServerComponent implements OnInit {
 
   disableServer() {
     this.isDisabled = true;
-
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
