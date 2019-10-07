@@ -141,7 +141,9 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
               });
             });
           }, (err) => {
-            return res.status(422).send({ errors: { err } });
+            user.endProcessing().then(() => {
+              return res.status(422).send({ errors: { err } });
+            });
           });
         });
       } else {
@@ -158,7 +160,9 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
               });
             });
           }, (err) => {
-            return res.status(422).send({ errors: { err } });
+            user.endProcessing().then(() => {
+              return res.status(422).send({ errors: { err } });
+            });
           });
         });
       }
@@ -191,7 +195,9 @@ router.delete('/:server', auth.required, function (req, res, next) {
             });
           });
         }, (err) => {
-          return res.status(422).send({ errors: { err } });
+          user.endProcessing().then(() => {
+            return res.status(422).send({ errors: { err } });
+          });
         });
       });
     } else {

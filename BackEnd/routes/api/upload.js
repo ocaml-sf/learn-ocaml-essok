@@ -221,23 +221,33 @@ router.post('/send', auth.required, function (req, res, next) {
 
                   }, (err) => {
                     console.log('Error sendToSwift !: ' + err);
-                    return res.status(422).json({ errors: { errors: err } });
+                    user.endProcessing().then(() => {
+                      return res.status(422).json({ errors: { errors: err } });
+                    });
                   });
                 }, (err) => {
                   console.log('Error create index.json !: ' + err);
-                  return res.status(422).json({ errors: { errors: err } });
+                  user.endProcessing().then(() => {
+                    return res.status(422).json({ errors: { errors: err } });
+                  });
                 });
               }, (err) => {
                 console.log('Error create newTabOfName !: ' + err);
-                return res.status(422).json({ errors: { errors: err } });
+                user.endProcessing().then(() => {
+                  return res.status(422).json({ errors: { errors: err } });
+                });
               });
             }, (err) => {
               console.log('Error delete useless file !: ' + err);
-              return res.status(422).json({ errors: { errors: err } });
+              user.endProcessing().then(() => {
+                return res.status(422).json({ errors: { errors: err } });
+              });
             });
           }, (err) => {
             console.log('Error checkfiles !: ' + err);
-            return res.status(422).json({ errors: { errors: err } });
+            user.endProcessing().then(() => {
+              return res.status(422).json({ errors: { errors: err } });
+            });
           });
         });
 
