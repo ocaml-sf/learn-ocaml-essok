@@ -16,12 +16,13 @@
     <div id="carouselUpload" class="carousel slide col-12" data-interval="false">
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <div id="accordionArchive">
+          <div id="accordionArchive" class="accordion">
             <div class="card">
               <div id="urlHead" class="card-header">
                 <h5 class="mb-0">
                   <button class="btn btn-link"
-                          data-toggle="collapse" data-target="#urlCollapse">
+                          data-toggle="collapse" data-target="#urlCollapse"
+                          aria-expanded="false" aria-controls="urlCollapse">
                     Upload with a github URL
                   </button>
                 </h5>
@@ -48,16 +49,20 @@
                   </form>
                 </div>
               </div>
+            </div>
 
+            <div class="card">
               <div id="browseUpload" class="card-header">
                 <h5 class="mb-0">
                   <button class="btn btn-link"
-                          data-toggle="collapse" data-target="#browseCollapse">
+                          data-toggle="collapse" data-target="#browseCollapse"
+                          aria-expanded="false" aria-controls="browseCollapse">
                     Upload with an archive (must be named "exercises.zip")
                   </button>
                 </h5>
               </div>
-              <div id="browseCollapse" class="collapse">
+              <div id="browseCollapse" class="collapse"
+                   aria-labelledby="browseHead" data-parent="#accordionArchive">
                 <div class="card-body">
                   <h3>Select files</h3>
                   <!--
@@ -240,7 +245,7 @@
           <br />
           <br />
           <button class="btn btn-sm btn-outline-danger" [ngClass]="{disabled: isDeleting}" type="submit">
-            <i class="ion-trash-a"></i> Delete Server
+            <i class="ion-md-trash"></i> Delete Server
           </button>
         </form>
       </div>
