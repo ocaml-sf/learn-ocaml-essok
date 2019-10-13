@@ -11,11 +11,11 @@
 
           <a [routerLink]="['/profile-settings/' + profile.username]" [hidden]="!isUser && !currentUser.admin" *ngIf="currentUser.active"
             class="btn btn-sm btn-outline-info">
-            <i class="ion-gear-a"></i> Edit Profile Settings
+            <i class="ion-md-settings"></i> Edit Profile Settings
           </a>
           <a [routerLink]="['/disable-account']" [hidden]="!isUser" *ngIf="!currentUser.active"
             class="btn btn-sm btn-outline-warning">
-            <i class="ion-gear-a"></i> Active my account
+            <i class="ion-md-power"></i> Active my account
           </a>
         </div>
 

@@ -67,7 +67,7 @@ export class ServerComponent implements OnInit {
       );
   }
 
-  disableServer() {
+  toggleServerStatus() {
     this.isDisabled = true;
     this.serversService.disable(this.server.slug)
       .subscribe(

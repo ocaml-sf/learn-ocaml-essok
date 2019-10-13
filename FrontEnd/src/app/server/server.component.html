@@ -1,47 +1,37 @@
-<div class="server-page">
+<div class="container p-5">
+  <div class="row text-white bg-dark p-3 justify-content-center">
+    <h1 class="col-11">{{server.title}}</h1>
+    <app-server-meta [server]="server" class="col-11">
+      <div class="btn-group" role="group" aria-label="Server buttons" [hidden]="!canModify">
+        <button class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
+          [routerLink]="['/server-settings', server.slug]">
+          <i class="ion-md-create"></i> Manage Server
+        </button>
 
-  <div class="banner">
-    <div class="container">
-      <h1>{{server.title}}</h1>
-      <app-server-meta [server]="server">
-        <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
-            [routerLink]="['/server-settings', server.slug]">
-            <i class="ion-edit"></i> Manage Server
-          </a>
+        <button class="btn btn-sm btn-outline-warning" *ngIf="currentUser.active"
+          [ngClass]="{disabled: isDisabled}" (click)="toggleServerStatus()">
+          <i class="ion-md-power"></i>
+          <span *ngIf="!server.active"> Enable Server</span>
+          <span *ngIf="server.active"> Disable Server</span>
+        </button>
 
-          <button class="btn btn-sm btn-outline-warning" *ngIf="!server.active && currentUser.active"
-            [ngClass]="{disabled: isDisabled}" (click)="disableServer()">
-            <i class="ion-settings"></i> Enable Server
-          </button>
+        <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin"
+           (click)="toggleDangerous()">
+          <i class="ion-md-warning"></i>
+          <span *ngIf="!isDangerous"> Show Dangerous options</span>
+          <span *ngIf="isDangerous"> Hide Dangerous options</span>
+        </button>
 
-          <button class="btn btn-sm btn-outline-warning" *ngIf="server.active && currentUser.active"
-            [ngClass]="{disabled: isDisabled}" (click)="disableServer()">
-            <i class="ion-settings"></i> Disable Server
-          </button>
+        <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
+          [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
+            <i class="ion-md-trash"></i> Delete Server
+        </button>
 
-          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && !isDangerous"
-             (click)="showDangerous()">
-            <i class="ion-settings"></i> Show Dangerous options
-          </button>
-          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
-             (click)="showDangerous()">
-            <i class="ion-settings"></i> Hide Dangerous options
-          </button>
-
-          <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
-            [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
-            <i class="ion-trash-a"></i> Delete Server
-          </button>
-
-        </span>
-      </app-server-meta>
-
-
-    </div>
-
+      </div>
+    </app-server-meta>
   </div>
-  <div class="container">
-    {{server.vue}}
-  </div>
+
+</div>
+<div class="row">
+  {{server.vue}}
 </div>

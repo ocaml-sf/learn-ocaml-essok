@@ -1,12 +1,19 @@
-<footer class="bg-sand" style="padding: 0">
-  <nav class="navbar navbar-expand justify-content-around">
+<footer class="bg-sand footer">
+  <nav class="navbar navbar-expand">
     <a href="https://ocaml-sf.org">
       <img src="assets/small_logo.svg" href="https://ocaml-sf.org">
     </a>
-    <span class="attribution">
-      &copy; {{ today | date: 'yyyy' }}.
-      Inspired from Conduit of <a href="https://thinkster.io">Thinkster</a>.
-      Code licensed under MIT.
-    </span>
+
+    <div class="navbar-collapse">
+      <span class="attribution">
+        &copy; {{ today | date: 'yyyy' }}.
+        Inspired from Conduit of <a href="https://thinkster.io">Thinkster</a>.
+        Code licensed under MIT.
+      </span>
+    </div>
+
+    <a href="https://ocaml-sf.org">
+      <img src="assets/small_logo.svg" href="https://ocaml-sf.org">
+    </a>
   </nav>
 </footer>
