@@ -12,9 +12,10 @@
       <input type="button" (click)="download()" value="Download Employee Data"/>
     </div>
   -->
-  <div class="row bg-sand" style="padding:15px">
-    <div id="carouselUpload" class="carousel slide col-12" data-interval="false">
-      <div class="carousel-inner">
+  <div class="row bg-sand">
+    <div id="carouselUpload" class="carousel slide col-12"
+         data-wrap="false" data-interval="false">
+      <div class="carousel-inner py-5 px-5">
         <div class="carousel-item active">
           <div id="accordionArchive" class="accordion">
             <div class="card">
@@ -102,7 +103,7 @@
                         <td><strong>{{ item?.file?.name }}</strong></td>
                         <td nowrap>{{ item?.file?.size/1024/1024 | number:'.2' }} MB</td>
                         <td>
-                          <div class="progress" style="margin-bottom: 0;">
+                          <div class="progress mb-0">
                             <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }"></div>
                           </div>
                         </td>
@@ -155,48 +156,54 @@
           </div>
         </div>
 
-        <div class="carousel-item">
-          <div class="col-xs-3 card bg-sand">
-            <h4 class="card-header" style="margin-bottom: 0">Exercises List: </h4>
-            <div id="exercises-list" class="card-body list-group p-2"
-                 cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
-              <div class="list-group-item m-2 rounded bg-main-orange"
-                   *ngFor="let exercise of exercisesList" cdkDrag>
-                <div class="text-center text-white">{{exercise}}</div>
-                <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+        <div class="carousel-item container">
+          <div class="row justify-content-around mb-5">
+            <div class="col-4 card bg-main-orange">
+              <h4 class="card-header mb-0">Exercises List: </h4>
+              <div id="exercises-list" class="card-body list-group p-3"
+                   cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
+                <div class="list-group-item m-2 rounded bg-main-orange"
+                     *ngFor="let exercise of exercisesList" cdkDrag>
+                  <div class="text-center text-white">{{exercise}}</div>
+                  <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-xs-8 card bg-sand">
-            <h4 class="card-header" style="margin-bottom: 0">Groups List: </h4>
-            <div class="card-body list-group" cdkDropList (cdkDropListDropped)="dropGroup($event)">
-              <div class="list-group-item row no-gutters d-flex"
-                  *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
-                  <div class="placeholder-group" *cdkDragPlaceholder></div>
-                  <input class="col-2 h-100 p-2 m-r-2 form-control"
-                         [(ngModel)]="group.title" />
-                  <div id="{{group.id}}"
-                       class="col-9 list-group p-2 border flex-row bg-light"
-                       cdkDropList cdkDropListOrientation="horizontal"
-                       [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
-                      (cdkDropListDropped)="dropExercise($event)">
-                    <div class="list-group-item m-2 rounded bg-oasis-blue"
-                         *ngFor="let exercise of group.exercises" cdkDrag>
-                      <div class="placeholder-exercise" *cdkDragPlaceholder></div>
-                      <div class="text-white">{{exercise}}</div>
+            <div class="col-7 card bg-main-orange">
+              <h4 class="card-header mb-0">Groups List: </h4>
+              <div class="card-body list-group p-3"
+                   cdkDropList (cdkDropListDropped)="dropGroup($event)">
+                <div class="list-group-item row no-gutters d-flex"
+                    *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
+                    <div class="placeholder-group" *cdkDragPlaceholder></div>
+                    <input class="col-2 h-100 p-2 m-r-2 form-control"
+                           [(ngModel)]="group.title" />
+                    <div id="{{group.id}}"
+                         class="col-9 list-group p-2 border flex-row bg-light"
+                         cdkDropList cdkDropListOrientation="horizontal"
+                         [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
+                        (cdkDropListDropped)="dropExercise($event)">
+                      <div class="list-group-item m-2 rounded bg-oasis-blue"
+                           *ngFor="let exercise of group.exercises" cdkDrag>
+                        <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                        <div class="text-white">{{exercise}}</div>
+                      </div>
                     </div>
-                  </div>
-              </div>
-              <div id="create-group" class="list-group-item"
-                  cdkDropList cdkDropListOrientation="horizontal"
-                  (cdkDropListDropped)="createGroup($event, $index)">
-                Drop an exercise here to create a new group.
+                </div>
+                <div id="create-group" class="list-group-item"
+                    cdkDropList cdkDropListOrientation="horizontal"
+                    (cdkDropListDropped)="createGroup($event, $index)">
+                  Drop an exercise here to create a new group.
+                </div>
               </div>
             </div>
           </div>
-          <button class="btn btn-lg btn-primary pull-xs-right" (click)="send()">
-            Send
-          </button>
+          <div class="row justify-content-center">
+            <button class="col-2 btn btn-lg btn-primary pull-xs-right"
+                    (click)="send()">
+              Send
+            </button>
+          </div>
         </div>
 
         <div class="carousel-item">
@@ -216,14 +223,16 @@
           </div>
         </div>
       </div>
-      <a class="carousel-control-prev" href="#carouselUpload" role="button" data-slide="prev">
+      <a class="carousel-control-prev" style="width: 5%"
+         href="#carouselUpload" role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
       </a>
-     <a class="carousel-control-next" href="#carouselUpload" role="button" data-slide="next">
-       <span class="carousel-control-next-icon" aria-hidden="true"></span>
-       <span class="sr-only">Next</span>
-     </a>
+      <a class="carousel-control-next" style="width: 5%"
+         href="#carouselUpload" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
     </div>
   </div>
 
