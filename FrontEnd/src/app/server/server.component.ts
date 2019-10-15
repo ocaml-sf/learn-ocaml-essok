@@ -76,7 +76,7 @@ export class ServerComponent implements OnInit {
         }
       );
   }
-  showDangerous() {
+  toggleDangerous() {
     this.isDangerous = !this.isDangerous;
   }
 
