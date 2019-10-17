@@ -13,6 +13,9 @@
     </div>
   -->
   <div class="row bg-sand">
+    <h1 class="col-12 p-2 text-center">{{ server.title }}</h1>
+    <app-list-errors [errors]="errors"></app-list-errors>
+  
     <div id="carouselUpload" class="carousel slide col-12"
          data-wrap="false" data-interval="false">
       <div class="carousel-inner py-5 px-5">
@@ -31,10 +34,6 @@
               <div id="urlCollapse" class="collapse"
                    aria-labelledby="urlHead" data-parent="#accordionArchive">
                 <div class="card-body">
-                  <h1 class="text-center">{{ server.title }}</h1>
-  
-                  <app-list-errors [errors]="errors"></app-list-errors>
-  
                   <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
                     <fieldset [disabled]="isSubmitting">
   
@@ -203,7 +202,7 @@
                     (click)="send()">
               Send
             </button>
-          </div>
+	  </div>
         </div>
 
         <div class="carousel-item">
@@ -239,8 +238,8 @@
   <hr/>
 
   <div class="row">
-    <div class="col-md-12 offset-md-0 col-xs-12">
-      <div class="danger">
+    <div class="col-12">
+      <div class="danger p-4">
         <h2>Dangerous ZONE</h2>
   
         <p>TO DELETE YOUR SERVER :</p>
@@ -257,6 +256,36 @@
             <i class="ion-md-trash"></i> Delete Server
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pleaseWaitModal">
+  Launch Alert(beta)
+</button>
+
+  <div class="modal fade" id="pleaseWaitModal" tabindex="-1" 
+       role="dialog" aria-labelledby="pleaseWaitModal"
+       data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Please wait...</h5>
+        </div>
+        <div class="modal-body">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped
+			progress-bar-animated w-100"
+                 role="progressbar"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div>
+            You cannot escape this alert with ESC and click, but you still can refresh the page or click on the button
+          </div>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
