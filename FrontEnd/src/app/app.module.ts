@@ -8,6 +8,7 @@ import {
   HeaderComponent,
   SharedModule
 } from './shared';
+import { ModalModule } from './modal/modal.module';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
 import { HelpModule } from './help/help.module';
@@ -26,6 +27,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     HelpModule,
     ContactModule,
     AppRoutingModule,
+    ModalModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

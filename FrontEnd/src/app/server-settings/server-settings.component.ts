@@ -6,6 +6,7 @@ import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file
 // import { FileService } from '../core/services/file.service';
 import { map } from 'rxjs/operators';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { ModalService } from '../modal';
 
 const URL = 'http://localhost:3000/api/uploads/check';
 
@@ -43,6 +44,7 @@ export class ServerSettingsComponent implements OnInit {
     private serversService: ServersService,
     private fb: FormBuilder,
     private jwtService: JwtService,
+    private modalService: ModalService,
     // private fileService: FileService
   ) {
     // create form group using the form builder
@@ -87,6 +89,7 @@ export class ServerSettingsComponent implements OnInit {
       this.exercisesList = this.useless.name;
       this.groupsList = [];
       this.idIndex = 1;
+      // move to the next slide
     };
   }
 
@@ -100,7 +103,7 @@ export class ServerSettingsComponent implements OnInit {
 
   submitForm() {
     this.isSubmitting = true;
-
+    // $('#pleaseWaitModal').modal('show');
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
@@ -108,6 +111,7 @@ export class ServerSettingsComponent implements OnInit {
         this.exercisesList = this.useless.name;
         this.groupsList = [];
         this.idIndex = 1;
+        // $('#pleaseWaitModal').modal('hide');
 
       },
       err => {
@@ -220,5 +224,12 @@ export class ServerSettingsComponent implements OnInit {
       console.log(this.groupsList);
       console.log(this.allExercisesID);
     }
+  }
+  openModal(id: string) {
+    this.modalService.open(id);
+  }
+
+  closeModal(id: string) {
+    this.modalService.close(id);
   }
 }

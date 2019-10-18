@@ -454,8 +454,15 @@ function _backup(slug, backupType, backupCommand, volume, namespace) {
                                 clearInterval(jobInProgress);
                                 k8sApiJobs.deleteNamespacedJob(backupType + '-' + slug, namespace).then((response) => {
                                     console.log('jobs deleted')
-                                    return resolve('success');
+                                    k8sApi.deleteNamespacedPod(backupType + '-' + slug, namespace).then((response) => {
+                                        return resolve('success');
+                                    }, (err) => {
+                                        console.log(err);
+
+                                        return resolve('success');
+                                    });
                                 }, (err) => {
+                                    console.log(err);
                                     return reject(err);
                                 });
                             }

@@ -1,7 +1,7 @@
 <div class="container">
   <!-- Line break for logout button -->
   <hr />
-  <!-- 
+  <!--
     <div>
       <h3>
         Using Link <br/>
@@ -15,33 +15,30 @@
   <div class="row bg-sand">
     <h1 class="col-12 p-2 text-center">{{ server.title }}</h1>
     <app-list-errors [errors]="errors"></app-list-errors>
-  
-    <div id="carouselUpload" class="carousel slide col-12"
-         data-wrap="false" data-interval="false">
+
+    <div id="carouselUpload" class="carousel slide col-12" data-wrap="false" data-interval="false">
       <div class="carousel-inner py-5 px-5">
         <div class="carousel-item active">
           <div id="accordionArchive" class="accordion">
             <div class="card">
               <div id="urlHead" class="card-header">
                 <h5 class="mb-0">
-                  <button class="btn btn-link"
-                          data-toggle="collapse" data-target="#urlCollapse"
-                          aria-expanded="false" aria-controls="urlCollapse">
+                  <button class="btn btn-link" data-toggle="collapse" data-target="#urlCollapse" aria-expanded="false"
+                    aria-controls="urlCollapse">
                     Upload with a github URL
                   </button>
                 </h5>
               </div>
-              <div id="urlCollapse" class="collapse"
-                   aria-labelledby="urlHead" data-parent="#accordionArchive">
+              <div id="urlCollapse" class="collapse" aria-labelledby="urlHead" data-parent="#accordionArchive">
                 <div class="card-body">
                   <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
                     <fieldset [disabled]="isSubmitting">
-  
+
                       <fieldset class="form-group">
                         <input class="form-control form-control-lg" type="url" placeholder="URL of server repository"
                           formControlName="url" />
                       </fieldset>
-  
+
                       <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
                         Charge URL's exercises
                       </button>
@@ -54,15 +51,13 @@
             <div class="card">
               <div id="browseUpload" class="card-header">
                 <h5 class="mb-0">
-                  <button class="btn btn-link"
-                          data-toggle="collapse" data-target="#browseCollapse"
-                          aria-expanded="false" aria-controls="browseCollapse">
+                  <button class="btn btn-link" data-toggle="collapse" data-target="#browseCollapse"
+                    aria-expanded="false" aria-controls="browseCollapse">
                     Upload with an archive (must be named "exercises.zip")
                   </button>
                 </h5>
               </div>
-              <div id="browseCollapse" class="collapse"
-                   aria-labelledby="browseHead" data-parent="#accordionArchive">
+              <div id="browseCollapse" class="collapse" aria-labelledby="browseHead" data-parent="#accordionArchive">
                 <div class="card-body">
                   <h3>Select files</h3>
                   <!--
@@ -103,7 +98,8 @@
                         <td nowrap>{{ item?.file?.size/1024/1024 | number:'.2' }} MB</td>
                         <td>
                           <div class="progress mb-0">
-                            <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }"></div>
+                            <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }">
+                            </div>
                           </div>
                         </td>
                         <td class="text-center">
@@ -133,7 +129,8 @@
                     <div>
                       Queue progress:
                       <div class="progress">
-                        <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
+                        <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }">
+                        </div>
                       </div>
                     </div>
                     <button type="button" class="btn btn-success btn-s" (click)="uploader.uploadAll()"
@@ -159,10 +156,9 @@
           <div class="row justify-content-around mb-5">
             <div class="col-4 card bg-main-orange">
               <h4 class="card-header mb-0">Exercises List: </h4>
-              <div id="exercises-list" class="card-body list-group p-3"
-                   cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
-                <div class="list-group-item m-2 rounded bg-main-orange"
-                     *ngFor="let exercise of exercisesList" cdkDrag>
+              <div id="exercises-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="exercisesList"
+                [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
+                <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of exercisesList" cdkDrag>
                   <div class="text-center text-white">{{exercise}}</div>
                   <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                 </div>
@@ -170,39 +166,33 @@
             </div>
             <div class="col-7 card bg-main-orange">
               <h4 class="card-header mb-0">Groups List: </h4>
-              <div class="card-body list-group p-3"
-                   cdkDropList (cdkDropListDropped)="dropGroup($event)">
-                <div class="list-group-item row no-gutters d-flex"
-                    *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
-                    <div class="placeholder-group" *cdkDragPlaceholder></div>
-                    <input class="col-2 h-100 p-2 m-r-2 form-control"
-                           [(ngModel)]="group.title" />
-                    <div id="{{group.id}}"
-                         class="col-9 list-group p-2 border flex-row bg-light"
-                         cdkDropList cdkDropListOrientation="horizontal"
-                         [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="allExercisesID"
-                        (cdkDropListDropped)="dropExercise($event)">
-                      <div class="list-group-item m-2 rounded bg-oasis-blue"
-                           *ngFor="let exercise of group.exercises" cdkDrag>
-                        <div class="placeholder-exercise" *cdkDragPlaceholder></div>
-                        <div class="text-white">{{exercise}}</div>
-                      </div>
+              <div class="card-body list-group p-3" cdkDropList (cdkDropListDropped)="dropGroup($event)">
+                <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;" cdkDragLockAxis="y"
+                  cdkDrag>
+                  <div class="placeholder-group" *cdkDragPlaceholder></div>
+                  <input class="col-2 h-100 p-2 m-r-2 form-control" [(ngModel)]="group.title" />
+                  <div id="{{group.id}}" class="col-9 list-group p-2 border flex-row bg-light" cdkDropList
+                    cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises"
+                    [cdkDropListConnectedTo]="allExercisesID" (cdkDropListDropped)="dropExercise($event)">
+                    <div class="list-group-item m-2 rounded bg-oasis-blue" *ngFor="let exercise of group.exercises"
+                      cdkDrag>
+                      <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                      <div class="text-white">{{exercise}}</div>
                     </div>
+                  </div>
                 </div>
-                <div id="create-group" class="list-group-item"
-                    cdkDropList cdkDropListOrientation="horizontal"
-                    (cdkDropListDropped)="createGroup($event, $index)">
+                <div id="create-group" class="list-group-item" cdkDropList cdkDropListOrientation="horizontal"
+                  (cdkDropListDropped)="createGroup($event, $index)">
                   Drop an exercise here to create a new group.
                 </div>
               </div>
             </div>
           </div>
           <div class="row justify-content-center">
-            <button class="col-2 btn btn-lg btn-primary pull-xs-right"
-                    (click)="send()">
+            <button class="col-2 btn btn-lg btn-primary pull-xs-right" (click)="send()">
               Send
             </button>
-	  </div>
+          </div>
         </div>
 
         <div class="carousel-item">
@@ -222,26 +212,24 @@
           </div>
         </div>
       </div>
-      <a class="carousel-control-prev" style="width: 5%"
-         href="#carouselUpload" role="button" data-slide="prev">
+      <a class="carousel-control-prev" style="width: 5%" href="#carouselUpload" role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
       </a>
-      <a class="carousel-control-next" style="width: 5%"
-         href="#carouselUpload" role="button" data-slide="next">
+      <a class="carousel-control-next" style="width: 5%" href="#carouselUpload" role="button" data-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="sr-only">Next</span>
       </a>
     </div>
   </div>
 
-  <hr/>
+  <hr />
 
   <div class="row">
     <div class="col-12">
       <div class="danger p-4">
         <h2>Dangerous ZONE</h2>
-  
+
         <p>TO DELETE YOUR SERVER :</p>
         <form (ngSubmit)="deleteServer()">
           <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my server's
@@ -259,13 +247,12 @@
       </div>
     </div>
   </div>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pleaseWaitModal">
-  Launch Alert(beta)
-</button>
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pleaseWaitModal">
+    Launch Alert(beta)
+  </button>
 
-  <div class="modal fade" id="pleaseWaitModal" tabindex="-1" 
-       role="dialog" aria-labelledby="pleaseWaitModal"
-       data-keyboard="false" data-backdrop="static">
+  <div class="modal fade" id="pleaseWaitModal" tabindex="-1" role="dialog" aria-labelledby="pleaseWaitModal"
+    data-keyboard="false" data-backdrop="static">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -274,8 +261,7 @@
         <div class="modal-body">
           <div class="progress">
             <div class="progress-bar progress-bar-striped
-			progress-bar-animated w-100"
-                 role="progressbar"></div>
+			progress-bar-animated w-100" role="progressbar"></div>
           </div>
         </div>
         <div class="modal-footer">
@@ -289,4 +275,13 @@
       </div>
     </div>
   </div>
+  <div>
+    <button (click)="openModal('custom-modal-1')">Open Modal 1</button>
+    <button (click)="openModal('custom-modal-2')">Open Modal 2</button>
+  </div>
+
+  <jw-modal id="custom-modal-2">
+    <h1 style="height:1000px">A Tall Custom Modal!</h1>
+    <button (click)="closeModal('custom-modal-2');">Close</button>
+  </jw-modal>
 </div>
