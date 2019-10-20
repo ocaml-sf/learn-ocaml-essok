@@ -251,37 +251,5 @@
     Launch Alert(beta)
   </button>
 
-  <div class="modal fade" id="pleaseWaitModal" tabindex="-1" role="dialog" aria-labelledby="pleaseWaitModal"
-    data-keyboard="false" data-backdrop="static">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Please wait...</h5>
-        </div>
-        <div class="modal-body">
-          <div class="progress">
-            <div class="progress-bar progress-bar-striped
-			progress-bar-animated w-100" role="progressbar"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div>
-            You cannot escape this alert with ESC and click, but you still can refresh the page or click on the button
-          </div>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div>
-    <button (click)="openModal('custom-modal-1')">Open Modal 1</button>
-    <button (click)="openModal('custom-modal-2')">Open Modal 2</button>
-  </div>
-
-  <jw-modal id="custom-modal-2">
-    <h1 style="height:1000px">A Tall Custom Modal!</h1>
-    <button (click)="closeModal('custom-modal-2');">Close</button>
-  </jw-modal>
+  <jw-modal id="pleaseWait2"></jw-modal>
 </div>

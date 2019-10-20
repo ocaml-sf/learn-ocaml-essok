@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ModalService } from '../modal';
 
 import {
   Server,
@@ -27,6 +28,7 @@ export class ServerComponent implements OnInit {
     private serversService: ServersService,
     private router: Router,
     private userService: UserService,
+    private modalService: ModalService
   ) { }
 
   ngOnInit() {
@@ -68,16 +70,22 @@ export class ServerComponent implements OnInit {
   }
 
   toggleServerStatus() {
+    this.modalService.open('pleaseWait2');
     this.isDisabled = true;
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
+          this.modalService.close('pleaseWait2');
           this.router.navigateByUrl('/');
         }
       );
   }
   toggleDangerous() {
     this.isDangerous = !this.isDangerous;
+  }
+
+  enable() {
+    this.modalService.open('pleaseWait2');
   }
 
 }

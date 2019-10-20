@@ -5,7 +5,7 @@ import { ModalService } from './modal.service';
 @Component({
   selector: 'jw-modal',
   templateUrl: 'modal.component.html',
-  styleUrls: ['modal.component.less'],
+  /*styleUrls: ['modal.component.less'],*/
   encapsulation: ViewEncapsulation.None
 })
 export class ModalComponent implements OnInit, OnDestroy {
@@ -45,13 +45,11 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   // open modal
   open(): void {
-    this.element.style.display = 'block';
-    document.body.classList.add('jw-modal-open');
+    $('#' + this.element.firstChild.id).modal('show');
   }
 
   // close modal
   close(): void {
-    this.element.style.display = 'none';
-    document.body.classList.remove('jw-modal-open');
+    $('#' + this.element.firstChild.id).modal('hide');
   }
 }

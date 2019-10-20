@@ -6,11 +6,13 @@ import { ServerResolver } from './server-resolver.service';
 import { MarkdownPipe } from './markdown.pipe';
 import { SharedModule } from '../shared';
 import { ServerRoutingModule } from './server-routing.module';
+import { ModalModule } from '../modal';
 
 @NgModule({
   imports: [
     SharedModule,
-    ServerRoutingModule
+    ServerRoutingModule,
+    ModalModule
   ],
   declarations: [
     ServerComponent,
