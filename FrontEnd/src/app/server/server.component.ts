@@ -84,8 +84,4 @@ export class ServerComponent implements OnInit {
     this.isDangerous = !this.isDangerous;
   }
 
-  enable() {
-    this.modalService.open('pleaseWait2');
-  }
-
 }
