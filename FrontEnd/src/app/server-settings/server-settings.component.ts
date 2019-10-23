@@ -128,9 +128,11 @@ export class ServerSettingsComponent implements OnInit {
   deleteServer() {
     if (this.isChecked && this.isAssuming) {
       this.isDeleting = true;
+      this.modalService.open('pleaseWait2');
       this.serversService.destroy(this.server.slug)
         .subscribe(
           success => {
+            this.modalService.close('pleaseWait2');
             this.router.navigateByUrl('/');
           }
         );
@@ -140,9 +142,11 @@ export class ServerSettingsComponent implements OnInit {
   disableServer() {
     this.isDisabled = true;
     this.isSending = true;
+    this.modalService.open('pleaseWait2');
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
+          this.modalService.close('pleaseWait2');
           this.router.navigateByUrl('/');
         }
       );
@@ -168,14 +172,17 @@ export class ServerSettingsComponent implements OnInit {
 
   send() {
     this.groups = [[]];
+    this.modalService.open('pleaseWait2');
     this.groupsList.forEach(element => {
       this.groups.push([element.title].concat(element.exercises));
     });
     this.serversService.send(this.server.slug, this.exercisesList, this.groups).subscribe(
       data => {
+        this.modalService.close('pleaseWait2');
         this.isDisabled = false;
       },
       err => {
+        this.modalService.close('pleaseWait2');
         this.errors = err;
         this.isSubmitting = false;
       }

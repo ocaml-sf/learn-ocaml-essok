@@ -61,9 +61,11 @@ export class ServerComponent implements OnInit {
 
   deleteServer() {
     this.isDeleting = true;
+    this.modalService.open('pleaseWait2');
     this.serversService.destroy(this.server.slug)
       .subscribe(
         success => {
+          this.modalService.close('pleaseWait2');
           this.router.navigateByUrl('/');
         }
       );
