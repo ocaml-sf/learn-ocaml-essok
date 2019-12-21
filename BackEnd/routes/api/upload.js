@@ -6,6 +6,8 @@ const auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
 var destPath = '';
+const safe_folder = 'exercises/';
+const dirt_folder = 'sandbox/';
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
 const upload_functions = require('../../lib/upload_functions');
@@ -204,41 +206,47 @@ router.post('/send', auth.required, function (req, res, next) {
         }
         user.startProcessing().then(() => {
           console.log('user.processing : ' + user.processing);
-          upload_functions.checkFiles(dir + 'exercises/').then((files) => {
-            upload_functions.delete_useless_files(req.body.useless, dir + 'exercises/', tabOfName, files).then((tabOfName_bis) => {
-              upload_functions.create_new_tabOfName(dir + 'exercises/', tabOfName_bis).then((new_tabOfName) => {
-                upload_functions.create_indexJSON(dir + 'exercises/index.json', new_tabOfName).then((response) => {
-                  // return res.status(422).json({ errors: { file: "index.json created" } });
-                  upload_functions.sendToSwift(dir + 'exercises/', server.slug).then((success) => {
-                    user.endProcessing().then(() => {
-                      console.log('user.processing : ' + user.processing);
+          upload_functions.checkFiles(dir + safe_folder).then((files) => {
+            upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
+              upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then((tabOfName_bis) => {
+                upload_functions.create_new_tabOfName(dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
+                  upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
+                    // return res.status(422).json({ errors: { file: "index.json created" } });
+                    upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
+                      user.endProcessing().then(() => {
+                        console.log('user.processing : ' + user.processing);
+                        return res.send({
+                          success: true,
+                          message: success
+                        });
+                      });
 
-                      return res.send({
-                        success: true,
-                        message: success
+                    }, (err) => {
+                      console.log('Error sendToSwift !: ' + err);
+                      user.endProcessing().then(() => {
+                        return res.status(422).json({ errors: { errors: err } });
                       });
                     });
-
                   }, (err) => {
-                    console.log('Error sendToSwift !: ' + err);
+                    console.log('Error create index.json !: ' + err);
                     user.endProcessing().then(() => {
                       return res.status(422).json({ errors: { errors: err } });
                     });
                   });
                 }, (err) => {
-                  console.log('Error create index.json !: ' + err);
+                  console.log('Error create newTabOfName !: ' + err);
                   user.endProcessing().then(() => {
                     return res.status(422).json({ errors: { errors: err } });
                   });
                 });
               }, (err) => {
-                console.log('Error create newTabOfName !: ' + err);
+                console.log('Error delete useless file !: ' + err);
                 user.endProcessing().then(() => {
                   return res.status(422).json({ errors: { errors: err } });
                 });
               });
             }, (err) => {
-              console.log('Error delete useless file !: ' + err);
+              console.log('Error copy directory !: ' + err);
               user.endProcessing().then(() => {
                 return res.status(422).json({ errors: { errors: err } });
               });

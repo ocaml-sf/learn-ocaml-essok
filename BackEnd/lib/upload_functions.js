@@ -1,4 +1,5 @@
 var fs = require('fs');
+var fsDir = require('fs-extra');
 var unzipper = require('unzipper');
 var url = require('url');
 var child_process = require('child_process');
@@ -363,6 +364,19 @@ function _createDir(path) {
     });
 }
 
+function _copyDir(source, destination) {
+    return new Promise(function (resolve, reject) {
+        fsDir.copy(source, destination, function (err) {
+            if (err) {
+                console.log('An error occured while copying the folder.')
+                return reject(err);
+            }
+            console.log(source + ' folder has been succefully copied in ' + destination);
+            return resolve("ok");
+        });
+    })
+}
+
 var upload_functions = {
     desarchived: function (dest_path, source_path) {
         return _desarchived(dest_path, source_path);
@@ -408,6 +422,9 @@ var upload_functions = {
     },
     createDir: function (path) {
         return _createDir(path);
+    },
+    copyDir: function (source, destination) {
+        return _copyDir(source, destination);
     },
 
 };
