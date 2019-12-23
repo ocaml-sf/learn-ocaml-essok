@@ -7,6 +7,7 @@ var rimraf = require("rimraf");
 const swiftClient = require('../Client/swiftClient');
 const read = require('fs-readdir-recursive');
 const global_functions = require('./global_functions');
+const saveFile = 'index_saved.txt'
 
 function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
@@ -238,7 +239,7 @@ function _delete_useless_files(useless, path, tabOfName, files) {
     });
 }
 
-function _create_new_tabOfName(path, tabOfName) {
+function _create_new_tabOfName(safe_path, path, tabOfName) {
     return new Promise(function (resolve, reject) {
 
         var nameProcessed = 0;
@@ -261,7 +262,13 @@ function _create_new_tabOfName(path, tabOfName) {
                         if (!new_tabOfName.length) {
                             return reject(': No correct files found for index.json');
                         }
-                        else return resolve(new_tabOfName);
+                        else {
+                            _save_tabOfName(safe_path, new_tabOfName).then(() => {
+                                _load_tabOfName(safe_path).then(() => {
+                                    return resolve(new_tabOfName);
+                                })
+                            });
+                        }
                     }
                 },
                     (err) => {
@@ -271,6 +278,43 @@ function _create_new_tabOfName(path, tabOfName) {
             });
         });
     });
+}
+
+function _save_tabOfName(safe_path, tabOfName) {
+    return new Promise(function (resolve, reject) {
+        var line = '';
+        tabOfName.forEach(tab => {
+            tab.forEach(element => {
+                line += element + ' ';
+            });
+            line += '\n';
+        });
+
+        fs.writeFile(safe_path + saveFile, line, function (err) {
+            if (err) {
+                console.log('error in saving tabofname');
+                return reject(err);
+            }
+            console.log('index_saved created');
+            return resolve('ok');
+        })
+    })
+}
+
+function _load_tabOfName(safe_path) {
+    return new Promise(function (resolve, reject) {
+        fs.readFile(safe_path + saveFile, 'utf8', function (err, data) {
+            if (err) {
+                console.log('error in loading tabofname');
+                console.log(err);
+                return resolve([]);
+            }
+            else {
+                console.log(data);
+                return resolve(data);
+            }
+        })
+    })
 }
 
 function _create_indexJSON(path, tabOfName) {
@@ -402,8 +446,8 @@ var upload_functions = {
         return _delete_useless_files(useless, path, tabOfName, files);
     },
 
-    create_new_tabOfName: function (path, tabOfName) {
-        return _create_new_tabOfName(path, tabOfName);
+    create_new_tabOfName: function (safe_path, path, tabOfName) {
+        return _create_new_tabOfName(safe_path, path, tabOfName);
     },
 
     create_indexJSON: function (path, tabOfName) {
@@ -425,6 +469,9 @@ var upload_functions = {
     },
     copyDir: function (source, destination) {
         return _copyDir(source, destination);
+    },
+    load_tabOfName: function (safe_path) {
+        return _load_tabOfName(safe_path);
     },
 
 };

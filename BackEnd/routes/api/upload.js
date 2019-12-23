@@ -63,11 +63,18 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
               upload_functions.createDir(dest_path).then((response) => {
                 upload_functions.desarchived(dest_path, source_path).then((response) => {
                   upload_functions.renameDir(dest_path, dest_path + 'exercises/', true).then((response) => {
+                  // upload_functions.copyDir(destPath, destPath + safe_folder, true).then((response) => {
                     upload_functions.unlinkSync(source_path).then((response) => {
                       upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
-                        console.log(files);
-                        return res.json({
-                          name: files
+                        upload_functions.load_tabOfName(dest_path + safe_folder).then((groups) => {
+                          console.log(files);
+                          console.log(groups);
+                          return res.json({
+                            name: files,
+                            group: groups,
+                          });
+                        }, (err) => {
+                          console.log('Error loading tabofName !: ' + err);
                         });
                       }, (err) => {
                         console.log('Error checkFiles !: ' + err);
@@ -209,30 +216,30 @@ router.post('/send', auth.required, function (req, res, next) {
           upload_functions.checkFiles(dir + safe_folder).then((files) => {
             upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
               upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then((tabOfName_bis) => {
-                upload_functions.create_new_tabOfName(dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
-                  upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
-                    // return res.status(422).json({ errors: { file: "index.json created" } });
-                    upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
-                      user.endProcessing().then(() => {
-                        console.log('user.processing : ' + user.processing);
-                        return res.send({
-                          success: true,
-                          message: success
-                        });
-                      });
-
-                    }, (err) => {
-                      console.log('Error sendToSwift !: ' + err);
-                      user.endProcessing().then(() => {
-                        return res.status(422).json({ errors: { errors: err } });
-                      });
-                    });
-                  }, (err) => {
-                    console.log('Error create index.json !: ' + err);
-                    user.endProcessing().then(() => {
-                      return res.status(422).json({ errors: { errors: err } });
+                upload_functions.create_new_tabOfName(dir + safe_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
+                  // upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
+                  //   // return res.status(422).json({ errors: { file: "index.json created" } });
+                  //   upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
+                  user.endProcessing().then(() => {
+                    console.log('user.processing : ' + user.processing);
+                    return res.send({
+                      success: true,
+                      message: 'ok'
                     });
                   });
+
+                  //   }, (err) => {
+                  //     console.log('Error sendToSwift !: ' + err);
+                  //     user.endProcessing().then(() => {
+                  //       return res.status(422).json({ errors: { errors: err } });
+                  //     });
+                  //   });
+                  // }, (err) => {
+                  //   console.log('Error create index.json !: ' + err);
+                  //   user.endProcessing().then(() => {
+                  //     return res.status(422).json({ errors: { errors: err } });
+                  //   });
+                  // });
                 }, (err) => {
                   console.log('Error create newTabOfName !: ' + err);
                   user.endProcessing().then(() => {
