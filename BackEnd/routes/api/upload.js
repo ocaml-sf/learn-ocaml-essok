@@ -6,6 +6,8 @@ const auth = require('../auth');
 const path = require('path');
 var dirPath = './uploads/';
 var destPath = '';
+var save_folder = 'save/';
+var archive_folder = 'archive/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
 var User = mongoose.model('User');
@@ -55,18 +57,18 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
             success: false
           });
         } else {
-          var dest_path = './uploads/' + server.author.username + '/';
+          var dest_path = dirPath + server.author.username + '/';
           var source_path = dirPath + destPath;
           if (req.file.mimetype === 'application/zip') {
             console.log('file received');
-            upload_functions.removeDir(dest_path).then((response) => {
-              upload_functions.createDir(dest_path).then((response) => {
-                upload_functions.desarchived(dest_path, source_path).then((response) => {
-                  upload_functions.renameDir(dest_path, dest_path + 'exercises/', true).then((response) => {
-                  // upload_functions.copyDir(destPath, destPath + safe_folder, true).then((response) => {
+            // upload_functions.removeDir(dest_path).then((response) => {
+            upload_functions.createArbo(dest_path, safe_folder, dirt_folder, save_folder).then((response) => {
+              upload_functions.desarchived(dest_path, source_path).then((response) => {
+                upload_functions.renameDir(dest_path, dest_path + archive_folder, true).then((response) => {
+                  upload_functions.copyDir(dest_path + archive_folder, dest_path + safe_folder).then((response) => {
                     upload_functions.unlinkSync(source_path).then((response) => {
-                      upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
-                        upload_functions.load_tabOfName(dest_path + safe_folder).then((groups) => {
+                      upload_functions.checkFiles(dest_path + safe_folder).then((files) => {
+                        upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
                           console.log(files);
                           console.log(groups);
                           return res.json({
@@ -82,26 +84,29 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                     }, (err) => {
                       console.log('Error unlink !: ' + err);
                     });
-                  },
-                    (err) => {
-                      console.log('Error renameDir !: ' + err);
-                    },
-                  );
+                  }, (err) => {
+                    console.log('Error copydir !: ' + err);
+                  });
                 },
                   (err) => {
-                    console.log('Error desarchived !: ' + err);
+                    console.log('Error renameDir !: ' + err);
                   },
                 );
               },
                 (err) => {
-                  console.log('Error createDir !: ' + err);
-                  return res.status(422).json({ errors: { errors: err } });
-                });
+                  console.log('Error desarchived !: ' + err);
+                },
+              );
             },
               (err) => {
-                console.log('Error removeDir !: ' + err);
+                console.log('Error createDir !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
+            // },
+            //   (err) => {
+            //     console.log('Error removeDir !: ' + err);
+            //     return res.status(422).json({ errors: { errors: err } });
+            //   });
           } else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
             return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
@@ -216,7 +221,7 @@ router.post('/send', auth.required, function (req, res, next) {
           upload_functions.checkFiles(dir + safe_folder).then((files) => {
             upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
               upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then((tabOfName_bis) => {
-                upload_functions.create_new_tabOfName(dir + safe_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
+                upload_functions.create_new_tabOfName(dir + save_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
                   // upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
                   //   // return res.status(422).json({ errors: { file: "index.json created" } });
                   //   upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
