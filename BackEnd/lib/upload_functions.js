@@ -239,7 +239,7 @@ function _delete_useless_files(useless, path, tabOfName, files) {
     });
 }
 
-function _create_new_tabOfName(safe_path, path, tabOfName) {
+function _create_new_tabOfName(save_path, path, tabOfName) {
     return new Promise(function (resolve, reject) {
 
         var nameProcessed = 0;
@@ -263,8 +263,8 @@ function _create_new_tabOfName(safe_path, path, tabOfName) {
                             return reject(': No correct files found for index.json');
                         }
                         else {
-                            _save_tabOfName(safe_path, new_tabOfName).then(() => {
-                                _load_tabOfName(safe_path).then(() => {
+                            _save_tabOfName(save_path, new_tabOfName).then(() => {
+                                _load_tabOfName(save_path).then(() => {
                                     return resolve(new_tabOfName);
                                 })
                             });
@@ -280,7 +280,7 @@ function _create_new_tabOfName(safe_path, path, tabOfName) {
     });
 }
 
-function _save_tabOfName(safe_path, tabOfName) {
+function _save_tabOfName(save_path, tabOfName) {
     return new Promise(function (resolve, reject) {
         var line = '';
         tabOfName.forEach(tab => {
@@ -290,7 +290,7 @@ function _save_tabOfName(safe_path, tabOfName) {
             line += '\n';
         });
 
-        fs.writeFile(safe_path + saveFile, line, function (err) {
+        fs.writeFile(save_path + saveFile, line, function (err) {
             if (err) {
                 console.log('error in saving tabofname');
                 return reject(err);
@@ -301,17 +301,30 @@ function _save_tabOfName(safe_path, tabOfName) {
     })
 }
 
-function _load_tabOfName(safe_path) {
+function _load_tabOfName(save_path) {
     return new Promise(function (resolve, reject) {
-        fs.readFile(safe_path + saveFile, 'utf8', function (err, data) {
+        fs.readFile(save_path + saveFile, 'utf8', function (err, data) {
             if (err) {
-                console.log('error in loading tabofname');
-                console.log(err);
-                return resolve([]);
-            }
-            else {
+                if (err.code === 'ENOENT') {
+                    console.error('The save file doesnt exist now, it is the first time the repository is created');
+                    return resolve([]);
+                } else {
+                    return resolve([]);
+                    console.log(err);
+                    return reject(err);
+                }
+            } else {
                 console.log(data);
-                return resolve(data);
+                var res = []
+
+                // console.log('group ' + group);
+
+                // group.split(' ').forEach(element => {
+
+                //     console.log('element ' + element);
+                // })
+
+                return resolve(data.split('\n'));
             }
         })
     })
@@ -401,9 +414,43 @@ function _renameDir(oldPath, newPath, unknown) {
 
 function _createDir(path) {
     return new Promise(function (resolve, reject) {
-        return fs.mkdir(path, function (err) {
-            if (err) return reject(err);
-            return resolve('created');
+        fs.mkdir(path, function (err) {
+            if (err) {
+                if (err.code === 'EEXIST') {
+                    console.error('my repository already exists');
+                } else {
+                    return reject(err);
+                }
+            }
+            return resolve('ok');
+        });
+    });
+}
+
+function _createArbo(path, safe_folder, dirt_folder, save_folder) {
+    return new Promise(function (resolve, reject) {
+        fs.mkdir(path, function (err) {
+            _createDir(path).then(() => {
+                _createDir(path + safe_folder).then(() => {
+                    _createDir(path + dirt_folder).then(() => {
+                        _createDir(path + save_folder).then(() => {
+                            return resolve('done');
+                        }, (err) => {
+                            console.log('Error creating save_folder !: ' + err);
+                            return reject(err);
+                        });
+                    }, (err) => {
+                        console.log('Error creating dirt_folder !: ' + err);
+                        return reject(err);
+                    });
+                }, (err) => {
+                    console.log('Error creating safe_folder !: ' + err);
+                    return reject(err);
+                });
+            }, (err) => {
+                console.log('Error creating path_folder !: ' + err);
+                return reject(err);
+            });
         });
     });
 }
@@ -446,8 +493,8 @@ var upload_functions = {
         return _delete_useless_files(useless, path, tabOfName, files);
     },
 
-    create_new_tabOfName: function (safe_path, path, tabOfName) {
-        return _create_new_tabOfName(safe_path, path, tabOfName);
+    create_new_tabOfName: function (save_path, path, tabOfName) {
+        return _create_new_tabOfName(save_path, path, tabOfName);
     },
 
     create_indexJSON: function (path, tabOfName) {
@@ -464,14 +511,14 @@ var upload_functions = {
     renameDir: function (oldPath, newPath, unknown) {
         return _renameDir(oldPath, newPath, unknown);
     },
-    createDir: function (path) {
-        return _createDir(path);
+    createArbo: function (path, safe_folder, dirt_folder, save_folder) {
+        return _createArbo(path, safe_folder, dirt_folder, save_folder);
     },
     copyDir: function (source, destination) {
         return _copyDir(source, destination);
     },
-    load_tabOfName: function (safe_path) {
-        return _load_tabOfName(safe_path);
+    load_tabOfName: function (save_path) {
+        return _load_tabOfName(save_path);
     },
 
 };
