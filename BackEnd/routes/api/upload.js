@@ -61,7 +61,6 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
           var source_path = dirPath + destPath;
           if (req.file.mimetype === 'application/zip') {
             console.log('file received');
-            // upload_functions.removeDir(dest_path).then((response) => {
             upload_functions.createArbo(dest_path, safe_folder, dirt_folder, save_folder).then((response) => {
               upload_functions.desarchived(dest_path, source_path).then((response) => {
                 upload_functions.renameDir(dest_path, dest_path + archive_folder, true).then((response) => {
@@ -102,11 +101,6 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                 console.log('Error createDir !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
-            // },
-            //   (err) => {
-            //     console.log('Error removeDir !: ' + err);
-            //     return res.status(422).json({ errors: { errors: err } });
-            //   });
           } else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
             return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
@@ -138,7 +132,7 @@ router.post('/url', auth.required, function (req, res, next) {
           repo = repo[repo.length - 1];
         }
         var DOWNLOAD_DIR = './downloads/';
-        var dest_path = './uploads/' + server.author.username + '/';
+        var dest_path = dirPath + server.author.username + '/';
 
         if (upload_functions.parse_url(file_url) !== 'github.com') {
           return res.status(422).json({ errors: { errors: ': URL invalid' } });
@@ -148,9 +142,9 @@ router.post('/url', auth.required, function (req, res, next) {
           upload_functions.removeDir(dest_path).then((response) => {
             upload_functions.createDir(dest_path).then((response) => {
               upload_functions.desarchived(dest_path, archive_path).then((response) => {
-                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + 'exercises/', false).then((response) => {
+                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + safe_folder, false).then((response) => {
                   upload_functions.unlinkSync(archive_path).then((response) => {
-                    upload_functions.checkFiles(dest_path + 'exercises/').then((files) => {
+                    upload_functions.checkFiles(dest_path + safe_folder).then((files) => {
                       console.log(files);
                       return res.json({
                         name: files
@@ -216,35 +210,51 @@ router.post('/send', auth.required, function (req, res, next) {
         if (upload_errors.group_duplicate(tabOfName)) {
           return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
         }
+        var test = false;
         user.startProcessing().then(() => {
           console.log('user.processing : ' + user.processing);
           upload_functions.checkFiles(dir + safe_folder).then((files) => {
             upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
               upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then((tabOfName_bis) => {
                 upload_functions.create_new_tabOfName(dir + save_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
-                  // upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
-                  //   // return res.status(422).json({ errors: { file: "index.json created" } });
-                  //   upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
-                  user.endProcessing().then(() => {
-                    console.log('user.processing : ' + user.processing);
-                    return res.send({
-                      success: true,
-                      message: 'ok'
-                    });
-                  });
 
-                  //   }, (err) => {
-                  //     console.log('Error sendToSwift !: ' + err);
-                  //     user.endProcessing().then(() => {
-                  //       return res.status(422).json({ errors: { errors: err } });
-                  //     });
-                  //   });
-                  // }, (err) => {
-                  //   console.log('Error create index.json !: ' + err);
-                  //   user.endProcessing().then(() => {
-                  //     return res.status(422).json({ errors: { errors: err } });
-                  //   });
-                  // });
+                  if (test) {
+
+                    user.endProcessing().then(() => {
+                      console.log('user.processing : ' + user.processing);
+                      return res.send({
+                        success: true,
+                        message: 'ok'
+                      });
+                    });
+
+                  } else {
+
+                    upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
+                      // return res.status(422).json({ errors: { file: "index.json created" } });
+                      upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
+                        user.endProcessing().then(() => {
+                          console.log('user.processing : ' + user.processing);
+                          return res.send({
+                            success: true,
+                            message: 'ok'
+                          });
+                        });
+                      }, (err) => {
+                        console.log('Error sendToSwift !: ' + err);
+                        user.endProcessing().then(() => {
+                          return res.status(422).json({ errors: { errors: err } });
+                        });
+                      });
+                    }, (err) => {
+                      console.log('Error create index.json !: ' + err);
+                      user.endProcessing().then(() => {
+                        return res.status(422).json({ errors: { errors: err } });
+                      });
+                    });
+
+                  }
+
                 }, (err) => {
                   console.log('Error create newTabOfName !: ' + err);
                   user.endProcessing().then(() => {
