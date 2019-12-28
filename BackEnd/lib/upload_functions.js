@@ -285,7 +285,7 @@ function _save_tabOfName(save_path, tabOfName) {
         var line = '';
         tabOfName.forEach(tab => {
             tab.forEach(element => {
-                line += element + ' ';
+                line += element + '®®®®®';
             });
             line += '\n';
         });
@@ -316,15 +316,22 @@ function _load_tabOfName(save_path) {
             } else {
                 console.log(data);
                 var res = []
-
-                // console.log('group ' + group);
-
-                // group.split(' ').forEach(element => {
-
-                //     console.log('element ' + element);
-                // })
-
-                return resolve(data.split('\n'));
+                var data_ = data.split('\n');
+                for (let index = 0; index < data_.length - 1; index++) {
+                    const element = data_[index];
+                    var items = element.split('®®®®®');
+                    var exercises_ = [];
+                    for (let index = 1; index < items.length - 1; index++) {
+                        exercises_.push(items[index]);
+                    }
+                    var group = {
+                        title: items[0],
+                        exercises: exercises_
+                    }
+                    res.push(group);
+                }
+                console.log(res);
+                return resolve(res);
             }
         })
     })
@@ -427,13 +434,13 @@ function _createDir(path) {
     });
 }
 
-function _createArbo(path, safe_folder, dirt_folder, save_folder) {
+function _createArbo(path, server_name, safe_folder, dirt_folder, save_folder) {
     return new Promise(function (resolve, reject) {
-        fs.mkdir(path, function (err) {
-            _createDir(path).then(() => {
-                _createDir(path + safe_folder).then(() => {
-                    _createDir(path + dirt_folder).then(() => {
-                        _createDir(path + save_folder).then(() => {
+        _createDir(path).then(() => {
+            _createDir(path + server_name).then(() => {
+                _createDir(path + server_name + safe_folder).then(() => {
+                    _createDir(path + server_name + dirt_folder).then(() => {
+                        _createDir(path + server_name + save_folder).then(() => {
                             return resolve('done');
                         }, (err) => {
                             console.log('Error creating save_folder !: ' + err);
@@ -448,10 +455,14 @@ function _createArbo(path, safe_folder, dirt_folder, save_folder) {
                     return reject(err);
                 });
             }, (err) => {
-                console.log('Error creating path_folder !: ' + err);
+                console.log('Error creating path + server name folder !: ' + err);
                 return reject(err);
             });
+        }, (err) => {
+            console.log('Error creating path_folder !: ' + err);
+            return reject(err);
         });
+
     });
 }
 
@@ -511,8 +522,8 @@ var upload_functions = {
     renameDir: function (oldPath, newPath, unknown) {
         return _renameDir(oldPath, newPath, unknown);
     },
-    createArbo: function (path, safe_folder, dirt_folder, save_folder) {
-        return _createArbo(path, safe_folder, dirt_folder, save_folder);
+    createArbo: function (path, server_name, safe_folder, dirt_folder, save_folder) {
+        return _createArbo(path, server_name, safe_folder, dirt_folder, save_folder);
     },
     copyDir: function (source, destination) {
         return _copyDir(source, destination);
