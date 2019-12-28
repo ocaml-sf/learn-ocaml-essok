@@ -29,6 +29,38 @@ router.get('/', auth.required, function (req, res) {
   res.end('file catcher example');
 });
 
+router.get('/index', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) {
+
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+    }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(401); }
+
+    Server.findOne({ slug: req.body.server })
+      .populate('author')
+      .then(function (server) {
+        if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+        if ((server.author.username !== user.username) && (!user.isAdmin())) {
+          console.log(server.author.username);
+          console.log(user.username);
+
+          return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+        }
+        var dest_path = dirPath + server.author.username + server.slug + '/';
+
+        upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
+          return res.json({
+            group: groups,
+          });
+        }, (err) => {
+          console.log('Error loading tabofName !: ' + err);
+        });
+      }).catch(next);
+  }).catch(next);
+});
+
 router.post('/check', auth.required, upload.single('file'), function (req, res, next) {
   console.log(req.body.server);
 
@@ -61,7 +93,8 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
           var source_path = dirPath + destPath;
           if (req.file.mimetype === 'application/zip') {
             console.log('file received');
-            upload_functions.createArbo(dest_path, safe_folder, dirt_folder, save_folder).then((response) => {
+            upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+              dest_path = dest_path + server.slug + '/';
               upload_functions.desarchived(dest_path, source_path).then((response) => {
                 upload_functions.renameDir(dest_path, dest_path + archive_folder, true).then((response) => {
                   upload_functions.copyDir(dest_path + archive_folder, dest_path + safe_folder).then((response) => {
@@ -200,7 +233,7 @@ router.post('/send', auth.required, function (req, res, next) {
         if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
 
-        var dir = './uploads/' + server.author.username + '/';
+        var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
         var tabOfName = req.body.list;
 
         if (!tabOfName || tabOfName === undefined || !tabOfName.length || (tabOfName.length == 1 && tabOfName[0].length < 2)) {
@@ -210,7 +243,7 @@ router.post('/send', auth.required, function (req, res, next) {
         if (upload_errors.group_duplicate(tabOfName)) {
           return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
         }
-        var test = false;
+        var test = true;
         user.startProcessing().then(() => {
           console.log('user.processing : ' + user.processing);
           upload_functions.checkFiles(dir + safe_folder).then((files) => {
