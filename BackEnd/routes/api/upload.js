@@ -48,7 +48,7 @@ router.get('/index', auth.required, function (req, res, next) {
 
           return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
         }
-        var dest_path = dirPath + server.author.username + server.slug + '/';
+        var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
 
         upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
           return res.json({
@@ -91,7 +91,7 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
         } else {
           var dest_path = dirPath + server.author.username + '/';
           var source_path = dirPath + destPath;
-          if (req.file.mimetype === 'application/zip') {
+          if (req.file.mimetype === 'application/zip' || req.file.mimetype === 'application/octet-stream') {
             console.log('file received');
             upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
               dest_path = dest_path + server.slug + '/';
@@ -243,7 +243,7 @@ router.post('/send', auth.required, function (req, res, next) {
         if (upload_errors.group_duplicate(tabOfName)) {
           return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
         }
-        var test = true;
+        var test = false;
         user.startProcessing().then(() => {
           console.log('user.processing : ' + user.processing);
           upload_functions.checkFiles(dir + safe_folder).then((files) => {
