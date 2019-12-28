@@ -29,7 +29,7 @@ router.get('/', auth.required, function (req, res) {
   res.end('file catcher example');
 });
 
-router.get('/index', auth.required, function (req, res, next) {
+router.post('/index', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) {
 
@@ -52,7 +52,7 @@ router.get('/index', auth.required, function (req, res, next) {
 
         upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
           return res.json({
-            group: groups,
+            name: groups,
           });
         }, (err) => {
           console.log('Error loading tabofName !: ' + err);
