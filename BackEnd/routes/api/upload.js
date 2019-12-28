@@ -31,13 +31,9 @@ router.get('/', auth.required, function (req, res) {
 
 router.post('/index', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) {
-
-      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
-    }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.processing) { return res.sendStatus(401); }
-
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
@@ -45,33 +41,26 @@ router.post('/index', auth.required, function (req, res, next) {
         if ((server.author.username !== user.username) && (!user.isAdmin())) {
           console.log(server.author.username);
           console.log(user.username);
-
           return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
         }
         var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
-
         upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
           return res.json({
             name: groups,
           });
         }, (err) => {
           console.log('Error loading tabofName !: ' + err);
+          return res.status(422).json({ errors: { errors: err } });
         });
       }).catch(next);
   }).catch(next);
 });
 
 router.post('/check', auth.required, upload.single('file'), function (req, res, next) {
-  console.log(req.body.server);
-
   User.findById(req.payload.id).then(function (user) {
-    if (!user) {
-
-      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
-    }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.processing) { return res.sendStatus(401); }
-
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
@@ -79,10 +68,8 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
         if ((server.author.username !== user.username) && (!user.isAdmin())) {
           console.log(server.author.username);
           console.log(user.username);
-
           return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
         }
-
         if (!req.file) {
           console.log("No file received");
           return res.send({
@@ -94,46 +81,19 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
           if (req.file.mimetype === 'application/zip' || req.file.mimetype === 'application/octet-stream') {
             console.log('file received');
             upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
-              dest_path = dest_path + server.slug + '/';
-              upload_functions.desarchived(dest_path, source_path).then((response) => {
-                upload_functions.renameDir(dest_path, dest_path + archive_folder, true).then((response) => {
-                  upload_functions.copyDir(dest_path + archive_folder, dest_path + safe_folder).then((response) => {
-                    upload_functions.unlinkSync(source_path).then((response) => {
-                      upload_functions.checkFiles(dest_path + safe_folder).then((files) => {
-                        upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
-                          console.log(files);
-                          console.log(groups);
-                          return res.json({
-                            name: files,
-                            group: groups,
-                          });
-                        }, (err) => {
-                          console.log('Error loading tabofName !: ' + err);
-                        });
-                      }, (err) => {
-                        console.log('Error checkFiles !: ' + err);
-                      });
-                    }, (err) => {
-                      console.log('Error unlink !: ' + err);
-                    });
-                  }, (err) => {
-                    console.log('Error copydir !: ' + err);
-                  });
-                },
-                  (err) => {
-                    console.log('Error renameDir !: ' + err);
-                  },
-                );
-              },
-                (err) => {
-                  console.log('Error desarchived !: ' + err);
-                },
-              );
-            },
-              (err) => {
-                console.log('Error createDir !: ' + err);
+              upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, true, '').then((files) => {
+                console.log(files);
+                return res.json({
+                  name: files,
+                });
+              }, (err) => {
+                console.log('Error archive traitement !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
+            }, (err) => {
+              console.log('Error createArbo !: ' + err);
+              return res.status(422).json({ errors: { errors: err } });
+            });
           } else {
             console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
             return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
@@ -144,77 +104,47 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
 });
 
 router.post('/url', auth.required, function (req, res, next) {
-
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { console.log('file received'); return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.isAdmin() && !user.authorized) { console.log('file received2'); return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.processing) { return res.sendStatus(401); }
-
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
         if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
         if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-
         console.log(req.body);
         var file_url = req.body.url.url + '/archive/master.zip';
-        var repo = req.body.url.url.split('/');
-        if ((repo[repo.length - 1] === "") || (repo[repo.length - 1] === undefined)) {
-          repo = repo[repo.length - 2];
-        } else {
-          repo = repo[repo.length - 1];
-        }
         var DOWNLOAD_DIR = './downloads/';
         var dest_path = dirPath + server.author.username + '/';
-
         if (upload_functions.parse_url(file_url) !== 'github.com') {
           return res.status(422).json({ errors: { errors: ': URL invalid' } });
         }
-
-        upload_functions.download_from_url(file_url, DOWNLOAD_DIR).then((archive_path) => {
-          upload_functions.removeDir(dest_path).then((response) => {
-            upload_functions.createDir(dest_path).then((response) => {
-              upload_functions.desarchived(dest_path, archive_path).then((response) => {
-                upload_functions.renameDir(dest_path + repo + '-master/', dest_path + safe_folder, false).then((response) => {
-                  upload_functions.unlinkSync(archive_path).then((response) => {
-                    upload_functions.checkFiles(dest_path + safe_folder).then((files) => {
-                      console.log(files);
-                      return res.json({
-                        name: files
-                      });
-                    }, (err) => {
-                      console.log('Error checkFiles !: ' + err);
-                      return res.status(422).json({ errors: { errors: err } });
-                    });
-                  }, (err) => {
-                    console.log('Error unlink !: ' + err);
-                    return res.status(422).json({ errors: { errors: err } });
-                  });
-                }, (err) => {
-                  console.log('Error renameDir !: ' + err);
-                  return res.status(422).json({ errors: { errors: err } });
+        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+          upload_functions.createDir(dest_path + server.slug + '/' + DOWNLOAD_DIR).then(() => {
+            upload_functions.download_from_url(file_url, dest_path + server.slug + '/' + DOWNLOAD_DIR).then((source_path) => {
+              upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
+                console.log(files);
+                return res.json({
+                  name: files,
                 });
-              },
-                (err) => {
-                  console.log('Error desarchived !: ' + err);
-                  return res.status(422).json({ errors: { errors: err } });
-                });
-            },
-              (err) => {
-                console.log('Error createDir !: ' + err);
+              }, (err) => {
+                console.log('Error archive traitement !: ' + err);
                 return res.status(422).json({ errors: { errors: err } });
               });
-          },
-            (err) => {
-              console.log('Error removeDir !: ' + err);
+            }, (err) => {
+              console.log('Error createArbo !: ' + err);
               return res.status(422).json({ errors: { errors: err } });
             });
-        },
-          (err) => {
-            console.log('Error download from url !: ' + err);
-            var message = upload_errors.wget_error(err.code) + err.message;
-            return res.status(422).send({ errors: { message } });
+          }, (err) => {
+            console.log('Error getRepo !: ' + err);
+            return res.status(422).json({ errors: { errors: err } });
           });
+        }, (err) => {
+          console.log('Error download from url !: ' + err);
+          var message = upload_errors.wget_error(err.code) + err.message;
+          return res.status(422).send({ errors: { message } });
+        });
       }).catch(next);
   }).catch(next);
 });
@@ -225,21 +155,16 @@ router.post('/send', auth.required, function (req, res, next) {
     if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.processing) { return res.sendStatus(401); }
-
     Server.findOne({ slug: req.body.server })
       .populate('author')
       .then(function (server) {
         if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
         if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-
-
         var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
         var tabOfName = req.body.list;
-
         if (!tabOfName || tabOfName === undefined || !tabOfName.length || (tabOfName.length == 1 && tabOfName[0].length < 2)) {
           return res.status(422).send({ errors: { file: ": No groups received" } });
         }
-
         if (upload_errors.group_duplicate(tabOfName)) {
           return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
         }
@@ -313,7 +238,6 @@ router.post('/send', auth.required, function (req, res, next) {
             });
           });
         });
-
       }).catch(next);
   }).catch(next);
 });

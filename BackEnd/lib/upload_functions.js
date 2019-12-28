@@ -399,7 +399,7 @@ function _removeDir(path) {
     });
 }
 
-function _renameDir(oldPath, newPath, unknown) {
+function _renameDir(oldPath, newPath, unknown, remove_if_not_empty) {
     return new Promise(function (resolve, reject) {
         if (unknown) {
             fs.readdir(oldPath, function (err, files) {
@@ -413,10 +413,26 @@ function _renameDir(oldPath, newPath, unknown) {
             })
         } else {
             fs.rename(oldPath, newPath, function (err) {
-                if (err) return reject(err);
+                if (err) {
+                    return reject(err);
+                }
                 return resolve('renamed');
             })
         }
+
+    })
+}
+
+function _moveDir(oldPath, newPath) {
+    return new Promise(function (resolve, reject) {
+        fsDir.move(oldPath, newPath, function (err) {
+            if (err) {
+                return reject(err);
+            }
+            else {
+                return resolve('ok');
+            }
+        })
 
     })
 }
@@ -481,43 +497,70 @@ function _copyDir(source, destination) {
     })
 }
 
+function _archive_traitement(dest_path, source_path, archive_folder, safe_folder) {
+    return new Promise(function (resolve, reject) {
+        _desarchived(dest_path + archive_folder, source_path).then((response) => {
+            _checkFiles(dest_path + archive_folder).then((archive_name) => {
+                _copyDir(dest_path + archive_folder + archive_name[0], dest_path + safe_folder).then((response) => {
+                    _removeDir(dest_path + archive_folder).then(() => {
+                        _unlinkSync(source_path).then((response) => {
+                            _checkFiles(dest_path + safe_folder).then((files) => {
+                                return resolve(files);
+                            }, (err) => {
+                                console.log('Error checkFiles !: ' + err);
+                                return reject(err);
+                            });
+                        }, (err) => {
+                            console.log('Error unlink !: ' + err);
+                            return reject(err);
+                        });
+                    }, (err) => {
+                        console.log('Error removeDir !: ' + err);
+                        return reject(err);
+                    });
+                }, (err) => {
+                    console.log('Error copydir !: ' + err);
+                    return reject(err);
+                });
+            }, (err) => {
+                console.log('Error checkFiles !: ' + err);
+                return reject(err);
+            });
+        }, (err) => {
+            console.log('Error desarchived !: ' + err);
+            return reject(err);
+        });
+    });
+}
+
 var upload_functions = {
     desarchived: function (dest_path, source_path) {
         return _desarchived(dest_path, source_path);
     },
-
     checkFiles: function (path) {
         return _checkFiles(path);
     },
-
     unlinkSync: function (path) {
         return _unlinkSync(path);
     },
-
     parse_url: function (file_url) {
         return url.parse(file_url).host;
     },
-
     download_from_url: function (file_url, dest_path) {
         return _download_from_url(file_url, dest_path);
     },
-
     delete_useless_files: function (useless, path, tabOfName, files) {
         return _delete_useless_files(useless, path, tabOfName, files);
     },
-
     create_new_tabOfName: function (save_path, path, tabOfName) {
         return _create_new_tabOfName(save_path, path, tabOfName);
     },
-
     create_indexJSON: function (path, tabOfName) {
         return _create_indexJSON(path, tabOfName);
     },
-
     sendToSwift: function (path, slug) {
         return _sendToSwift(path, slug);
     },
-
     removeDir: function (path) {
         return _removeDir(path);
     },
@@ -532,6 +575,12 @@ var upload_functions = {
     },
     load_tabOfName: function (save_path) {
         return _load_tabOfName(save_path);
+    },
+    archive_traitement: function (dest_path, source_path, archive_folder, safe_folder) {
+        return _archive_traitement(dest_path, source_path, archive_folder, safe_folder);
+    },
+    createDir: function (path) {
+        return _createDir(path);
     },
 
 };
