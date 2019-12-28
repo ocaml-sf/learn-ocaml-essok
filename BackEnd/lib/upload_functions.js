@@ -1,13 +1,15 @@
-var fs = require('fs');
-var fsDir = require('fs-extra');
-var unzipper = require('unzipper');
-var url = require('url');
-var child_process = require('child_process');
-var rimraf = require("rimraf");
+const fs = require('fs');
+const fsDir = require('fs-extra');
+const unzipper = require('unzipper');
+const url = require('url');
+const child_process = require('child_process');
+const rimraf = require("rimraf");
 const swiftClient = require('../Client/swiftClient');
 const read = require('fs-readdir-recursive');
 const global_functions = require('./global_functions');
 const saveFile = 'index_saved.txt'
+const separator = '®';
+const new_separator = '';
 
 function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
@@ -55,12 +57,12 @@ function addFileInTabOfName(element, tmp) {
         var new_group = [];
         for (let i = 0; i < element.length; i++) {
             if (i === 0) {
-                new_group.push(element[i]);
+                new_group.push(element[i].replace(separator, new_separator));
             }
             else {
                 if (tmp.includes(element[i])) {
                     console.log(tmp + ' contains : ' + element[i] + ' so it will be push in ' + new_group);
-                    new_group.push(element[i]);
+                    new_group.push(element[i].replace(separator, new_separator));
                     console.log('new_group : ' + new_group);
                 }
                 if (i == element.length - 1) {
@@ -285,7 +287,7 @@ function _save_tabOfName(save_path, tabOfName) {
         var line = '';
         tabOfName.forEach(tab => {
             tab.forEach(element => {
-                line += element + '®®®®®';
+                line += element + separator;
             });
             line += '\n';
         });
@@ -319,7 +321,7 @@ function _load_tabOfName(save_path) {
                 var data_ = data.split('\n');
                 for (let index = 0; index < data_.length - 1; index++) {
                     const element = data_[index];
-                    var items = element.split('®®®®®');
+                    var items = element.split(separator);
                     var exercises_ = [];
                     for (let index = 1; index < items.length - 1; index++) {
                         exercises_.push(items[index]);
