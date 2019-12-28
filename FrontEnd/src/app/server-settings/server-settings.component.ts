@@ -67,6 +67,7 @@ export class ServerSettingsComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadGroups();
     this.uploadPrepare();
     this.router.navigateByUrl('/server-settings/' + this.server.slug);
   }
@@ -81,14 +82,28 @@ export class ServerSettingsComponent implements OnInit {
     });
   }
 
+  loadGroups() {
+    this.serversService.getGroups(this.server.slug).subscribe(
+      data => {
+        /*modify here*/
+        this.useless = JSON.parse(JSON.stringify(data));
+        // this.groupsList = this.useless.name;
+        console.log(this.useless.name);
+        /*modify here */
+      },
+      err => {
+        this.errors = err;
+      }
+    )
+  }
+
   uploadPrepare() {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
-      this.groupsList = [];
-      // this.groupsList = this.useless.group;
+      this.groupsList = []; //may be remove this line after setting up loadGroups
       this.idIndex = 1;
       // move to the next slide
     };

@@ -61,4 +61,8 @@ export class ServersService {
   send(slug, useless, list) {
     return this.apiService.post('/uploads/send', { server: slug, useless, list });
   }
+
+  getGroups(slug) {
+    return this.apiService.post('/uploads/index', { server: slug });
+  }
 }
