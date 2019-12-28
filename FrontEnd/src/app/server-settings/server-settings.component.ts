@@ -60,7 +60,7 @@ export class ServerSettingsComponent implements OnInit {
       {
         url: URL,
         authToken: `Token ${token}`,
-        allowedMimeType: ['application/zip'/*, 'application/gzip'*/],
+        allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
       }
     );
   }
