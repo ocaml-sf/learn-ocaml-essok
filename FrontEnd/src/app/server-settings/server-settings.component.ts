@@ -65,6 +65,10 @@ export class ServerSettingsComponent implements OnInit {
     );
   }
 
+  generateGroupID() {
+    return 'group' + (this.idIndex++);
+  }
+
   ngOnInit() {
     this.loadData();
     this.loadGroups();
@@ -85,11 +89,9 @@ export class ServerSettingsComponent implements OnInit {
   loadGroups() {
     this.serversService.getGroups(this.server.slug).subscribe(
       data => {
-        /*modify here*/
         this.useless = JSON.parse(JSON.stringify(data));
-        // this.groupsList = this.useless.name;
-        console.log(this.useless.name);
-        /*modify here */
+        this.groupsList = this.useless.name.map(
+          group => { return {...group, id: this.generateGroupID()}; });
       },
       err => {
         this.errors = err;
@@ -103,7 +105,6 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
-      this.groupsList = []; //may be remove this line after setting up loadGroups
       this.idIndex = 1;
       // move to the next slide
     };
@@ -227,7 +228,7 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   createGroup(event: CdkDragDrop<string[]>) {
-    const title = 'group' + (this.idIndex++);
+    const title = this.generateGroupID();
     const newGroup = { id: title, title: title, exercises: [] };
     const previousContainer = event.previousContainer;
 
