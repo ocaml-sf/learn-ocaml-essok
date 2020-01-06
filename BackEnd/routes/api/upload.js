@@ -45,8 +45,14 @@ router.post('/index', auth.required, function (req, res, next) {
         }
         var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
         upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
-          return res.json({
-            name: groups,
+          upload_functions.checkFiles(dest_path + safe_folder).then((files) => {
+            return res.json({
+              name: files,
+              group: groups
+            });
+          }, (err) => {
+            console.log('Error checkFiles !: ' + err);
+            return res.status(422).json({ errors: { errors: err } });
           });
         }, (err) => {
           console.log('Error loading tabofName !: ' + err);

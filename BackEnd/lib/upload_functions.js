@@ -166,12 +166,12 @@ function _checkFiles(path) {
             fs.readdir(path, function (err, files) {
                 if (err) return reject(err);
                 else if (!files.length) {
-                    return reject('File not found');
+                    return resolve([]);
                 }
                 else return resolve(files);
             })
         } else {
-            return reject('File not found');
+            return resolve([]);
         }
     });
 }

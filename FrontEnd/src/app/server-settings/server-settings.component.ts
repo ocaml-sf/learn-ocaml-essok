@@ -90,8 +90,9 @@ export class ServerSettingsComponent implements OnInit {
     this.serversService.getGroups(this.server.slug).subscribe(
       data => {
         this.useless = JSON.parse(JSON.stringify(data));
-        this.groupsList = this.useless.name.map(
-          group => { return {...group, id: this.generateGroupID()}; });
+        this.groupsList = this.useless.group.map(
+          group => { return { ...group, id: this.generateGroupID() }; });
+        this.exercisesList = this.useless.name;
       },
       err => {
         this.errors = err;
