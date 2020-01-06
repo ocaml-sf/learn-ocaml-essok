@@ -33,10 +33,8 @@ export class ServerSettingsComponent implements OnInit {
   exercises: any[];
   idIndex = 1;
   exercisesList = [];
-  groups: String[][];
+  exercisesDroplist = [];
   groupsList = [];
-  allExercisesID = ['exercises-list', 'create-group',
-    ...this.groupsList.map(group => group.id)];
   useless: ExercisesList = {} as ExercisesList;
   constructor(
     private router: Router,
@@ -63,6 +61,12 @@ export class ServerSettingsComponent implements OnInit {
         allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
       }
     );
+  }
+
+  updateExercisesDroplist() {
+    this.exercisesDroplist = ['exercises-list', 'create-group',
+                              ...this.groupsList.map(group => group.id)];
+    console.log(this.exercisesDroplist);
   }
 
   generateGroupID() {
@@ -92,6 +96,7 @@ export class ServerSettingsComponent implements OnInit {
         this.useless = JSON.parse(JSON.stringify(data));
         this.groupsList = this.useless.group.map(
           group => { return { ...group, id: this.generateGroupID() }; });
+        this.updateExercisesDroplist()
         this.exercisesList = this.useless.name;
       },
       err => {
@@ -106,6 +111,7 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
+      this.updateExercisesDroplist()
       this.idIndex = 1;
       // move to the next slide
     };
@@ -189,12 +195,12 @@ export class ServerSettingsComponent implements OnInit {
   // }
 
   send() {
-    this.groups = [[]];
+    var groups = [[]];
     this.modalService.open('pleaseWait2');
     this.groupsList.forEach(element => {
-      this.groups.push([element.title].concat(element.exercises));
+      groups.push([element.title].concat(element.exercises));
     });
-    this.serversService.send(this.server.slug, this.exercisesList, this.groups).subscribe(
+    this.serversService.send(this.server.slug, this.exercisesList, groups).subscribe(
       data => {
         this.modalService.close('pleaseWait2');
         this.isDisabled = false;
@@ -234,7 +240,7 @@ export class ServerSettingsComponent implements OnInit {
     const previousContainer = event.previousContainer;
 
     this.groupsList.push(newGroup);
-    this.allExercisesID.push(title);
+    this.updateExercisesDroplist();
     transferArrayItem(event.previousContainer.data,
       newGroup.exercises,
       event.previousIndex,
@@ -245,9 +251,9 @@ export class ServerSettingsComponent implements OnInit {
   deleteGroupCheck(id, data) {
     if (id !== 'exercises-list' && data.length === 0) {
       this.groupsList = this.groupsList.filter(group => group.id !== id);
-      this.allExercisesID = this.allExercisesID.filter(iId => iId !== id);
+      this.updateExercisesDroplist();
       console.log(this.groupsList);
-      console.log(this.allExercisesID);
+      console.log(this.exercisesDroplist);
     }
   }
 }
