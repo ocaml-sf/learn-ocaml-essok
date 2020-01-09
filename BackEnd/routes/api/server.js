@@ -5,6 +5,7 @@ var User = mongoose.model('User');
 var auth = require('../auth');
 var events = require('events');
 const server_functions = require('../../lib/server_functions');
+const log_functions = require('../../lib/log_functions');
 
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
@@ -22,8 +23,13 @@ router.param('server', function (req, res, next, slug) {
 router.get('/', auth.required, function (req, res, next) {
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) {
+      log_functions.create('error', 'get /server/', 'user unknown, value ' + user, null, req.server);
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+    }
+    if (!user.isAdmin() && !user.authorized) { 
+      
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
 
     if ((user.username !== req.query.author) && !user.isAdmin()) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     var author = req.query.author;
