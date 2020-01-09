@@ -45,7 +45,7 @@ function _createNamespacedIngress(rule, namespace) {
     });
 };
 
-function _createObjectDeployment(slug, volume) {
+function _createObjectDeployment(slug) {
     return {
         apiVersion: 'apps/v1',
         kind: 'Deployment',
@@ -72,36 +72,39 @@ function _createObjectDeployment(slug, volume) {
                     containers: [
                         {
                             name: 'learn-ocaml',
-                            image: 'ocamlsf/learn-ocaml:latest',
+                            image: 'ocamlsf/learnocaml-essok-dockerfile:latest',
                             ports: [
                                 {
                                     containerPort: 8080
                                 }
                             ],
-                            volumeMounts: [
+                            env: [
                                 {
-                                    name: slug,
-                                    mountPath: '/repository/',
-                                    subPath: 'repository',
+                                    name: 'OS_AUTH_URL',
+                                    value: OS.authUrl
                                 },
                                 {
-                                    name: slug,
-                                    mountPath: '/sync/',
-                                    subPath: 'sync',
+                                    name: 'OS_IDENTIY_API_VERSION',
+                                    value: OS.identityApiVersion
+                                },
+                                {
+                                    name: 'OS_USERNAME',
+                                    value: OS.username
+                                },
+                                {
+                                    name: 'OS_PASSWORD',
+                                    value: OS.password
+                                },
+                                {
+                                    name: 'OS_PROJECT_ID',
+                                    value: OS.tenantID
+                                },
+                                {
+                                    name: 'OS_REGION_NAME',
+                                    value: OS.region
                                 }
-                            ]
-                        }
-                    ],
-                    securityContext: {
-                        fsGroup: 1000
-                    },
-                    volumes: [
-                        {
-                            name: slug,
-                            cinder: {
-                                volumeID: volume,
-                                fsType: 'ext4'
-                            }
+                            ],
+                            args: [ slug ]
                         }
                     ]
                 }
@@ -150,103 +153,6 @@ function _createObjectRule(slug, username) {
     }
 }
 
-function _createObjectPVC(slug, namespace) {
-    return {
-        apiVersion: 'v1',
-        kind: 'PersistentVolumeClaim',
-        metadata: {
-            name: slug,
-            namespace: namespace
-        },
-        spec: {
-            accessModes: [
-                'ReadWriteOnce'
-            ],
-            resources: {
-                requests: {
-                    storage: '1Gi'
-                }
-            },
-            storageClassName: 'cinder-classic',
-            volumeMode: 'Filesystem'
-        }
-    };
-}
-function _createObjectJob(slug, backupType, backupCommand, volume) {
-    return {
-        apiVersion: 'batch/v1',
-        kind: 'Job',
-        metadata: {
-            name: backupType + '-' + slug
-        },
-        spec: {
-            ttlSecondsAfterFinished: 0,
-            template: {
-                spec: {
-                    containers: [
-                        {
-                            image: 'python',
-                            name: slug,
-                            env: [
-                                {
-                                    name: 'OS_AUTH_URL',
-                                    value: OS.authUrl
-                                },
-                                {
-                                    name: 'OS_IDENTIY_API_VERSION',
-                                    value: OS.identityApiVersion
-                                },
-                                {
-                                    name: 'OS_USERNAME',
-                                    value: OS.username
-                                },
-                                {
-                                    name: 'OS_PASSWORD',
-                                    value: OS.password
-                                },
-                                {
-                                    name: 'OS_TENANT_ID',
-                                    value: OS.tenantID
-                                },
-                                {
-                                    name: 'OS_REGION_NAME',
-                                    value: OS.region
-                                }
-                            ],
-                            command: [
-                                '/bin/sh'
-                            ],
-                            args: [
-                                '-c',
-                                backupCommand
-                            ],
-                            volumeMounts: [
-                                {
-                                    name: slug,
-                                    mountPath: '/volume/'
-                                }
-                            ]
-                        },
-                    ],
-                    restartPolicy: 'OnFailure',
-                    securityContext: {
-                        fsGroup: 1000
-                    },
-                    volumes: [
-                        {
-                            name: slug,
-                            cinder: {
-                                volumeID: volume,
-                                fsType: 'ext4'
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-    }
-}
-
 function _createObjectContainer(slug) {
     return {
         name: slug,
@@ -254,11 +160,11 @@ function _createObjectContainer(slug) {
     }
 }
 
-function _createkubelink(volume, slug, username, namespace) {
+function _createkubelink(slug, username, namespace) {
     return new Promise(function (resolve, reject) {
+        var deployment = _createObjectDeployment(slug);
         var service = _createObjectService(slug);
         var rule = _createObjectRule(slug, username);
-        var deployment = _createObjectDeployment(slug, volume);
         _createNamespacedDeployment(deployment, namespace).then((response) => {
             _createNamespacedService(service, namespace).then((response) => {
                 _createNamespacedIngress(rule, namespace).then((response) => {
@@ -404,168 +310,11 @@ function _removekubelink(slug, namespace) {
     });
 };
 
-function _deleteNamespacedPersistentVolumeClaim(slug, namespace) {
-    return new Promise(function (resolve, reject) {
-        k8sApi.readNamespacedPersistentVolumeClaim(slug, namespace).then((response) => {
-            return resolve(k8sApi.deleteNamespacedPersistentVolumeClaim(slug, namespace));
-        }, (err) => {
-            console.log('PVC doesnt exist');
-            return resolve('PVC doesnt exist');
-        });
-    });
-}
-
-function _listPersistentVolume(slug) {
-    return new Promise(function (resolve, reject) {
-        k8sApi.listPersistentVolume().then((response) => {
-            var itemsProcessed = 0;
-            response.body.items.forEach((element, index, array) => {
-                global_functions.asyncFunction(element, () => {
-                    if (element.spec.claimRef.name === slug) {
-                        console.log('volumeID found : ' + element.spec.cinder.volumeID);
-                        return resolve(element.spec.cinder.volumeID);
-                    }
-                    itemsProcessed++;
-                    if (itemsProcessed === array.length) {
-                        console.log('volumeID not found');
-                        return reject('volumeID not found');
-                    }
-                });
-            });
-        }, (err) => {
-            console.log('Error!: ' + err);
-            return reject(err);
-        });
-    });
-};
-
-function _backup(slug, backupType, backupCommand, volume, namespace) {
-    return new Promise(function (resolve, reject) {
-        var job = _createObjectJob(slug, backupType, backupCommand, volume);
-        k8sApiJobs.createNamespacedJob(namespace, job).then((response) => {
-            var jobInProgress = setInterval(function () {
-                k8sApiJobs.listNamespacedJob(namespace).then((response) => {
-                    response.body.items.forEach(item => {
-                        if (item.metadata.name === backupType + "-" + slug) {
-                            console.log('job found');
-                            console.log('job succeeded : ' + item.status.succeeded);
-                            if (item.status.succeeded !== undefined) {
-                                console.log('job done');
-                                clearInterval(jobInProgress);
-                                k8sApiJobs.deleteNamespacedJob(backupType + '-' + slug, namespace).then((response) => {
-                                    console.log('jobs deleted')
-                                    k8sApi.deleteNamespacedPod(backupType + '-' + slug, namespace).then((response) => {
-                                        return resolve('success');
-                                    }, (err) => {
-                                        console.log(err);
-
-                                        return resolve('success');
-                                    });
-                                }, (err) => {
-                                    console.log(err);
-                                    return reject(err);
-                                });
-                            }
-                        }
-                    });
-                }, (err) => {
-                    console.log(err);
-                    return reject(err);
-                });
-            }, 5000);
-        }, (err) => {
-            console.log(err);
-            return reject(err);
-        });
-    });
-};
-
-function _backupUpload(volume, slug, namespace) {
-    var backupType = 'upload';
-    var backupCommand = 'pip install --no-cache python-swiftclient python-keystoneclient;' +
-        'swift download ' + slug + ' -D /volume/';
-    console.log('asking for upload');
-    return _backup(slug, backupType, backupCommand, volume, namespace);
-};
-
-function _backupDownload(volume, slug, namespace) {
-    var backupType = 'download';
-    var backupCommand = 'pip install --no-cache python-swiftclient python-keystoneclient;' +
-        'rm -rf /volume/lost+found;' + 'swift upload ' + slug + ' /volume/ --object-name /';
-    console.log('asking for download');
-    return _backup(slug, backupType, backupCommand, volume, namespace);
-};
-
-function _createNamespacedPersistentVolumeClaim(slug, namespace) {
-    var serverCreated = false;
-    var pvc = _createObjectPVC(slug, namespace);
-    return new Promise(function (resolve, reject) {
-        k8sApi.createNamespacedPersistentVolumeClaim(namespace, pvc)
-            .then((response) => {
-                console.log('Volume ' + slug + ' claimed');
-                var serverInCreation = setInterval(function () {
-                    k8sApi.listNamespacedPersistentVolumeClaim(namespace).then((response) => {
-                        response.body.items.forEach(element => {
-                            if (element.metadata.name === slug) {
-                                console.log('item found ' + element);
-                                status = element.status.phase;
-                                console.log('status found ' + status);
-                                if (element.status.phase === 'Bound') {
-                                    serverCreated = true;
-                                    console.log('status bound found !');
-                                    clearInterval(serverInCreation);
-                                    return resolve('created');
-                                }
-                            }
-                        });
-                    });
-                }, 3000);
-            }, (err) => {
-                // Actually the only error is 'Already Claimed' so it's temporary put to okay until a better error biding, that need some time, so to fix ...
-                return resolve(err);
-            });
-    });
-}
-
-function _createPersistentVolumeAndLinkKube(slug, username, namespace) {
-    return new Promise(function (resolve, reject) {
-        var serverCreated = false;
-        var pvc = _createObjectPVC(slug, namespace);
-        _createNamespacedPersistentVolumeClaim(slug, namespace)
-            .then((response) => {
-                _listPersistentVolume(slug).then((volume) => {
-                    _backupUpload(volume, slug, namespace).then((response) => {
-                        console.log('backup ok');
-                        _createkubelink(volume, slug, username, namespace).then((response) => {
-                            console.log('server shut on');
-                            return resolve(volume);
-                        }, (err) => {
-                            return reject(err);
-                        });
-                    }, (err) => {
-                        //abort all
-                        return reject(err);
-                    });
-                }, (err) => {
-                    return reject(err);
-                });
-            });
-    });
-};
-
-function _shut_off(slug, namespace, volume) {
+function _shut_off(slug, namespace) {
     return new Promise(function (resolve, reject) {
         _removekubelink(slug, namespace).then((response) => {
-            _backupDownload(volume, slug, namespace).then((response) => {
-                _deleteNamespacedPersistentVolumeClaim(slug, namespace).then((response) => {
-                    console.log('server shut off');
-                    return resolve('done');
-                }, (err) => {
-                    return reject(err);
-                });
-            }, (err) => {
-                return reject(err);
-            });
+            console.log('server shut off');
+            return resolve('done');
         }, (err) => {
             return reject(err);
         });
@@ -576,16 +325,10 @@ function _delete(slug, namespace) {
     return new Promise(function (resolve, reject) {
         _removekubelink(slug, namespace).then((response) => {
             console.log('kubelink removed');
-            _deleteNamespacedPersistentVolumeClaim(slug, namespace).then((response) => {
-                console.log('pvc removed');
-                _destroySwiftContainer(slug).then((response) => {
-                    console.log('swift container removed');
-                    console.log('server deleted');
-                    return resolve('done');
-                }, (err) => {
-                    console.log(err);
-                    return reject(err);
-                });
+            _destroySwiftContainer(slug).then((response) => {
+                console.log('swift container removed');
+                console.log('server deleted');
+                return resolve('done');
             }, (err) => {
                 console.log(err);
                 return reject(err);
@@ -598,26 +341,15 @@ function _delete(slug, namespace) {
 }
 
 var server_functions = {
-    createNamespacedDeployment: function (deployment) {
-        return _createNamespacedDeployment(deployment);
-    },
+    createNamespacedDeployment: _createNamespacedDeployment,
 
-    createSwiftContainer: function (slug) {
-        return _createSwiftContainer(slug);
-    },
+    createSwiftContainer: _createSwiftContainer,
 
-    shut_on: function (slug, username, namespace) {
-        return _createPersistentVolumeAndLinkKube(slug, username, namespace);
-    },
+    shut_on: _createkubelink,
 
-    shut_off: function (slug, namespace, volume) {
-        return _shut_off(slug, namespace, volume);
-    },
+    shut_off: _removekubelink,
 
-    delete: function (slug, namespace) {
-        return _delete(slug, namespace);
-    },
-
+    delete: _delete
 }
 
 module.exports = server_functions;
