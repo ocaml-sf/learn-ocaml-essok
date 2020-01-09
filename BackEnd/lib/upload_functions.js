@@ -534,55 +534,24 @@ function _archive_traitement(dest_path, source_path, archive_folder, safe_folder
 }
 
 var upload_functions = {
-    desarchived: function (dest_path, source_path) {
-        return _desarchived(dest_path, source_path);
-    },
-    checkFiles: function (path) {
-        return _checkFiles(path);
-    },
-    unlinkSync: function (path) {
-        return _unlinkSync(path);
-    },
+    desarchived: _desarchived,
+    checkFiles: _checkFiles,
+    unlinkSync: _unlinkSync,
+    download_from_url: _download_from_url,
+    delete_useless_files: _delete_useless_files,
+    create_new_tabOfName: _create_new_tabOfName,
+    create_indexJSON: _create_indexJSON,
+    sendToSwift: _sendToSwift,
+    removeDir: _removeDir,
+    renameDir: _renameDir,
+    createArbo: _createArbo,
+    copyDir: _copyDir,
+    load_tabOfName: _load_tabOfName,
+    archive_traitement: _archive_traitement,
+    createDir: _createDir,
     parse_url: function (file_url) {
         return url.parse(file_url).host;
     },
-    download_from_url: function (file_url, dest_path) {
-        return _download_from_url(file_url, dest_path);
-    },
-    delete_useless_files: function (useless, path, tabOfName, files) {
-        return _delete_useless_files(useless, path, tabOfName, files);
-    },
-    create_new_tabOfName: function (save_path, path, tabOfName) {
-        return _create_new_tabOfName(save_path, path, tabOfName);
-    },
-    create_indexJSON: function (path, tabOfName) {
-        return _create_indexJSON(path, tabOfName);
-    },
-    sendToSwift: function (path, slug) {
-        return _sendToSwift(path, slug);
-    },
-    removeDir: function (path) {
-        return _removeDir(path);
-    },
-    renameDir: function (oldPath, newPath, unknown) {
-        return _renameDir(oldPath, newPath, unknown);
-    },
-    createArbo: function (path, server_name, safe_folder, dirt_folder, save_folder) {
-        return _createArbo(path, server_name, safe_folder, dirt_folder, save_folder);
-    },
-    copyDir: function (source, destination) {
-        return _copyDir(source, destination);
-    },
-    load_tabOfName: function (save_path) {
-        return _load_tabOfName(save_path);
-    },
-    archive_traitement: function (dest_path, source_path, archive_folder, safe_folder) {
-        return _archive_traitement(dest_path, source_path, archive_folder, safe_folder);
-    },
-    createDir: function (path) {
-        return _createDir(path);
-    },
-
 };
 
 module.exports = upload_functions;

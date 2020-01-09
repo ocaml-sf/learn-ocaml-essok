@@ -6,9 +6,7 @@ function _asyncFunction(item, cb) {
 }
 
 var global_functions = {
-    asyncFunction: function (item, cb) {
-        return _asyncFunction(item, cb);
-    },
+    asyncFunction: _asyncFunction,
 }
 
 module.exports = global_functions;

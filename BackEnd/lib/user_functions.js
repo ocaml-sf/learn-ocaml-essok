@@ -19,15 +19,9 @@ function _createObjectNamespace(_name) {
     };
 }
 var user_functions = {
-    createNamespace: function (namespace) {
-        return _createNamespace(namespace);
-    },
-    readNamespace: function (namespace) {
-        return _readNamespace(namespace);
-    },
-    createObjectNamespace: function (name) {
-        return _createObjectNamespace(name);
-    },
+    createNamespace: _createNamespace,
+    readNamespace: _readNamespace,
+    createObjectNamespace: _createObjectNamespace,
 }
 
 module.exports = user_functions;

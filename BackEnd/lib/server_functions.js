@@ -4,7 +4,6 @@ kc.loadFromDefault();
 const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
-const k8sApiJobs = kc.makeApiClient(k8s.BatchV1Api);
 
 k8sApiIngress.defaultHeaders = {
     'Content-Type': 'application/strategic-merge-patch+json',
@@ -104,7 +103,7 @@ function _createObjectDeployment(slug) {
                                     value: OS.region
                                 }
                             ],
-                            args: [ slug ]
+                            args: [slug]
                         }
                     ]
                 }
@@ -310,17 +309,6 @@ function _removekubelink(slug, namespace) {
     });
 };
 
-function _shut_off(slug, namespace) {
-    return new Promise(function (resolve, reject) {
-        _removekubelink(slug, namespace).then((response) => {
-            console.log('server shut off');
-            return resolve('done');
-        }, (err) => {
-            return reject(err);
-        });
-    });
-}
-
 function _delete(slug, namespace) {
     return new Promise(function (resolve, reject) {
         _removekubelink(slug, namespace).then((response) => {
@@ -342,13 +330,9 @@ function _delete(slug, namespace) {
 
 var server_functions = {
     createNamespacedDeployment: _createNamespacedDeployment,
-
     createSwiftContainer: _createSwiftContainer,
-
     shut_on: _createkubelink,
-
     shut_off: _removekubelink,
-
     delete: _delete
 }
 
