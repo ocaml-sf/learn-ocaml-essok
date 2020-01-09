@@ -1,9 +1,14 @@
 var mongoose = require('mongoose');
 var Log = mongoose.model('Log');
 
-function _create(type, action, author = null, server = null) {
+function _create(type, action, message = null, author = null, server = null) {
     return new Promise((resolve, reject) => {
-        var log = new Log(type, action, author, server);
+        var log = new Log();
+        log.type = type;
+        log.action = action;
+        log.message = message;
+        log.author = author;
+        log.server = server;
         return log.save().then(() => {
             console.log(log);
             return resolve(log);
