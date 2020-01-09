@@ -40,6 +40,7 @@ if (isProduction) {
 
 require('./models/User');
 require('./models/Server');
+require('./models/Log');
 require('./config/passport');
 
 /// catch 404 and forward to error handler
