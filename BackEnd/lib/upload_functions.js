@@ -347,7 +347,7 @@ function _create_indexJSON(path, tabOfName) {
                 console.log('body created : \n' + body);
                 create_IndexJSON_footer().then((footer) => {
                     console.log('footer created : \n' + footer);
-                    fs.appendFile(path, header + body + footer, function (err) {
+                    fs.writeFile(path, header + body + footer, function (err) {
                         if (err) return reject(err);
                         console.log('index.json : ' + header + body + footer);
                         return resolve(path + 'exercises/index.json');
