@@ -86,6 +86,20 @@ UserSchema.methods.findAllUsers = function (query, limit, offset) {
   }
 };
 
+UserSchema.methods.findAllLogs = function (query, limit, offset) {
+  if (this.isAdmin()) {
+
+    return Promise.all([
+      mongoose.model('Log').find(query)
+        .limit(Number(limit))
+        .skip(Number(offset))
+        .sort({ createdAt: 'desc' })
+        .exec(),
+      mongoose.model('Log').countDocuments(query).exec(),
+    ]);
+  }
+};
+
 UserSchema.methods.findAnUser = function (author) {
   return Promise.all([
     author ? mongoose.model('User').findOne({ username: author }) : null,
