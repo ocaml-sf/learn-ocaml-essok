@@ -6,7 +6,7 @@ import { SharedModule } from '../shared';
 import { ServerSettingsComponent } from './server-settings.component';
 import { ServerSettingsRoutingModule } from './server-settings-routing.module';
 import { ServerSettingsResolver } from './server-settings-resolver.service';
-import { FileSelectDirective } from 'ng2-file-upload';
+import { FileUploadModule } from 'ng2-file-upload';
 import { ModalModule } from '../modal';
 
 @NgModule({
@@ -16,10 +16,10 @@ import { ModalModule } from '../modal';
     DragDropModule,
     ScrollingModule,
     ModalModule,
+    FileUploadModule,
   ],
   declarations: [
     ServerSettingsComponent,
-    FileSelectDirective
   ],
 
   providers: [
