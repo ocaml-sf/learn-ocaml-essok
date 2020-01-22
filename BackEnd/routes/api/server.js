@@ -117,7 +117,7 @@ router.get('/:server', auth.required, function (req, res, next) {
 
     if ((user.username !== server.author.username) && (!user.isAdmin())) {
       log_functions.create('error', 'get /server/:' + req.server.slug,
-        'user unauthorized to access the server, his is trying to access a not owned server', user, req.server);
+        'user unauthorized to access the server, he is trying to access a not owned server', user, req.server);
       return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
     }
     log_functions.create('general', 'get /server/:' + req.server.slug, 'ok', user, req.server);
