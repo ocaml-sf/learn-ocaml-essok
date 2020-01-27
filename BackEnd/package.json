@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "mongo:start": "docker run --name realworld-mongo -p 27017:27017 mongo & sleep 5",
-    "start": "node ./app.js",
+    "start": "pm2 start ./app.js -i 2",
     "dev": "nodemon ./app.js --ignore ./uploads",
     "test": "newman run ./tests/api-tests.postman.json -e ./tests/env-api-tests.postman.json",
     "stop": "lsof -ti :3000 | xargs kill",
@@ -32,6 +32,7 @@
     "fs-readdir-recursive": "^1.1.0",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.2.0",
+    "helmet": "^3.21.2",
     "jsonwebtoken": "8.5.1",
     "method-override": "3.0.0",
     "methods": "1.1.2",
