@@ -7,8 +7,9 @@ import { FileUploader } from 'ng2-file-upload/';
 import { map } from 'rxjs/operators';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ModalService } from '../modal';
+import { environment } from '../../environments/environment';
 
-const URL = 'http://localhost:3000/api/uploads/check';
+const URL = environment.api_url + '/uploads/check';
 
 @Component({
   selector: 'app-server-settings-page',
@@ -57,8 +58,8 @@ export class ServerSettingsComponent implements OnInit {
     this.uploader = new FileUploader(
       {
         url: URL,
-        authToken: `Token ${token}`,
-        allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
+        authToken: `Token ${token}`
+        //allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
       }
     );
   }

@@ -41,7 +41,7 @@ if (!isProduction) {
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/esso');
+  mongoose.connect('mongodb://localhost/esso', { useNewUrlParser: true });
   mongoose.set('debug', true);
 }
 
