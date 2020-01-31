@@ -53,11 +53,11 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileService
       .getUser(this.profile.username)
       .subscribe(
-        (userTM: any) => {
+        userTM => {
           Object.assign(this.userToModify, userTM);
           Object.assign(this.userBase, userTM);
         },
-        (err: Object) => {
+        err => {
           this.errors = err;
         }
       );
@@ -75,8 +75,8 @@ export class ProfileSettingsComponent implements OnInit {
     this.userService
       .update(this.userToModify, this.userBase)
       .subscribe(
-        (updatedUser: { username: string }) => this.router.navigateByUrl('/profile/' + updatedUser.username),
-        (err: Object) => {
+        updatedUser => this.router.navigateByUrl('/profile/' + updatedUser.username),
+        err => {
           this.errors = err;
           this.isSubmitting = false;
         }
@@ -91,21 +91,22 @@ export class ProfileSettingsComponent implements OnInit {
     this.userService
       .activateAccount(this.userToModify)
       .subscribe(
-        (_success: any) =>
+        success =>
           this.router.navigateByUrl('/'),
-        (err: Object) => {
+        err => {
           this.errors = err;
           this.isSubmitting = false;
         }
       );
   }
-  authorizeAccount(){
+
+  authorizeAccount() {
     this.userService
       .authorizeAccount(this.userToModify)
       .subscribe(
-        (_success: any) =>
+        success =>
           this.router.navigateByUrl('/'),
-        (err: Object) => {
+        err => {
           this.errors = err;
           this.isSubmitting = false;
         }

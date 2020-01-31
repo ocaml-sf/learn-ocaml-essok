@@ -32,8 +32,8 @@ export class UserService {
     if (this.jwtService.getToken()) {
       this.apiService.get('/user')
         .subscribe(
-          (data: { user: User; }) => this.setAuth(data.user),
-          (err: any) => this.purgeAuth()
+          data => this.setAuth(data.user),
+          err => this.purgeAuth()
         );
     } else {
       // Remove any potential remnants of previous auth states
@@ -59,21 +59,21 @@ export class UserService {
     this.isAdminSubject.next(false);
   }
 
-  attemptAuth(type: string | String, credentials: any): Observable<User> {
+  attemptAuth(type, credentials): Observable<User> {
     const route = (type === 'login') ? '/login' : '';
     return this.apiService.post('/users' + route, { user: credentials })
       .pipe(map(
-        (data: { user: User }) => {
+        data => {
           this.setAuth(data.user);
           return data;
         }
       ));
   }
 
-  attemptChangePassword(credentialsReset: any, credentialsLogin: any): Observable<User> {
+  attemptChangePassword(credentialsReset, credentialsLogin): Observable<User> {
     return this.apiService.post('/reset-password', { reset: credentialsReset, user: credentialsLogin })
       .pipe(map(
-        (data: { user: any }) => {
+        data => {
           this.currentUserSubject.next(data.user);
           return data.user;
         }
@@ -85,27 +85,27 @@ export class UserService {
   }
 
   // Update the user on the server (email, pass, etc)
-  update(user: User, userBase: User): Observable<User> {
+  update(user, userBase): Observable<User> {
     return this.apiService
       .put('/user', { user: user, userBase: userBase })
-      .pipe(map((data: { user: any }) => data.user));
+      .pipe(map(data => data.user));
 
   }
 
-  disable(credentialsDisable: any, credentialsLogin: any): Observable<User> {
+  disable(credentialsDisable, credentialsLogin): Observable<User> {
     return this.apiService
       .post(
         '/users/disable/',
         { user: credentialsLogin, disable: credentialsDisable }
       )
-      .pipe(map((data: { user: any }) => {
+      .pipe(map(data => {
         this.currentUserSubject.next(data.user);
         return data.user;
       }
       ));
   }
 
-  delete(credentialsDisable: any, credentialsLogin: any): Observable<User> {
+  delete(credentialsDisable, credentialsLogin): Observable<User> {
     return this.apiService
       .post(
         '/users/delete/',
@@ -129,16 +129,16 @@ export class UserService {
       );
   }
 
-  activateAccount(user: User): Observable<User> {
+  activateAccount(user): Observable<User> {
     return this.apiService
       .post('/user/activate', { user })
-      .pipe(map((data: { user: any }) => data.user));
+      .pipe(map(data => data.user));
   }
 
-  authorizeAccount(user: User): Observable<User> {
+  authorizeAccount(user): Observable<User> {
     return this.apiService
       .post('/user/authorize', { user })
-      .pipe(map((data: { user: any }) => data.user));
+      .pipe(map(data => data.user));
   }
 
 }
