@@ -80,7 +80,8 @@
 /BackEnd/.node_repl_history
 
 # Uploads files
-/BackEnd/uploads
+/BackEnd/uploads/**/
+/BackEnd/uploads/.*
 
 /BackEnd/.idea
 /BackEnd/Client/OS.js
