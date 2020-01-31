@@ -42,6 +42,7 @@ if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
   mongoose.connect('mongodb://localhost/essok', { useNewUrlParser: true });
+  mongoose.set('useCreateIndex', true);
   mongoose.set('debug', true);
 }
 
