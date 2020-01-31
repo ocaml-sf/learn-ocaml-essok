@@ -63,7 +63,7 @@ export class UserService {
     const route = (type === 'login') ? '/login' : '';
     return this.apiService.post('/users' + route, { user: credentials })
       .pipe(map(
-        (data: { user: User; }) => {
+        (data: { user: User }) => {
           this.setAuth(data.user);
           return data;
         }
@@ -73,7 +73,7 @@ export class UserService {
   attemptChangePassword(credentialsReset: any, credentialsLogin: any): Observable<User> {
     return this.apiService.post('/reset-password', { reset: credentialsReset, user: credentialsLogin })
       .pipe(map(
-        (data: { user: any; }) => {
+        (data: { user: any }) => {
           this.currentUserSubject.next(data.user);
           return data.user;
         }
@@ -88,7 +88,7 @@ export class UserService {
   update(user: User, userBase: User): Observable<User> {
     return this.apiService
       .put('/user', { user: user, userBase: userBase })
-      .pipe(map((data: { user: any; }) => data.user));
+      .pipe(map((data: { user: any }) => data.user));
 
   }
 
@@ -98,7 +98,7 @@ export class UserService {
         '/users/disable/',
         { user: credentialsLogin, disable: credentialsDisable }
       )
-      .pipe(map((data: { user: any; }) => {
+      .pipe(map((data: { user: any }) => {
         this.currentUserSubject.next(data.user);
         return data.user;
       }
@@ -132,13 +132,13 @@ export class UserService {
   activateAccount(user: User): Observable<User> {
     return this.apiService
       .post('/user/activate', { user })
-      .pipe(map((data: { user: any; }) => data.user));
+      .pipe(map((data: { user: any }) => data.user));
   }
 
   authorizeAccount(user: User): Observable<User> {
     return this.apiService
       .post('/user/authorize', { user })
-      .pipe(map((data: { user: any; }) => data.user));
+      .pipe(map((data: { user: any }) => data.user));
   }
 
 }

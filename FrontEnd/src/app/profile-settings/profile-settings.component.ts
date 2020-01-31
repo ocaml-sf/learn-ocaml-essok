@@ -75,7 +75,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.userService
       .update(this.userToModify, this.userBase)
       .subscribe(
-        (updatedUser: { username: string; }) => this.router.navigateByUrl('/profile/' + updatedUser.username),
+        (updatedUser: { username: string }) => this.router.navigateByUrl('/profile/' + updatedUser.username),
         (err: Object) => {
           this.errors = err;
           this.isSubmitting = false;
