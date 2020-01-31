@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.disable('x-powered-by');
 app.use(require('method-override')());
-app.use(express.static('dist/'));
+//app.use(express.static('dist/'));
 // add secret inputline to use memory based secret
 app.use(session({ secret: 'essok', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 

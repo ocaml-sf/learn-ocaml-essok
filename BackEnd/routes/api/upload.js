@@ -84,7 +84,10 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
         } else {
           var dest_path = dirPath + server.author.username + '/';
           var source_path = dirPath + destPath;
-          if (req.file.mimetype === 'application/zip' || req.file.mimetype === 'application/octet-stream') {
+          var mimetype = req.file.mimetype;
+          if (mimetype === 'application/zip' 
+		|| mimetype === 'application/octet-stream'
+		|| mimetype === 'application/x-zip-compressed') {
             console.log('file received');
             upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
               upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, true, '').then((files) => {
