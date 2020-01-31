@@ -63,6 +63,17 @@
             <br />
             <br />
           </div>
+          <div class="warning" *ngIf="user.admin">
+            <h2>DEBUG ZONE (ADMIN ONLY)</h2>
+            <p>AUTHORIZE THE ACCOUNT:</p>
+            <p>If they were a bug and an account has been unauthorized and is blocked you can click here to solve the problem.
+            </p>
+            <button class="btn btn-outline-warning" (click)="authorizeAccount()">
+              Click here to make the account great again !
+            </button>
+            <br />
+            <br />
+          </div>
           <hr />
           <div class="danger" *ngIf="userToModify.authorized || user.admin">
             <h2>Dangerous ZONE</h2>
