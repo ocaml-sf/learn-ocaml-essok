@@ -111,6 +111,12 @@ Run
 
 For a dev server.
 
+Run 
+
+`ng build --prod`
+
+For a prod server. The production files will be generated in dist/ folder.
+
 Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Run Backend
@@ -121,7 +127,11 @@ Run
 
 For a dev server.
 
+Run 
 
+`sudo npm install pm2 -g && npm run start`
+
+For a prod server
 
 ## Optionnal steps : 
 
