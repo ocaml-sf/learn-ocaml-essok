@@ -24,6 +24,7 @@
 /FrontEnd/!.vscode/tasks.json
 /FrontEnd/!.vscode/launch.json
 /FrontEnd/!.vscode/extensions.json
+/**/.log/
 
 # misc
 /FrontEnd//.sass-cache
