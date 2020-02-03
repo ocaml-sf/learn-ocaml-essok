@@ -13,6 +13,8 @@ var swiftClient = require('../Client/swiftClient');
 var OS = require('../Client/OS');
 const global_functions = require('./global_functions');
 
+const podLabelPrefix = 'app=';
+
 function _createNamespacedDeployment(deployment, namespace) {
     return k8sApiDeploy.createNamespacedDeployment(namespace, deployment);
 }
@@ -20,6 +22,19 @@ function _createNamespacedDeployment(deployment, namespace) {
 function _readNamespacedDeployment(slug, namespace) {
     return k8sApiDeploy.readNamespacedDeployment(slug, namespace);
 };
+
+function _readNamespacedPod(slug, namespace) {
+    return k8sApi.listNamespacedPod(namespace, undefined, undefined, undefined,
+				    undefined, podLabelPrefix + slug);
+}
+
+function _readNamespacedPodLog(slug, namespace) {
+    return _readNamespacedPod(slug, namespace)
+	.then((res) => {
+	    var name = res.body.items[0].metadata.name;
+	    return k8sApi.readNamespacedPodLog(name, namespace);
+	});
+}
 
 function _createNamespacedService(service, namespace) {
     return k8sApi.createNamespacedService(namespace, service);
@@ -333,7 +348,8 @@ var server_functions = {
     createSwiftContainer: _createSwiftContainer,
     shut_on: _createkubelink,
     shut_off: _removekubelink,
-    delete: _delete
-}
+    delete: _delete,
+    readNamespacedPodLog: _readNamespacedPodLog
+};
 
 module.exports = server_functions;
