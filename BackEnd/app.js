@@ -1,4 +1,4 @@
-var http = require('http'),
+const https = require('https'),
   path = require('path'),
   methods = require('methods'),
   express = require('express'),
@@ -7,7 +7,14 @@ var http = require('http'),
   cors = require('cors'),
   passport = require('passport'),
   errorhandler = require('errorhandler'),
-  mongoose = require('mongoose');
+  mongoose = require('mongoose'),
+  helmet = require('helmet'),
+  fs = require('fs')
+// options = {
+//   key: fs.readFileSync('/.pem', 'utf8'),
+//   cert: fs.readFileSync('/.pem', 'utf8'),
+//   dhparam: fs.readFileSync('/.pem', 'utf8')
+// }
 
 var isProduction = process.env.NODE_ENV === 'production';
 
@@ -20,10 +27,10 @@ app.use(cors());
 app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use(helmet());
+app.disable('x-powered-by');
 app.use(require('method-override')());
-app.use(express.static(__dirname + '/public'));
-
+//app.use(express.static('dist/'));
 // add secret inputline to use memory based secret
 app.use(session({ secret: 'essok', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
@@ -34,7 +41,8 @@ if (!isProduction) {
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/esso');
+  mongoose.connect('mongodb://localhost/essok', { useNewUrlParser: true });
+  mongoose.set('useCreateIndex', true);
   mongoose.set('debug', true);
 }
 
@@ -90,3 +98,5 @@ app.use(function (err, req, res, next) {
 var server = app.listen(process.env.PORT || 3000, function () {
   console.log('Listening on port ' + server.address().port);
 });
+
+// https.createServer(options, app).listen(8080);

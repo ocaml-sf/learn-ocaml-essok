@@ -99,4 +99,17 @@ export class ProfileSettingsComponent implements OnInit {
         }
       );
   }
+
+  authorizeAccount() {
+    this.userService
+      .authorizeAccount(this.userToModify)
+      .subscribe(
+        success =>
+          this.router.navigateByUrl('/'),
+        err => {
+          this.errors = err;
+          this.isSubmitting = false;
+        }
+      );
+  }
 }

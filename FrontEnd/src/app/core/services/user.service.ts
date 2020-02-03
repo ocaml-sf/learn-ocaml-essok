@@ -135,4 +135,10 @@ export class UserService {
       .pipe(map(data => data.user));
   }
 
+  authorizeAccount(user): Observable<User> {
+    return this.apiService
+      .post('/user/authorize', { user })
+      .pipe(map(data => data.user));
+  }
+
 }

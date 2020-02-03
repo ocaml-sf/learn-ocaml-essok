@@ -78,8 +78,8 @@ export class HomeComponent implements OnInit {
   authFalse() {
     this.route.url.subscribe(data => {
       this.title = 'Home';
-      this.header = 'This is the header of the home page';
-      this.body = 'This is the body of the home page';
+      this.header = 'Welcome';
+      this.body = 'This site is currently in developpement, please report here : https://github.com/ocaml-sf/learn-ocaml-essok any issue you encounter.';
     });
   }
 

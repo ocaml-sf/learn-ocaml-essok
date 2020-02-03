@@ -386,4 +386,18 @@ router.post('/user/activate', auth.required, function (req, res, next) {
   }).catch(next);
 });
 
+router.post('/user/authorize', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    if (!user.isAdmin()) { return res.sendStatus(401); }
+    user.findAnUser(req.body.user.username).then(function (userToActivate) {
+      userToActivate[0].authorized = true;
+      userToActivate[0].processing = false;
+      userToActivate[0].save().then(function () {
+        return res.json({ user: userToActivate[0].toAuthJSON() });
+      }).catch(next);
+    }).catch(next);
+  }).catch(next);
+});
+
 module.exports = router;

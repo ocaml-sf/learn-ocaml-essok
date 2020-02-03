@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Server, ServersService, ApiService, JwtService, ExercisesList } from '../core';
-import { FileUploader, FileSelectDirective, FileUploaderOptions } from 'ng2-file-upload/ng2-file-upload';
+import { FileUploader } from 'ng2-file-upload/';
 // import { FileService } from '../core/services/file.service';
 import { map } from 'rxjs/operators';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ModalService } from '../modal';
+import { environment } from '../../environments/environment';
 
-const URL = 'http://localhost:3000/api/uploads/check';
+const URL = environment.api_url + '/uploads/check';
 
 @Component({
   selector: 'app-server-settings-page',
@@ -57,15 +58,15 @@ export class ServerSettingsComponent implements OnInit {
     this.uploader = new FileUploader(
       {
         url: URL,
-        authToken: `Token ${token}`,
-        allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
+        authToken: `Token ${token}`
+        //allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
       }
     );
   }
 
   updateExercisesDroplist() {
     this.exercisesDroplist = ['exercises-list', 'create-group',
-                              ...this.groupsList.map(group => group.id)];
+      ...this.groupsList.map(group => group.id)];
     console.log(this.exercisesDroplist);
   }
 

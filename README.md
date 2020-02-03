@@ -60,7 +60,7 @@ After installing Kubectl we need to setup our config, so make this
 `mkdir ~/.kube`
 
 Then put your kubernetes config file in this reposotory.
-Hopefully you can retrieve your config file from OVH go to your project pannel then search for your config setup in your project settings (down on the right pannel to find it) then download the config file, rename it as "config" (no extension, just config) then past it inside the .kube repository in your HOME.
+Hopefully you can retrieve your config file from OVH go to your `project pannel` then search for your config setup in `Containers & Orchestration` section then `Managed Kubernetes Service` then click on your project name, then scroll down and click on `kubeconfig`. Wait the file creation and download the config file, rename it as "config" (no extension, just config) then past it inside the .kube repository in your HOME. Well done !
 
 Tips : your OVH project administrator and/or your Kubernetes expert will help you a lot if this step is too harsh for you !
 
@@ -111,6 +111,12 @@ Run
 
 For a dev server.
 
+Run 
+
+`ng build --prod`
+
+For a prod server. The production files will be generated in dist/ folder.
+
 Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Run Backend
@@ -121,7 +127,11 @@ Run
 
 For a dev server.
 
+Run 
 
+`sudo npm install pm2 -g && npm run start`
+
+For a prod server
 
 ## Optionnal steps : 
 

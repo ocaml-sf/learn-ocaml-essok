@@ -19,8 +19,8 @@ export class HelpComponent implements OnInit {
   ngOnInit() {
     this.route.url.subscribe(data => {
       this.title = 'Help';
-      this.header = 'This is the header of the contact page';
-      this.body = 'This is the body of the contact page';
+      this.header = 'Help page';
+      this.body = 'if you need any help please contact : sebastien.lecleire@etu.univ-paris-diderot.fr or astyax.nourel@etu.univ-paris-diderot.fr or yrg@irif.fr';
     });
   }
 
