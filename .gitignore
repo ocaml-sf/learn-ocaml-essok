@@ -85,7 +85,5 @@
 /BackEnd/uploads/.*
 
 /BackEnd/.idea
-/BackEnd/Client/OS.js
-/BackEnd/downloads
-/BackEnd/app.js
+/BackEnd/configs/OS.js
 /BackEnd/dist
