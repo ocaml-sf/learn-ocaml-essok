@@ -1,5 +1,5 @@
 var openstack = require('pkgcloud');
-var OS = require('./OS');
+var OS = require('../configs/OS');
 
 var swiftClient = openstack.storage.createClient({
     provider: OS.provider,
