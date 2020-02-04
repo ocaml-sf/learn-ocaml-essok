@@ -112,8 +112,7 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
-      this.updateExercisesDroplist()
-      this.idIndex = 1;
+      this.loadGroups();
       // move to the next slide
     };
   }
@@ -135,8 +134,7 @@ export class ServerSettingsComponent implements OnInit {
         this.modalService.close('pleaseWait2');
         this.useless = JSON.parse(JSON.stringify(data));
         this.exercisesList = this.useless.name;
-        this.groupsList = [];
-        this.idIndex = 1;
+        this.loadGroups();
       },
       err => {
         this.modalService.close('pleaseWait2');
