@@ -1,16 +1,28 @@
 <div class="server-preview">
 
   <a [routerLink]="['/server', server.slug]" class="preview-link" *ngIf="server.active">
+    <i>Status : Online</i>
     <h1>{{ server.title }}</h1>
     <p>{{ server.description }}</p>
-    <hr />
 
   </a>
   <a [routerLink]="['/server', server.slug]" class="preview-link-archived" *ngIf="!server.active">
-    <i>Offline</i>
+    <i>Status : Offline</i>
     <h1>{{ server.title }}</h1>
-    <p>{{ server.description }}</p>
-    <hr />
 
   </a>
+  <h3>{{ server.description }}
+    <div *ngIf="server.active">
+      <div *ngIf="server.token">
+        Teacher token : {{server.token}}<br />
+      </div>
+      <div *ngIf="!server.token">
+        Teacher token : <button type="button" class="btn btn-outline-warning" (click)="getToken()">Click here to retrieve your teacher
+          token</button><br />
+      </div>
+
+      Server URL : <a href="http://{{server.url}}" target="_blank">{{server.url}}</a>
+    </div>
+  </h3>
+  <hr />
 </div>

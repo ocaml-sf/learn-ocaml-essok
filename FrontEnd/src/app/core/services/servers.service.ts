@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ServersService {
+
   constructor(
     private apiService: ApiService
   ) { }
@@ -64,5 +65,10 @@ export class ServersService {
 
   getGroups(slug) {
     return this.apiService.post('/uploads/index', { server: slug });
+  }
+
+  getToken(slug) {
+    return this.apiService.post('/servers/token/' + slug, { server: slug })
+      .pipe(map(data => data.server));
   }
 }

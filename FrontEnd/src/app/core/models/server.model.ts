@@ -10,4 +10,6 @@ export interface Server {
   updatedAt: string;
   author: Profile;
   active: boolean;
+  token: string;
+  url: string;
 }
