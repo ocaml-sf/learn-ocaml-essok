@@ -15,13 +15,14 @@ function _tryFindTeacherToken(log, regexp, regexp_len) {
     var index = log.indexOf(regexp);
     if(index === -1)
 	return undefined;
-    return log.substr(index + regexp, token_len);
+    return log.substr(index + regexp_len, token_len);
 }
 
 function _tryAllFindTeacherToken(log) {
     var try1 = _tryFindTeacherToken(log, token_regexp1, token_regexp1_len);
-    if(try1 === undefined)
-	return _tryFindTeacherToken(log, token_regexp2, token_regexp2_len);
+    if(try1 !== undefined)
+	return try1;
+    return _tryFindTeacherToken(log, token_regexp2, token_regexp2_len);
 }
 
 var global_functions = {
