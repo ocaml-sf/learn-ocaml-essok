@@ -9,8 +9,9 @@ k8sApiIngress.defaultHeaders = {
     'Content-Type': 'application/strategic-merge-patch+json',
     ...k8sApiIngress.defaultHeaders,
 };
-var swiftClient = require('../Client/swiftClient');
-var OS = require('../Client/OS');
+var swiftClient = require('../clients/swiftClient');
+var OS = require('../configs/OS');
+
 const global_functions = require('./global_functions');
 
 const podLabelPrefix = 'app=';

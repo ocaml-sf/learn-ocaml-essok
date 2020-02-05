@@ -144,7 +144,7 @@ router.put('/:server', auth.required, function (req, res, next) {
         'user unauthorized to access the server, his account is processing', user, req.server);
       return res.sendStatus(401);
     }
-    if (req.server.author._id.toString() === req.payload.id.toString()) {
+    if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
       if (typeof req.body.server.title !== 'undefined') {
         req.server.title = req.body.server.title;
@@ -301,6 +301,60 @@ router.delete('/:server', auth.required, function (req, res, next) {
       });
     } else {
       log_functions.create('error', 'delete /server/:' + req.server.slug,
+        'user unauthorized to access the server, his is trying to access a not owned server', user, req.server);
+      return res.sendStatus(403);
+    }
+  }).catch(next);
+});
+
+router.post('/token/:server', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        'user unknown, value ' + user, user, req.server);
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+    }
+    if (!user.active) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        'user unauthorized to access the server, his account is disabled', user, req.server);
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        'user unauthorized to access the server, his account is not already activated', user, req.server);
+      return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+    }
+
+    if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+
+      if (req.server.token !== undefined) {
+        console.log(req.server.token);
+        return res.status(422).send({ errors: 'teacher token already retrieve' });
+      }
+      else {
+        user.startProcessing().then(() => {
+
+          /* insert function to retrieve the token
+          *
+          * something like : req.server.token = server_functions.getToken(); 
+          *
+          **/
+          log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server)
+          return req.server.save().then(function () {
+            user.endProcessing().then(() => {
+              return res.json({ server: req.server.toJSONFor(user) });
+            }, (err) => {
+              user.endProcessing().then(() => {
+                log_functions.create('error', 'post /server/',
+                  'user failed to retrieve his token teacher for the server:' + req.server.slug, user, req.server);
+                return res.status(422).send({ errors: { err } });
+              });
+            });
+          });
+        });
+      }
+    } else {
+      log_functions.create('error', 'get /server/disable/:' + req.server.slug,
         'user unauthorized to access the server, his is trying to access a not owned server', user, req.server);
       return res.sendStatus(403);
     }

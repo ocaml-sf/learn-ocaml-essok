@@ -49,7 +49,7 @@ if (isProduction) {
 require('./models/User');
 require('./models/Server');
 require('./models/Log');
-require('./config/passport');
+require('./configs/passport');
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {

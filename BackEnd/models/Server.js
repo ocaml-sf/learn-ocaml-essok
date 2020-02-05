@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 var slug = require('slug');
+const domain = 'learnocaml.site';
 
 var ServerSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true },
@@ -11,7 +12,8 @@ var ServerSchema = new mongoose.Schema({
   volume: String,
   active: { type: Boolean, default: false },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  token: String
+  token: String,
+  url: String
 }, { timestamps: true });
 
 ServerSchema.plugin(uniqueValidator, { message: 'is already taken' });
@@ -20,6 +22,7 @@ ServerSchema.pre('validate', function (next) {
   if (!this.slug) {
     this.slugify();
   }
+  this.url = this.author.username + '.' + this.slug + '.' + domain;
   next();
 });
 
@@ -39,7 +42,8 @@ ServerSchema.methods.toJSONFor = function (user) {
     author: this.author.toProfileJSONFor(user),
     active: this.active,
     volume: this.volume,
-    token: this.token
+    token: this.token,
+    url: this.url
   };
 };
 
