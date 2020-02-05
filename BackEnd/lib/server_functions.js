@@ -52,18 +52,22 @@ function _tryGetTeacherToken(slug, namespace) {
 }
 
 async function _catchTeacherToken(slug, namespace) {
-    var promise;
     var token = undefined;
     
     while(token === undefined) {
-	token = await new Promise((resolve) => {
+	token = await new Promise((resolve, reject) => {
 	    setTimeout(() => {
-		_tryGetTeacherToken(slug, namespace).then(resolve);
-	    }, 1000);
+		_tryGetTeacherToken(slug, namespace)
+		    .then(resolve)
+		    .catch(reject);
+	    }, intervalTime);
+	}).catch((err) => {
+	    console.log(err);
+	    return 'error';
 	});
     }
-    if(token === -1)
-	return undefined;
+    if(token === 'error')
+	token = undefined;
     return token;
 }
 
