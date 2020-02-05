@@ -10,7 +10,8 @@ var ServerSchema = new mongoose.Schema({
   vue: String,
   volume: String,
   active: { type: Boolean, default: false },
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  token: String
 }, { timestamps: true });
 
 ServerSchema.plugin(uniqueValidator, { message: 'is already taken' });
@@ -38,6 +39,7 @@ ServerSchema.methods.toJSONFor = function (user) {
     author: this.author.toProfileJSONFor(user),
     active: this.active,
     volume: this.volume,
+    token: this.token
   };
 };
 

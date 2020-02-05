@@ -14,6 +14,7 @@ var OS = require('../Client/OS');
 const global_functions = require('./global_functions');
 
 const podLabelPrefix = 'app=';
+const intervalTime = 5000;
 
 function _createNamespacedDeployment(deployment, namespace) {
     return k8sApiDeploy.createNamespacedDeployment(namespace, deployment);
@@ -29,11 +30,40 @@ function _readNamespacedPod(slug, namespace) {
 }
 
 function _readNamespacedPodLog(slug, namespace) {
+    var items;
+    var name;
+    
     return _readNamespacedPod(slug, namespace)
 	.then((res) => {
-	    var name = res.body.items[0].metadata.name;
+	    items = res.body.items;
+	    if(items.length === 0)
+		throw new Error('Pod not found');
+
+	    name = items[0].metadata.name;
+
 	    return k8sApi.readNamespacedPodLog(name, namespace);
 	});
+}
+
+function _tryGetTeacherToken(slug, namespace) {
+    return _readNamespacedPodLog(slug, namespace)
+	.then((log) => global_functions.findTeacherToken(log.body));
+}
+
+async function _catchTeacherToken(slug, namespace) {
+    var promise;
+    var token = undefined;
+    
+    while(token === undefined) {
+	token = await new Promise((resolve) => {
+	    setTimeout(() => {
+		_tryGetTeacherToken(slug, namespace).then(resolve);
+	    }, 1000);
+	});
+    }
+    if(token === -1)
+	return undefined;
+    return token;
 }
 
 function _createNamespacedService(service, namespace) {
@@ -349,7 +379,9 @@ var server_functions = {
     shut_on: _createkubelink,
     shut_off: _removekubelink,
     delete: _delete,
-    readNamespacedPodLog: _readNamespacedPodLog
+    readNamespacedPodLog: _readNamespacedPodLog,
+    tryGetTeacherToken: _tryGetTeacherToken,
+    catchTeacherToken: _catchTeacherToken
 };
 
 module.exports = server_functions;
