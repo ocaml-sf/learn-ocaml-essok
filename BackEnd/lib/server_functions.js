@@ -48,7 +48,7 @@ function _readNamespacedPodLog(slug, namespace) {
 
 function _tryGetTeacherToken(slug, namespace) {
     return _readNamespacedPodLog(slug, namespace)
-	.then((log) => global_functions.findTeacherToken(log.body));
+	.then((log) => global_functions.tryFindTeacherToken(log.body));
 }
 
 async function _catchTeacherToken(slug, namespace) {

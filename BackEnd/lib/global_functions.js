@@ -11,22 +11,22 @@ function _asyncFunction(item, cb) {
     }, 100);
 }
 
-function _findTeacherToken(log, regexp, regexp_len) {
+function _tryFindTeacherToken(log, regexp, regexp_len) {
     var index = log.indexOf(regexp);
     if(index === -1)
 	return undefined;
     return log.substr(index + regexp, token_len);
 }
 
-function _findTeacherToken(log) {
-    var try1 = _findTeacherToken(log, token_regexp1, token_regexp1_len);
+function _tryAllFindTeacherToken(log) {
+    var try1 = _tryFindTeacherToken(log, token_regexp1, token_regexp1_len);
     if(try1 === undefined)
-	return _findTeacherToken(log, token_regexp2, token_regexp2_len);
+	return _tryFindTeacherToken(log, token_regexp2, token_regexp2_len);
 }
 
 var global_functions = {
     asyncFunction: _asyncFunction,
-    findTeacherToken: _findTeacherToken
+    tryFindTeacherToken: _tryAllFindTeacherToken
 }
 
 module.exports = global_functions;
