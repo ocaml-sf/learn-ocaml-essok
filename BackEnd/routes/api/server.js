@@ -332,10 +332,10 @@ router.post('/token/:server', auth.required, function (req, res, next) {
         return res.status(422).send({ errors: 'teacher token already retrieve' });
       }
       else {
-        user.startProcessing().then(() => {
+        user.startProcessing().then(async () => {
 	    var slug = req.server.slug;
 	    var namespace = 'default';
-	    req.server.token = server_functions.catchTeacherToken(slug, namespace);
+	    req.server.token = await server_functions.catchTeacherToken(slug, namespace);
 	    if(req.server.token !== undefined)
 		log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server)
             return req.server.save().then(function () {
