@@ -333,14 +333,11 @@ router.post('/token/:server', auth.required, function (req, res, next) {
       }
       else {
         user.startProcessing().then(() => {
-
-          /* insert function to retrieve the token
-          *
-          * something like : req.server.token = server_functions.getToken(); 
-          *
-          **/
-          log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server)
-          return req.server.save().then(function () {
+	    var slug = req.server.slug;
+	    var namespace = 'default';
+	    req.server.token = server_functions.catchTeacherToken(slug, namespace);
+            log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server)
+            return req.server.save().then(function () {
             user.endProcessing().then(() => {
               return res.json({ server: req.server.toJSONFor(user) });
             }, (err) => {
