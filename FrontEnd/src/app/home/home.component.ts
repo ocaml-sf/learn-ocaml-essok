@@ -79,7 +79,7 @@ export class HomeComponent implements OnInit {
     this.route.url.subscribe(data => {
       this.title = 'Home';
       this.header = 'Welcome';
-      this.body = 'This site is currently in developpement, please report here : https://github.com/ocaml-sf/learn-ocaml-essok any issue you encounter.';
+      this.body = '';
     });
   }
 
