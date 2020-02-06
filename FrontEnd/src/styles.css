@@ -7,7 +7,9 @@
 
 /* Wallpaper for the background */
 .bg-body {
-  background-image: url('assets/wallpaper.jpg');
+  /* background-image: url('assets/wallpaper.jpg'); */
+  background-color: #f67220 !important;
+
 }
 
 /* Sand background for NavBar */
