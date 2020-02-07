@@ -95,7 +95,7 @@ export class UserService {
   disable(credentialsDisable, credentialsLogin): Observable<User> {
     return this.apiService
       .post(
-        '/users/disable/',
+        '/users/disable',
         { user: credentialsLogin, disable: credentialsDisable }
       )
       .pipe(map(data => {
@@ -108,7 +108,7 @@ export class UserService {
   delete(credentialsDisable, credentialsLogin): Observable<User> {
     return this.apiService
       .post(
-        '/users/delete/',
+        '/users/delete',
         { user: credentialsLogin, disable: credentialsDisable }
       );
   }

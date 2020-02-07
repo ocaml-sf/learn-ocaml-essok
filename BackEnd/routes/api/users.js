@@ -173,7 +173,7 @@ router.post('/reset-password', auth.required, function (req, res, next) {
 });
 
 //disable or enable an user
-router.post('/users/disable/', auth.required, function (req, res, next) {
+router.post('/users/disable', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
     if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
@@ -264,7 +264,7 @@ router.post('/users/disable/', auth.required, function (req, res, next) {
 });
 
 //delete an user
-router.post('/users/delete/', auth.required, function (req, res, next) {
+router.post('/users/delete', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
     if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401); }
