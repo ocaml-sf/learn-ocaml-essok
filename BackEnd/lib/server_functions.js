@@ -133,21 +133,29 @@ function _createObjectDeployment(slug) {
                                     value: OS.authUrl
                                 },
                                 {
-                                    name: 'OS_IDENTIY_API_VERSION',
+                                    name: 'ST_AUTH_VERION',
                                     value: OS.identityApiVersion
                                 },
                                 {
                                     name: 'OS_USERNAME',
                                     value: OS.username
                                 },
+				{
+				    name: 'OS_USER_DOMAIN_NAME',
+				    value: OS.domainName
+				},
                                 {
                                     name: 'OS_PASSWORD',
                                     value: OS.password
                                 },
                                 {
-                                    name: 'OS_PROJECT_ID',
-                                    value: OS.tenantID
+                                    name: 'OS_PROJECT_NAME',
+                                    value: OS.projectName
                                 },
+				{
+				    name: 'OS_PROJECT_DOMAIN_NAME',
+				    value: OS.domainName
+				},
                                 {
                                     name: 'OS_REGION_NAME',
                                     value: OS.region
