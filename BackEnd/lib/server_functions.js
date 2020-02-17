@@ -269,6 +269,34 @@ function _getSwiftContainer(slug) {
     });
 };
 
+function _copySwiftContainerFile(containerSrc, containerDst, file) {
+    return new Promise((resolve, reject) => {
+	swiftClient.copy({
+	    sourceContainer: containerSrc,
+	    destinationContainer: containerDst,
+	    sourceFile: file,
+	    destinationFile: file
+	}, (err, res) => {
+	    if(err !== null)
+		reject(err);
+	    resolve(res);
+	});
+    });
+}
+
+function _copySwiftContainer(containerSrc, containerDst) {
+    return new Promise((resolve, reject) => {
+	swiftClient.getFiles(containerSrc, (err, files) => {
+	    if (err !== null)
+		reject(err);
+	    files = files.map(file => _copySwiftContainerFile(containerSrc,
+							      containerDst,
+							      file));
+	    Promise.all(files).then(resolve, reject);
+	});
+    });
+}
+
 function _destroySwiftContainer(slug) {
     return new Promise(function (resolve, reject) {
         _getSwiftContainer(slug).then(function (response) {
