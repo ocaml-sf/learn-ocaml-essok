@@ -1,12 +1,13 @@
 // var OS = {
 //     provider: '',
+//     identityApiVersion: '',
 //     username: '',
 //     password: '',
 //     authUrl: '',
+//     projectName: '',
+//     domainName: '',
 //     region: '',
-//     objectStoreUrl: ''
-//     identityApiVersion: '',
-//     tenantID: '',
+//     defaultContainerName: ''
 // };
 
 // module.exports = OS;
