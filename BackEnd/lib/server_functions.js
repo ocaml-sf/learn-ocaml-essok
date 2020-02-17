@@ -416,6 +416,7 @@ function _delete(slug, namespace) {
 
 var server_functions = {
     createNamespacedDeployment: _createNamespacedDeployment,
+    copySwiftContainer: _copySwiftContainer,
     createSwiftContainer: _createSwiftContainer,
     shut_on: _createkubelink,
     shut_off: _removekubelink,

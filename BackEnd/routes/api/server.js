@@ -7,6 +7,8 @@ var events = require('events');
 const server_functions = require('../../lib/server_functions');
 const log_functions = require('../../lib/log_functions');
 
+const defaultContainerName = require('../../configs/OS').defaultContainerName;
+
 // Preload server objects on routes with ':server'
 router.param('server', function (req, res, next, slug) {
   Server.findOne({ slug: slug })
@@ -79,12 +81,14 @@ router.post('/', auth.required, function (req, res, next) {
     }
     var server = new Server(req.body.server);
     server.author = user;
-    log_functions.create('bin', 'post /server/', 'user has created a server', user, server)
+    log_functions.create('bin', 'post /server/', 'user has created a server', user, server);
     return server.save().then(function () {
-      server_functions.createSwiftContainer(server.slug).then((response) => {
-        log_functions.create('general', 'post /server/', 'user has created a swift container', user, server)
+      server_functions.createSwiftContainer(server.slug).then((_) => {
+	server_functions.copySwiftContainer(defaultContainerName, server.slug).then(_ => {
+        log_functions.create('general', 'post /server/', 'user has created a swift container', user, server);
         console.log('swift created');
         return res.json({ server: server.toJSONFor(user) });
+	});
       }, (err) => {
         log_functions.create('error', 'post /server/',
           'user failed to create a swift container for the server', user, server);
