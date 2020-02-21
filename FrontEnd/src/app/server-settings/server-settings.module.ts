@@ -8,6 +8,7 @@ import { ServerSettingsRoutingModule } from './server-settings-routing.module';
 import { ServerSettingsResolver } from './server-settings-resolver.service';
 import { FileUploadModule } from 'ng2-file-upload';
 import { ModalModule } from '../modal';
+import { ConfirmDialogModule } from "../confirm";
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { ModalModule } from '../modal';
     ScrollingModule,
     ModalModule,
     FileUploadModule,
+    ConfirmDialogModule,
   ],
   declarations: [
     ServerSettingsComponent,

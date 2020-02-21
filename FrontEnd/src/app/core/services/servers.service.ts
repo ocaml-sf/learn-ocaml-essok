@@ -71,4 +71,7 @@ export class ServersService {
     return this.apiService.post('/servers/token/' + slug, { server: slug })
       .pipe(map(data => data.server));
   }
+  deleteExercises(slug, trash) {
+    return this.apiService.post('/uploads/delete', { server: slug, trash });
+  }
 }

@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ModalService } from '../modal';
 import { environment } from '../../environments/environment';
-
+import { ConfirmDialogService } from '../confirm';
 const URL = environment.api_url + '/uploads/check';
 
 @Component({
@@ -34,7 +34,9 @@ export class ServerSettingsComponent implements OnInit {
   exercises: any[];
   idIndex = 1;
   exercisesList = [];
+  trashesList = [];
   exercisesDroplist = [];
+  trashesDroplist = [];
   groupsList = [];
   useless: ExercisesList = {} as ExercisesList;
   constructor(
@@ -44,6 +46,7 @@ export class ServerSettingsComponent implements OnInit {
     private fb: FormBuilder,
     private jwtService: JwtService,
     private modalService: ModalService,
+    private confirmDialogService: ConfirmDialogService,
     // private fileService: FileService
   ) {
     // create form group using the form builder
@@ -64,10 +67,16 @@ export class ServerSettingsComponent implements OnInit {
     );
   }
 
-  updateExercisesDroplist() {
+  updateExercisesDropList() {
     this.exercisesDroplist = ['exercises-list', 'create-group',
       ...this.groupsList.map(group => group.id)];
     console.log(this.exercisesDroplist);
+  }
+
+  updateTrashesDropList() {
+    this.trashesDroplist = ['trashes-list', 'create-group',
+      ...this.groupsList.map(group => group.id)];
+    console.log(this.trashesDroplist);
   }
 
   generateGroupID() {
@@ -97,7 +106,8 @@ export class ServerSettingsComponent implements OnInit {
         this.useless = JSON.parse(JSON.stringify(data));
         this.groupsList = this.useless.group.map(
           group => { return { ...group, id: this.generateGroupID() }; });
-        this.updateExercisesDroplist()
+        this.updateExercisesDropList()
+        this.updateTrashesDropList()
         this.exercisesList = this.useless.name;
       },
       err => {
@@ -112,6 +122,7 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
+      this.trashesList = [];
       this.loadGroups();
       // move to the next slide
     };
@@ -239,7 +250,8 @@ export class ServerSettingsComponent implements OnInit {
     const previousContainer = event.previousContainer;
 
     this.groupsList.push(newGroup);
-    this.updateExercisesDroplist();
+    this.updateExercisesDropList();
+    this.updateTrashesDropList();
     transferArrayItem(event.previousContainer.data,
       newGroup.exercises,
       event.previousIndex,
@@ -248,11 +260,37 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   deleteGroupCheck(id, data) {
-    if (id !== 'exercises-list' && data.length === 0) {
+    if ((id !== 'exercises-list') && (id !== 'trashes-list') && (data.length === 0)) {
       this.groupsList = this.groupsList.filter(group => group.id !== id);
-      this.updateExercisesDroplist();
+      this.updateTrashesDropList();
+      this.updateExercisesDropList();
       console.log(this.groupsList);
       console.log(this.exercisesDroplist);
+      console.log(this.trashesDroplist);
     }
+  }
+  // how it works
+  showDialog() {
+    this.confirmDialogService.confirmThis("Are you sure to delete?", function () {
+      alert("Yes clicked");
+    }, function () {
+      alert("No clicked");
+    })
+  }
+
+  clean() {
+    let that = this;
+    this.confirmDialogService.confirmThis("Are you sure you want to delete all the Exercises in the Trashes list ?", function () {
+      that.serversService.deleteExercises(that.server.slug, that.trashesList).subscribe(
+        data => {
+          that.loadGroups();
+        },
+        err => {
+          that.errors = err;
+        }
+      );
+    }, function () {
+      alert("The operation has been aborted");
+    })
   }
 }

@@ -1,7 +1,7 @@
 <div class="container">
-  <!-- Line break for logout button -->
-  <hr />
-  <!--
+    <!-- Line break for logout button -->
+    <hr />
+    <!--
     <div>
       <h3>
         Using Link <br/>
@@ -12,55 +12,52 @@
       <input type="button" (click)="download()" value="Download Employee Data"/>
     </div>
   -->
-  <div class="row bg-sand">
-    <h1 class="col-12 p-2 text-center">{{ server.title }}</h1>
-    <app-list-errors [errors]="errors"></app-list-errors>
+    <div class="row bg-sand">
+        <h1 class="col-12 p-2 text-center">{{ server.title }}</h1>
+        <app-list-errors [errors]="errors"></app-list-errors>
 
-    <div id="carouselUpload" class="carousel slide col-12" data-wrap="false" data-interval="false">
-      <div class="carousel-inner py-5 px-5">
-        <div class="carousel-item active">
-          <div id="accordionArchive" class="accordion">
-            <div class="card">
-              <div id="urlHead" class="card-header">
-                <h5 class="mb-0">
-                  <button class="btn btn-link" data-toggle="collapse" data-target="#urlCollapse" aria-expanded="false"
-                    aria-controls="urlCollapse">
+        <div id="carouselUpload" class="carousel slide col-12" data-wrap="false" data-interval="false">
+            <div class="carousel-inner py-5 px-5">
+                <div class="carousel-item active">
+                    <div id="accordionArchive" class="accordion">
+                        <div class="card">
+                            <div id="urlHead" class="card-header">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" data-toggle="collapse" data-target="#urlCollapse" aria-expanded="false" aria-controls="urlCollapse">
                     Upload with a github URL
                   </button>
-                </h5>
-              </div>
-              <div id="urlCollapse" class="collapse" aria-labelledby="urlHead" data-parent="#accordionArchive">
-                <div class="card-body">
-                  <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
-                    <fieldset [disabled]="isSubmitting">
+                                </h5>
+                            </div>
+                            <div id="urlCollapse" class="collapse" aria-labelledby="urlHead" data-parent="#accordionArchive">
+                                <div class="card-body">
+                                    <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
+                                        <fieldset [disabled]="isSubmitting">
 
-                      <fieldset class="form-group">
-                        <input class="form-control form-control-lg" type="url" placeholder="URL of server repository"
-                          formControlName="url" />
-                      </fieldset>
+                                            <fieldset class="form-group">
+                                                <input class="form-control form-control-lg" type="url" placeholder="URL of server repository" formControlName="url" />
+                                            </fieldset>
 
-                      <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
+                                            <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
                         Charge URL's exercises
                       </button>
-                    </fieldset>
-                  </form>
-                </div>
-              </div>
-            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="card">
-              <div id="browseUpload" class="card-header">
-                <h5 class="mb-0">
-                  <button class="btn btn-link" data-toggle="collapse" data-target="#browseCollapse"
-                    aria-expanded="false" aria-controls="browseCollapse">
+                        <div class="card">
+                            <div id="browseUpload" class="card-header">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" data-toggle="collapse" data-target="#browseCollapse" aria-expanded="false" aria-controls="browseCollapse">
                     Upload with an archive (must be named "exercises.zip")
                   </button>
-                </h5>
-              </div>
-              <div id="browseCollapse" class="collapse" aria-labelledby="browseHead" data-parent="#accordionArchive">
-                <div class="card-body">
-                  <h3>Select files</h3>
-                  <!--
+                                </h5>
+                            </div>
+                            <div id="browseCollapse" class="collapse" aria-labelledby="browseHead" data-parent="#accordionArchive">
+                                <div class="card-body">
+                                    <h3>Select files</h3>
+                                    <!--
                   <div ng2FileDrop
                       [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
                       (fileOver)="fileOverBase($event)"
@@ -77,179 +74,190 @@
                       Another drop zone
                   </div>
                   -->
-                  <input type="file" name="archive" ng2FileSelect [uploader]="uploader" />
-                </div>
-                <div class="col-6">
-                  <h3>Upload queue</h3>
-                  <p>Queue length: {{ uploader?.queue?.length }}</p>
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th width="50%">Name</th>
-                        <th>Size</th>
-                        <th>Progress</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr *ngFor="let item of uploader.queue">
-                        <td><strong>{{ item?.file?.name }}</strong></td>
-                        <td nowrap>{{ item?.file?.size/1024/1024 | number:'.2' }} MB</td>
-                        <td>
-                          <div class="progress mb-0">
-                            <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }">
-                            </div>
-                          </div>
-                        </td>
-                        <td class="text-center">
-                          <span *ngIf="item.isSuccess">Success<i class="glyphicon glyphicon-ok"></i></span>
-                          <span *ngIf="item.isCancel">Cancel<i class="glyphicon glyphicon-ban-circle"></i></span>
-                          <span *ngIf="item.isError">Error<i class="glyphicon glyphicon-remove"></i></span>
-                        </td>
-                        <td nowrap>
-                          <button type="button" class="btn btn-success btn-xs" (click)="item.upload()"
-                            [disabled]="item.isReady || item.isUploading || item.isSuccess">
+                                    <input type="file" name="archive" ng2FileSelect [uploader]="uploader" />
+                                </div>
+                                <div class="col-6">
+                                    <h3>Upload queue</h3>
+                                    <p>Queue length: {{ uploader?.queue?.length }}</p>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th width="50%">Name</th>
+                                                <th>Size</th>
+                                                <th>Progress</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let item of uploader.queue">
+                                                <td><strong>{{ item?.file?.name }}</strong></td>
+                                                <td nowrap>{{ item?.file?.size/1024/1024 | number:'.2' }} MB</td>
+                                                <td>
+                                                    <div class="progress mb-0">
+                                                        <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span *ngIf="item.isSuccess">Success<i class="glyphicon glyphicon-ok"></i></span>
+                                                    <span *ngIf="item.isCancel">Cancel<i class="glyphicon glyphicon-ban-circle"></i></span>
+                                                    <span *ngIf="item.isError">Error<i class="glyphicon glyphicon-remove"></i></span>
+                                                </td>
+                                                <td nowrap>
+                                                    <button type="button" class="btn btn-success btn-xs" (click)="item.upload()" [disabled]="item.isReady || item.isUploading || item.isSuccess">
                             <span class="glyphicon glyphicon-upload"></span> Upload
                           </button>
-                          <button type="button" class="btn btn-warning btn-xs" (click)="item.cancel()"
-                            [disabled]="!item.isUploading">
+                                                    <button type="button" class="btn btn-warning btn-xs" (click)="item.cancel()" [disabled]="!item.isUploading">
                             <span class="glyphicon glyphicon-ban-circle"></span> Cancel
                           </button>
-                          <button type="button" class="btn btn-danger btn-xs" (click)="item.remove()">
+                                                    <button type="button" class="btn btn-danger btn-xs" (click)="item.remove()">
                             <span class="glyphicon glyphicon-trash"></span> Remove
                           </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  {{uploadErrors}}
-                  <app-list-errors [errors]="errors"></app-list-errors>
-                  <div>
-                    <div>
-                      Queue progress:
-                      <div class="progress">
-                        <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }">
-                        </div>
-                      </div>
-                    </div>
-                    <button type="button" class="btn btn-success btn-s" (click)="uploader.uploadAll()"
-                      [disabled]="!uploader.getNotUploadedItems().length">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {{uploadErrors}}
+                                    <app-list-errors [errors]="errors"></app-list-errors>
+                                    <div>
+                                        <div>
+                                            Queue progress:
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-success btn-s" (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
                       <span class="glyphicon glyphicon-upload"></span> Upload all
                     </button>
-                    <button type="button" class="btn btn-warning btn-s" (click)="uploader.cancelAll()"
-                      [disabled]="!uploader.isUploading">
+                                        <button type="button" class="btn btn-warning btn-s" (click)="uploader.cancelAll()" [disabled]="!uploader.isUploading">
                       <span class="glyphicon glyphicon-ban-circle"></span> Cancel all
                     </button>
-                    <button type="button" class="btn btn-danger btn-s" (click)="uploader.clearQueue()"
-                      [disabled]="!uploader.queue.length">
+                                        <button type="button" class="btn btn-danger btn-s" (click)="uploader.clearQueue()" [disabled]="!uploader.queue.length">
                       <span class="glyphicon glyphicon-trash"></span> Remove all
                     </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="carousel-item container">
-          <div class="row justify-content-around mb-5">
-            <div class="col-4 card bg-main-orange">
-              <h4 class="card-header mb-0">Exercises List: </h4>
-              <div id="exercises-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="exercisesList"
-                [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
-                <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of exercisesList" cdkDrag>
-                  <div class="text-center text-white">{{exercise}}</div>
-                  <div class="placeholder-exercise" *cdkDragPlaceholder></div>
-                </div>
-              </div>
-            </div>
-            <div class="col-7 card bg-main-orange">
-              <h4 class="card-header mb-0">Groups List: </h4>
-              <div class="card-body list-group p-3" cdkDropList (cdkDropListDropped)="dropGroup($event)">
-                <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;" cdkDragLockAxis="y"
-                  cdkDrag>
-                  <div class="placeholder-group" *cdkDragPlaceholder></div>
-                  <input class="col-2 h-100 p-2 m-r-2 form-control" [(ngModel)]="group.title" />
-                  <div id="{{group.id}}" class="col-9 list-group p-2 border flex-row bg-light" cdkDropList
-                    cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises"
-                    [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
-                    <div class="list-group-item m-2 rounded bg-oasis-blue" *ngFor="let exercise of group.exercises"
-                      cdkDrag>
-                      <div class="placeholder-exercise" *cdkDragPlaceholder></div>
-                      <div class="text-white">{{exercise}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-                <div id="create-group" class="list-group-item" cdkDropList cdkDropListOrientation="horizontal"
-                  (cdkDropListDropped)="createGroup($event)">
-                  Drop an exercise here to create a new group.
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row justify-content-center">
-            <button class="col-2 btn btn-lg btn-primary pull-xs-right" (click)="send()">
-              Send
-            </button>
-          </div>
-        </div>
 
-        <div class="carousel-item">
-          <div class="activate_server">
-            <div *ngIf="!isDisabled"> Congratulation, the upload has been a success ! Now you can launch your
-              LeanOCaml
-              instance !
-            </div>
-            <div *ngIf="isDisabled && !isSending"> Try to send some files !
-            </div>
-            <div *ngIf="isSending"> Your files are processing !
-            </div>
-            <button class="btn btn-lg btn-info" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}"
-              (click)="disableServer()">
+                <div class="carousel-item container">
+                    <div class="row justify-content-around mb-5">
+                        <div class="col-3 card bg-main-orange">
+                            <h4 class="card-header mb-0">Trash: </h4>
+                            <div id="trashes-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="trashesList" [cdkDropListConnectedTo]="trashesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                                <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of trashesList" cdkDrag>
+                                    <div class="text-center text-white">{{exercise}}</div>
+                                    <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3 card bg-main-orange">
+                            <h4 class="card-header mb-0">Exercises List: </h4>
+                            <div id="exercises-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                                <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of exercisesList" cdkDrag>
+                                    <div class="text-center text-white">{{exercise}}</div>
+                                    <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-5 card bg-main-orange">
+                            <h4 class="card-header mb-0">Groups List: </h4>
+                            <div class="card-body list-group p-3" cdkDropList (cdkDropListDropped)="dropGroup($event)">
+                                <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
+                                    <div class="placeholder-group" *cdkDragPlaceholder></div>
+                                    <input class="col-2 h-100 p-2 m-r-2 form-control" [(ngModel)]="group.title" />
+                                    <div id="{{group.id}}" class="col-9 list-group p-2 border flex-row bg-light" cdkDropList cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                                        <div class="list-group-item m-2 rounded bg-oasis-blue" *ngFor="let exercise of group.exercises" cdkDrag>
+                                            <div class="placeholder-exercise" *cdkDragPlaceholder></div>
+                                            <div class="text-white">{{exercise}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="create-group" class="list-group-item" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="createGroup($event)">
+                                    Drop an exercise here to create a new group.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-around mb-5">
+                        <button class="col-3 btn btn-lg btn-danger pull-xs-left" (click)="clean()">
+              <i class="ion-md-trash"></i> Clean
+            </button>
+                        <button class="col-3 btn btn-lg btn-info pull-xs-left" (click)="loadGroups()">
+              <i class="ion-md-refresh"></i> Reset
+            </button>
+                        <button class="col-3 btn btn-lg btn-success pull-xs-right" (click)="send()">
+              <i class="ion-md-paper-plane"></i> Send
+            </button>
+                    </div>
+                    <div class="row justify-content-around mb-5">
+                        <p class="col-3 justify-content-center"> Delete the files in Trash</p>
+                        <p class="col-3 justify-content-center"> Undo the changes you made without sending</p>
+                        <p class="col-3 justify-content-center"> Send your files</p>
+
+                    </div>
+
+                </div>
+
+                <div class="carousel-item">
+                    <div class="activate_server">
+                        <div *ngIf="!isDisabled"> Congratulation, the upload has been a success ! Now you can launch your LeanOCaml instance !
+                        </div>
+                        <div *ngIf="isDisabled && !isSending"> Try to send some files !
+                        </div>
+                        <div *ngIf="isSending"> Your files are processing !
+                        </div>
+                        <button class="btn btn-lg btn-info" *ngIf="!server.active" [ngClass]="{disabled: isDisabled}" (click)="disableServer()">
               <i class="ion-settings"></i> Launch my LearnOCaml !
             </button>
-          </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev" style="width: 5%" href="#carouselUpload" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" style="width: 5%" href="#carouselUpload" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
         </div>
-      </div>
-      <a class="carousel-control-prev" style="width: 5%" href="#carouselUpload" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="carousel-control-next" style="width: 5%" href="#carouselUpload" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a>
     </div>
-  </div>
 
-  <hr />
+    <hr />
 
-  <div class="row">
-    <div class="col-12">
-      <div class="danger p-4">
-        <h2>Dangerous ZONE</h2>
+    <div class="row">
+        <div class="col-12">
+            <div class="danger p-4">
+                <h2>Dangerous ZONE</h2>
 
-        <p>TO DELETE YOUR SERVER :</p>
-        <form (ngSubmit)="deleteServer()">
-          <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my server's
-          data and there are no way to have it back !
-          <br />
-          <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and to DISABLE my server
-          is
-          NOT what I want
-          <br />
-          <br />
-          <button class="btn btn-sm btn-outline-danger" [ngClass]="{disabled: isDeleting}" type="submit">
+                <p>TO DELETE YOUR SERVER :</p>
+                <form (ngSubmit)="deleteServer()">
+                    <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my server's data and there are no way to have it back !
+                    <br />
+                    <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and to DISABLE my server is NOT what I want
+                    <br />
+                    <br />
+                    <button class="btn btn-sm btn-outline-danger" [ngClass]="{disabled: isDeleting}" type="submit">
             <i class="ion-md-trash"></i> Delete Server
           </button>
-        </form>
-      </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pleaseWaitModal">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pleaseWaitModal">
     Launch Alert(beta)
-  </button>
+    </button>
+    <jw-modal id="pleaseWait2"></jw-modal>
 
-  <jw-modal id="pleaseWait2"></jw-modal>
+    <button class="btn btn-primary pull-right" (click)="showDialog()">Show Dialog
+
+    </button>
+    <confirm-dialog></confirm-dialog>
+
 </div>
+<!-- <app-confirm-dialog></app-confirm-dialog> -->
