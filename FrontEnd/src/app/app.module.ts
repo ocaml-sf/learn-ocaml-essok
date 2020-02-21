@@ -14,6 +14,7 @@ import { CoreModule } from './core/core.module';
 import { HelpModule } from './help/help.module';
 import { ContactModule } from './contact/contact.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ConfirmDialogModule } from './confirm/confirm-dialog.module';
 
 @NgModule({
   declarations: [AppComponent, FooterComponent, HeaderComponent],
@@ -27,6 +28,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     HelpModule,
     ContactModule,
     AppRoutingModule,
+    ConfirmDialogModule,
     ModalModule,
   ],
   providers: [],
