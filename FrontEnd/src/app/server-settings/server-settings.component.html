@@ -148,23 +148,23 @@
                     <div class="row justify-content-around mb-5">
                         <div class="col-3 card bg-main-orange">
                             <h4 class="card-header mb-0">Trash: </h4>
-                            <div id="trashes-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="trashesList" [cdkDropListConnectedTo]="trashesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                            <div id="trashes-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="trashesList" [cdkDropListConnectedTo]="trashesDroplist && exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
                                 <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of trashesList" cdkDrag>
                                     <div class="text-center text-white">{{exercise}}</div>
                                     <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3 card bg-main-orange">
+                        <div class="col-2.5 card bg-main-orange">
                             <h4 class="card-header mb-0">Exercises List: </h4>
-                            <div id="exercises-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                            <div id="exercises-list" class="card-body list-group p-3" cdkDropList [cdkDropListData]="exercisesList" [cdkDropListConnectedTo]="exercisesDroplist && trashesDroplist" (cdkDropListDropped)="dropExercise($event)">
                                 <div class="list-group-item m-2 rounded bg-main-orange" *ngFor="let exercise of exercisesList" cdkDrag>
                                     <div class="text-center text-white">{{exercise}}</div>
                                     <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-5 card bg-main-orange">
+                        <div class="col-6 card bg-main-orange">
                             <h4 class="card-header mb-0">Groups List: </h4>
                             <div class="card-body list-group p-3" cdkDropList (cdkDropListDropped)="dropGroup($event)">
                                 <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>

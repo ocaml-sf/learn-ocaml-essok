@@ -109,6 +109,8 @@ export class ServerSettingsComponent implements OnInit {
         this.updateExercisesDropList()
         this.updateTrashesDropList()
         this.exercisesList = this.useless.name;
+        this.trashesList = [];
+        this.errors = {};
       },
       err => {
         this.errors = err;
@@ -213,7 +215,14 @@ export class ServerSettingsComponent implements OnInit {
     this.serversService.send(this.server.slug, this.exercisesList, groups).subscribe(
       data => {
         this.modalService.close('pleaseWait2');
+
         this.isDisabled = false;
+        let that = this;
+        this.confirmDialogService.confirmThis("Launch your learnOCaml server now?", function () {
+          that.disableServer();
+        }, function () {
+          alert("The operation has been aborted, you can launch it later");
+        })
       },
       err => {
         this.modalService.close('pleaseWait2');
