@@ -13,7 +13,7 @@ var swiftClient = require('../clients/swiftClient');
 var OS = require('../configs/OS');
 
 const global_functions = require('./global_functions');
-
+const upload_functions = require('./upload_functions');
 const podLabelPrefix = 'app=';
 const intervalTime = 5000;
 
@@ -27,47 +27,47 @@ function _readNamespacedDeployment(slug, namespace) {
 
 function _readNamespacedPod(slug, namespace) {
     return k8sApi.listNamespacedPod(namespace, undefined, undefined, undefined,
-				    undefined, podLabelPrefix + slug);
+        undefined, podLabelPrefix + slug);
 }
 
 function _readNamespacedPodLog(slug, namespace) {
     var items;
     var name;
-    
+
     return _readNamespacedPod(slug, namespace)
-	.then((res) => {
-	    items = res.body.items;
-	    if(items.length === 0)
-		throw new Error('Pod not found');
+        .then((res) => {
+            items = res.body.items;
+            if (items.length === 0)
+                throw new Error('Pod not found');
 
-	    name = items[0].metadata.name;
+            name = items[0].metadata.name;
 
-	    return k8sApi.readNamespacedPodLog(name, namespace);
-	});
+            return k8sApi.readNamespacedPodLog(name, namespace);
+        });
 }
 
 function _tryGetTeacherToken(slug, namespace) {
     return _readNamespacedPodLog(slug, namespace)
-	.then((log) => global_functions.tryFindTeacherToken(log.body));
+        .then((log) => global_functions.tryFindTeacherToken(log.body));
 }
 
 async function _catchTeacherToken(slug, namespace) {
     var token = undefined;
-    
-    while(token === undefined) {
-	token = await new Promise((resolve, reject) => {
-	    setTimeout(() => {
-		_tryGetTeacherToken(slug, namespace)
-		    .then(resolve)
-		    .catch(reject);
-	    }, intervalTime);
-	}).catch((err) => {
-	    console.log(err);
-	    return 'error';
-	});
+
+    while (token === undefined) {
+        token = await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                _tryGetTeacherToken(slug, namespace)
+                    .then(resolve)
+                    .catch(reject);
+            }, intervalTime);
+        }).catch((err) => {
+            console.log(err);
+            return 'error';
+        });
     }
-    if(token === 'error')
-	token = undefined;
+    if (token === 'error')
+        token = undefined;
     return token;
 }
 
@@ -80,7 +80,7 @@ function _patchNamespacedIngress(_spec, namespace) {
 };
 
 function _createNamespacedIngress(rule, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         k8sApiIngress.readNamespacedIngress('learn-ocaml', namespace, 'true').then(
             (response) => {
                 response.body.spec.rules.push(rule);
@@ -118,52 +118,47 @@ function _createObjectDeployment(slug) {
                     }
                 },
                 spec: {
-                    containers: [
-                        {
-                            name: 'learn-ocaml',
-                            image: 'ocamlsf/learnocaml-essok-dockerfile:latest',
-                            ports: [
-                                {
-                                    containerPort: 8080
-                                }
-                            ],
-                            env: [
-                                {
-                                    name: 'OS_AUTH_URL',
-                                    value: OS.authUrl
-                                },
-                                {
-                                    name: 'ST_AUTH_VERION',
-                                    value: OS.identityApiVersion
-                                },
-                                {
-                                    name: 'OS_USERNAME',
-                                    value: OS.username
-                                },
-				{
-				    name: 'OS_USER_DOMAIN_NAME',
-				    value: OS.domainName
-				},
-                                {
-                                    name: 'OS_PASSWORD',
-                                    value: OS.password
-                                },
-                                {
-                                    name: 'OS_PROJECT_NAME',
-                                    value: OS.projectName
-                                },
-				{
-				    name: 'OS_PROJECT_DOMAIN_NAME',
-				    value: OS.domainName
-				},
-                                {
-                                    name: 'OS_REGION_NAME',
-                                    value: OS.region
-                                }
-                            ],
-                            args: [slug]
-                        }
-                    ]
+                    containers: [{
+                        name: 'learn-ocaml',
+                        image: 'ocamlsf/learnocaml-essok-dockerfile:latest',
+                        ports: [{
+                            containerPort: 8080
+                        }],
+                        env: [{
+                                name: 'OS_AUTH_URL',
+                                value: OS.authUrl
+                            },
+                            {
+                                name: 'ST_AUTH_VERION',
+                                value: OS.identityApiVersion
+                            },
+                            {
+                                name: 'OS_USERNAME',
+                                value: OS.username
+                            },
+                            {
+                                name: 'OS_USER_DOMAIN_NAME',
+                                value: OS.domainName
+                            },
+                            {
+                                name: 'OS_PASSWORD',
+                                value: OS.password
+                            },
+                            {
+                                name: 'OS_PROJECT_NAME',
+                                value: OS.projectName
+                            },
+                            {
+                                name: 'OS_PROJECT_DOMAIN_NAME',
+                                value: OS.domainName
+                            },
+                            {
+                                name: 'OS_REGION_NAME',
+                                value: OS.region
+                            }
+                        ],
+                        args: [slug]
+                    }]
                 }
             }
         }
@@ -185,13 +180,11 @@ function _createObjectService(slug) {
             selector: {
                 app: slug
             },
-            ports: [
-                {
-                    name: 'http',
-                    port: 80,
-                    targetPort: 8080
-                }
-            ]
+            ports: [{
+                name: 'http',
+                port: 80,
+                targetPort: 8080
+            }]
         }
     }
 }
@@ -218,22 +211,22 @@ function _createObjectContainer(slug) {
 }
 
 function _createkubelink(slug, username, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var deployment = _createObjectDeployment(slug);
         var service = _createObjectService(slug);
         var rule = _createObjectRule(slug, username);
         _createNamespacedDeployment(deployment, namespace).then((response) => {
-            _createNamespacedService(service, namespace).then((response) => {
-                _createNamespacedIngress(rule, namespace).then((response) => {
-                    console.log('kubelink created');
-                    return resolve('done');
+                _createNamespacedService(service, namespace).then((response) => {
+                    _createNamespacedIngress(rule, namespace).then((response) => {
+                        console.log('kubelink created');
+                        return resolve('done');
+                    }, (err) => {
+                        return reject(err);
+                    });
                 }, (err) => {
                     return reject(err);
                 });
-            }, (err) => {
-                return reject(err);
-            });
-        },
+            },
             (err) => {
                 return reject(err);
             });
@@ -241,8 +234,8 @@ function _createkubelink(slug, username, namespace) {
 };
 
 function _createSwiftContainer(slug) {
-    return new Promise(function (resolve, reject) {
-        swiftClient.createContainer(_createObjectContainer(slug), function (err, container) {
+    return new Promise(function(resolve, reject) {
+        swiftClient.createContainer(_createObjectContainer(slug), function(err, container) {
             if (err) return reject(err);
             return resolve(container);
         });
@@ -250,15 +243,14 @@ function _createSwiftContainer(slug) {
 };
 
 function _getSwiftContainer(slug) {
-    return new Promise(function (resolve, reject) {
-        swiftClient.getContainers(function (err, containers) {
+    return new Promise(function(resolve, reject) {
+        swiftClient.getContainers(function(err, containers) {
             if (err) return reject(err);
             else {
                 for (let i = 0; i < containers.length; i++) {
                     if (containers[i].name === slug) {
                         return resolve(containers[i]);
-                    }
-                    else {
+                    } else {
                         if (i === containers.length - 1) {
                             return reject('not found');
                         }
@@ -271,36 +263,36 @@ function _getSwiftContainer(slug) {
 
 function _copySwiftContainerFile(containerSrc, containerDst, file) {
     return new Promise((resolve, reject) => {
-	swiftClient.copy({
-	    sourceContainer: containerSrc,
-	    destinationContainer: containerDst,
-	    sourceFile: file,
-	    destinationFile: file
-	}, (err, res) => {
-	    if(err !== null)
-		reject(err);
-	    resolve(res);
-	});
+        swiftClient.copy({
+            sourceContainer: containerSrc,
+            destinationContainer: containerDst,
+            sourceFile: file,
+            destinationFile: file
+        }, (err, res) => {
+            if (err !== null)
+                reject(err);
+            resolve(res);
+        });
     });
 }
 
 function _copySwiftContainer(containerSrc, containerDst) {
     return new Promise((resolve, reject) => {
-	swiftClient.getFiles(containerSrc, (err, files) => {
-	    if (err !== null)
-		reject(err);
-	    files = files.map(file => _copySwiftContainerFile(containerSrc,
-							      containerDst,
-							      file));
-	    Promise.all(files).then(resolve, reject);
-	});
+        swiftClient.getFiles(containerSrc, (err, files) => {
+            if (err !== null)
+                reject(err);
+            files = files.map(file => _copySwiftContainerFile(containerSrc,
+                containerDst,
+                file));
+            Promise.all(files).then(resolve, reject);
+        });
     });
 }
 
 function _destroySwiftContainer(slug) {
-    return new Promise(function (resolve, reject) {
-        _getSwiftContainer(slug).then(function (response) {
-            swiftClient.destroyContainer(response, function (err, result) {
+    return new Promise(function(resolve, reject) {
+        _getSwiftContainer(slug).then(function(response) {
+            swiftClient.destroyContainer(response, function(err, result) {
                 if (err) return reject(err);
                 return resolve(result);
             });
@@ -312,14 +304,13 @@ function _destroySwiftContainer(slug) {
 };
 
 function _removeIngressFile(rules, slug) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
         for (let index = 0; index < rules.length; index++) {
             if (rules[index].http.paths[0].backend.serviceName === slug) {
                 rules.splice(index, 1);
                 return resolve('done');
-            }
-            else {
+            } else {
                 if (index === rules.length - 1) {
                     return resolve('already deleted');
                 }
@@ -329,7 +320,7 @@ function _removeIngressFile(rules, slug) {
 };
 
 function _deleteNamespacedIngress(slug, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         k8sApiIngress.readNamespacedIngress('learn-ocaml', namespace, 'true').then(
             (response) => {
                 var rules = response.body.spec.rules;
@@ -353,7 +344,7 @@ function _deleteNamespacedIngress(slug, namespace) {
 };
 
 function _deleteNamespacedService(slug, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         k8sApi.readNamespacedService(slug, namespace).then((response) => {
             return resolve(k8sApi.deleteNamespacedService(slug, namespace));
         }, (err) => {
@@ -364,7 +355,7 @@ function _deleteNamespacedService(slug, namespace) {
 };
 
 function _deleteNamespacedDeployment(slug, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         k8sApiDeploy.readNamespacedDeployment(slug, namespace).then((response) => {
             return resolve(k8sApiDeploy.deleteNamespacedDeployment(slug, namespace));
         }, (err) => {
@@ -375,7 +366,7 @@ function _deleteNamespacedDeployment(slug, namespace) {
 };
 
 function _removekubelink(slug, namespace) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         _deleteNamespacedIngress(slug, namespace).then((response) => {
             console.log('ingress removed');
             _deleteNamespacedService(slug, namespace).then((response) => {
@@ -395,14 +386,19 @@ function _removekubelink(slug, namespace) {
     });
 };
 
-function _delete(slug, namespace) {
-    return new Promise(function (resolve, reject) {
+function _delete(slug, namespace, path) {
+    return new Promise(function(resolve, reject) {
         _removekubelink(slug, namespace).then((response) => {
             console.log('kubelink removed');
             _destroySwiftContainer(slug).then((response) => {
                 console.log('swift container removed');
-                console.log('server deleted');
-                return resolve('done');
+                upload_functions.removeDir(path).then(_ => {
+                    console.log('server deleted');
+                    return resolve('done');
+                }, (err) => {
+                    console.log(err);
+                    return reject(err);
+                });
             }, (err) => {
                 console.log(err);
                 return reject(err);
