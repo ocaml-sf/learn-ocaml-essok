@@ -170,7 +170,7 @@
                                 <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;" cdkDragLockAxis="y" cdkDrag>
                                     <div class="placeholder-group" *cdkDragPlaceholder></div>
                                     <input class="col-2 h-100 p-2 m-r-2 form-control" [(ngModel)]="group.title" />
-                                    <div id="{{group.id}}" class="col-9 list-group p-2 border flex-row bg-light" cdkDropList cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
+                                    <div id="{{group.id}}" class="col-9 overflow-auto list-group p-2 border flex-row bg-light" cdkDropList cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises" [cdkDropListConnectedTo]="exercisesDroplist" (cdkDropListDropped)="dropExercise($event)">
                                         <div class="list-group-item m-2 rounded bg-oasis-blue" *ngFor="let exercise of group.exercises" cdkDrag>
                                             <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                                             <div class="text-white">{{exercise}}</div>
