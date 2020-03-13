@@ -158,7 +158,8 @@ function _createObjectDeployment(slug) {
                             }
                         ],
                         args: [slug]
-                    }]
+                    }],
+		    terminationGracePeriodSeconds: 900
                 }
             }
         }
