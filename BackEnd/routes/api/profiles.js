@@ -19,20 +19,24 @@ router.get('/:username', auth.required, function (req, res, next) {
     req.payload ? User.findById(req.payload.id) : null,
   ]).then(function (results) {
     var user = results[0];
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if ((user.username !== req.profile.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    return res.json({ profile: req.profile.toProfileJSONFor(user) });
+    if (!user
+      || (!user.isAdmin() && !user.authorized)
+      || ((user.username !== req.profile.username) && (!user.isAdmin()))
+    ) { return res.sendStatus(401); }
+    else return res.json({ profile: req.profile.toProfileJSONFor(user) });
   }).catch(next);
 
 });
 
+// code duplication to remove in the future
 router.get('/user/:username', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if ((user.username !== req.profile.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    return res.json({ user: req.profile.toAuthJSON() });
+    if (!user
+      || (!user.isAdmin() && !user.authorized)
+      || ((user.username !== req.profile.username) && (!user.isAdmin()))
+    ) { return res.sendStatus(401); }
+    else return res.json({ user: req.profile.toAuthJSON() });
   }).catch(next);
 });
+
 module.exports = router;
