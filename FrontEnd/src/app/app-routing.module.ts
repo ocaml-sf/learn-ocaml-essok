@@ -4,39 +4,39 @@ import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 const routes: Routes = [
   {
     path: 'admin',
-    loadChildren: './admin/admin.module#AdminModule'
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: 'profile-settings',
-    loadChildren: './profile-settings/profile-settings.module#ProfileSettingsModule'
+    loadChildren: () => import('./profile-settings/profile-settings.module').then(m => m.ProfileSettingsModule)
   },
   {
     path: 'profile',
-    loadChildren: './profile/profile.module#ProfileModule'
+    loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule)
   },
   {
     path: 'editor',
-    loadChildren: './editor/editor.module#EditorModule'
+    loadChildren: () => import('./editor/editor.module').then(m => m.EditorModule)
   },
   {
     path: 'reset-password',
-    loadChildren: './reset-password/reset-password.module#ResetPasswordModule'
+    loadChildren: () => import('./reset-password/reset-password.module').then(m => m.ResetPasswordModule)
   },
   {
     path: 'delete-account',
-    loadChildren: './delete-account/delete-account.module#DeleteAccountModule'
+    loadChildren: () => import('./delete-account/delete-account.module').then(m => m.DeleteAccountModule)
   },
   {
     path: 'disable-account',
-    loadChildren: './disable-account/disable-account.module#DisableAccountModule'
+    loadChildren: () => import('./disable-account/disable-account.module').then(m => m.DisableAccountModule)
   },
   {
     path: 'server',
-    loadChildren: './server/server.module#ServerModule'
+    loadChildren: () => import('./server/server.module').then(m => m.ServerModule)
   },
   {
     path: 'server-settings',
-    loadChildren: './server-settings/server-settings.module#ServerSettingsModule'
+    loadChildren: () => import('./server-settings/server-settings.module').then(m => m.ServerSettingsModule)
   },
   { path: '', redirectTo: '/', pathMatch: 'full' },
   { path: '**', redirectTo: '/', pathMatch: 'full' }
