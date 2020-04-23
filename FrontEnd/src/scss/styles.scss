@@ -5,26 +5,31 @@ $ionicons-font-path: "~ionicons/dist/fonts";
 @import 'fonts/fonts';
 @import '~ionicons/dist/scss/ionicons';
 
+@import './variables';
+@import './mixins';
+
 /*@import url('//demo.productionready.io/main.css');*/
-
-/* Wallpaper for the background */
-.bg-body {
-  /* background-image: url('assets/wallpaper.jpg'); */
-  background-color: #f67220 !important;
-
-}
 
 /* Sand background for NavBar */
 .bg-sand {
-  background-color: #f6ebe3 !important;
+    @include background($color-sand);
 }
 
 /* Oasis Blue background for Banner */
 .bg-oasis-blue {
-  background-color: #3b55f2 !important;
+    @include background($color-oasis-blue);
 }
 
 /* Main Orange background for Main Orange */
 .bg-main-orange {
-  background-color: #f67242 !important;
+    @include background($color-main-orange);
+}
+
+/* Wallpaper for the background */
+.bg-body {
+    @extends bg-main-orange;
+}
+
+.mb-6 {
+    margin: $spacers;
 }

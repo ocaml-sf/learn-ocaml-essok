@@ -1,0 +1,9 @@
+@use "sass:map";
+
+/* Colors */
+$color-main-orange: #f67220; // Main Orange
+$color-oasis-blue: #3b55f2; // Oasis Blue
+$color-sand: #f6ebe3; // Sand
+
+/* Bootstrap variables update */
+$spacers: map.merge($spacers, (6: 5rem));

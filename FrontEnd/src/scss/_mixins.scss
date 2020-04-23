@@ -1,0 +1,9 @@
+// Background color
+@mixin background($color: #ffffff) {
+    background-color: $color !important;
+}
+
+// Margin and Padding sizes
+@mixin margin($m, $s) {
+    $m: $s;
+}
