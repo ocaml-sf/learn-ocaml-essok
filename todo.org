@@ -1,0 +1,11 @@
+#+TITLE: TODO List Learn-OCaml-Essok
+* TODO Scrollbar verticale sur les exercices
+* TODO Délai d'extinction des serveurs (lock-unlock le temps de...)
+* TODO Temps de timeout d'une requête au Backend à "augmenter"
+* TODO Ajouter un timeout dans la fonction qui lock (et éviter un deadlock)
+* TODO Mise en page du CSS
+** TODO Remplacer le Carousel par des onglets
+** TODO NgBootstrap (sensé remplacer JQuery, ne pas mettre si pas besoin de JQuery)
+** TODO Update la page Admin (un peu comme la page Home)
+** TODO Changer les couleurs (couleurs du désert)
+** TODO Page d'aide (mise en page simple en cours, à améliorer après)
