@@ -14,7 +14,7 @@ const URL = environment.api_url + '/uploads/check';
 @Component({
   selector: 'app-server-settings-page',
   templateUrl: './server-settings.component.html',
-  styleUrls: ['./server-settings.component.css']
+  styleUrls: ['./server-settings.component.scss']
 })
 export class ServerSettingsComponent implements OnInit {
   server: Server = {} as Server;

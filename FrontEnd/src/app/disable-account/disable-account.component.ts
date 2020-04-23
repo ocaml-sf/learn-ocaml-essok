@@ -6,7 +6,7 @@ import { UserService, Profile, User } from '../core';
 @Component({
   selector: 'app-disable-account',
   templateUrl: './disable-account.component.html',
-  styleUrls: ['./disable-account.component.css']
+  styleUrls: ['./disable-account.component.scss']
 })
 export class DisableAccountComponent implements OnInit {
 

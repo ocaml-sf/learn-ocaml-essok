@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { User, UserListConfig, UserService } from '../../core';
 @Component({
   selector: 'app-user-list',
-  styleUrls: ['user-list.component.css'],
+  styleUrls: ['user-list.component.scss'],
   templateUrl: './user-list.component.html'
 })
 export class UserListComponent {

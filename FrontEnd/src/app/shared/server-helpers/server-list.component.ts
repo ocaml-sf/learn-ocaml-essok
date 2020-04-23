@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { Server, ServerListConfig, ServersService } from '../../core';
 @Component({
   selector: 'app-server-list',
-  styleUrls: ['server-list.component.css'],
+  styleUrls: ['server-list.component.scss'],
   templateUrl: './server-list.component.html'
 })
 export class ServerListComponent {

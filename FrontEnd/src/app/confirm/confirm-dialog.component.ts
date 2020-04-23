@@ -4,7 +4,7 @@ import { ConfirmDialogService } from "./confirm-dialog.service";
 @Component({
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
-    styleUrls: ['confirm-dialog.component.css']
+    styleUrls: ['confirm-dialog.component.scss']
 })
 export class ConfirmDialogComponent {
     message: any;
