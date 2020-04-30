@@ -1,27 +1,21 @@
-<app-server-preview
-  *ngFor="let server of results"
-  [server]="server">
+<app-server-preview *ngFor="let server of results" [server]="server">
 </app-server-preview>
 
-<div class="list-group-item"
-  [hidden]="!loading">
+<div class="list-group-item" [hidden]="!loading">
   Loading servers...
 </div>
 
-<div class="list-group-item"
-  [hidden]="loading || results.length">
+<div class="list-group-item" [hidden]="loading || results.length">
   No servers are here... yet.
 </div>
 
 <nav [hidden]="loading || totalPages.length <= 1">
   <ul class="pagination justify-content-center">
 
-    <li class="page-item"
-      [ngClass]="{'active': pageNumber === currentPage}"
-      *ngFor="let pageNumber of totalPages"
+    <li class="page-item" [ngClass]="{'active': pageNumber === currentPage}" *ngFor="let pageNumber of totalPages"
       (click)="setPageTo(pageNumber)">
 
-      <a class="page-link" >{{ pageNumber }}</a>
+      <a class="page-link">{{ pageNumber }}</a>
 
     </li>
 

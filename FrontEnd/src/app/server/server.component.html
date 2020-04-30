@@ -8,23 +8,24 @@
           <i class="ion-md-create"></i> Manage Server
         </button>
 
-        <button class="btn btn-sm btn-outline-warning" *ngIf="currentUser.active"
-          [ngClass]="{disabled: isDisabled}" (click)="toggleServerStatus()">
+        <button class="btn btn-sm btn-outline-warning" *ngIf="currentUser.active" [ngClass]="{disabled: isDisabled}"
+          (click)="toggleServerStatus()">
           <i class="ion-md-power"></i>
           <span *ngIf="!server.active"> Enable Server</span>
           <span *ngIf="server.active"> Disable Server</span>
         </button>
 
         <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin"
-           (click)="toggleDangerous()">
+          (click)="toggleDangerous()">
           <i class="ion-md-warning"></i>
           <span *ngIf="!isDangerous"> Show Dangerous options</span>
           <span *ngIf="isDangerous"> Hide Dangerous options</span>
         </button>
 
-        <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
+        <button class="btn btn-sm btn-outline-danger"
+          *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
           [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
-            <i class="ion-md-trash"></i> Delete Server
+          <i class="ion-md-trash"></i> Delete Server
         </button>
 
       </div>

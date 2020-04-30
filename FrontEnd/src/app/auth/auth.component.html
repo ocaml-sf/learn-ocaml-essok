@@ -14,57 +14,34 @@
       <form [formGroup]="authForm" (ngSubmit)="submitForm()">
         <fieldset [disabled]="isSubmitting">
           <fieldset class="form-group">
-            <input
-              formControlName="username"
-              placeholder="Username"
-              class="form-control form-control-lg"
-              type="text"
+            <input formControlName="username" placeholder="Username" class="form-control form-control-lg" type="text"
               *ngIf="authType == 'register'" />
           </fieldset>
           <fieldset class="form-group">
-            <textarea
-              class="form-control form-control-lg"
-              formControlName="description"
-              placeholder="Who are you ?"
-              type="text"
-              *ngIf="authType == 'register'">
+            <textarea class="form-control form-control-lg" formControlName="description" placeholder="Who are you ?"
+              type="text" *ngIf="authType == 'register'">
             </textarea>
           </fieldset>
           <fieldset class="form-group">
-            <textarea class="form-control form-control-lg"
-              formControlName="place"
-              placeholder="Where do you work ?"
-              type="text"
-              rows="5"
-              *ngIf="authType == 'register'">
+            <textarea class="form-control form-control-lg" formControlName="place" placeholder="Where do you work ?"
+              type="text" rows="5" *ngIf="authType == 'register'">
             </textarea>
           </fieldset>
           <fieldset class="form-group">
-            <textarea class="form-control form-control-lg"
-              formControlName="goal"
-              placeholder="Why would you want an account ?"
-              type="text"
-              rows="5"
-              *ngIf="authType == 'register'" >
+            <textarea class="form-control form-control-lg" formControlName="goal"
+              placeholder="Why would you want an account ?" type="text" rows="5" *ngIf="authType == 'register'">
             </textarea>
           </fieldset>
           <fieldset class="form-group">
-            <input
-              formControlName="email"
-              placeholder="Email"
-              class="form-control form-control-lg"
-              rows="5"
+            <input formControlName="email" placeholder="Email" class="form-control form-control-lg" rows="5"
               type="text" />
-              Email must be a valid email : [example]@[example].[example]
+            Email must be a valid email : [example]@[example].[example]
           </fieldset>
           <fieldset class="form-group">
-            <input
-              formControlName="password"
-              placeholder="Password"
-              class="form-control form-control-lg"
+            <input formControlName="password" placeholder="Password" class="form-control form-control-lg"
               type="password" />
-              Password must be include at one letter and one number and be at least 6 characters long. <br/>
-              No special characters are allowed. (!%*+-,...)
+            Password must be include at one letter and one number and be at least 6 characters long. <br />
+            No special characters are allowed. (!%*+-,...)
           </fieldset>
           <button class="btn btn-lg btn-primary pull-xs-right" [disabled]="!authForm.valid" type="submit">
             {{ title }}

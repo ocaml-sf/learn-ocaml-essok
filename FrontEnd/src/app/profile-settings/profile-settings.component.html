@@ -55,8 +55,9 @@
             <p>ACTIVATE THE ACCOUNT:</p>
             <p>If the form satisfies you, you can activate the account then the user would create and manage its server
             </p>
-            <p>Otherwise you can delete the account in the Dangerous ZONE and ask the user to make a more accurate form.
-              </p>
+            <p>
+              Otherwise you can delete the account in the Dangerous ZONE and ask the user to make a more accurate form.
+            </p>
             <button class="btn btn-outline-warning" (click)="activateAccount()">
               Click here to activate the account
             </button>
@@ -66,7 +67,9 @@
           <div class="warning" *ngIf="user.admin">
             <h2>DEBUG ZONE (ADMIN ONLY)</h2>
             <p>AUTHORIZE THE ACCOUNT:</p>
-            <p>If they were a bug and an account has been unauthorized and is blocked you can click here to solve the problem.
+            <p>
+              If they were a bug and an account has been unauthorized and is blocked you can click here to solve the
+              problem.
             </p>
             <button class="btn btn-outline-warning" (click)="authorizeAccount()">
               Click here to make the account great again !
