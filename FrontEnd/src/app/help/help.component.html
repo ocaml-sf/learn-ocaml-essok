@@ -4,17 +4,256 @@
       <div class="col-md-10 offset-md-1 col-xs-12">
         <h1 class="text-xs-center">{{ title }}</h1>
         <hr />
-        <!-- <p class="text-xs-center">{{ header }}</p> -->
-        <!-- <hr /> -->
-        <!-- <p class="text-xs-center">{{ body }}</p> -->
-        <h2>
-          1/ Create your servers
-          <br />
-          2/ Upload your files
-          <br />
-          3/ Launch your servers
-        </h2>
+        <h2>Table of contents</h2>
+        <h4>
+          <a href="help#create_server">How to create a server</a><br />
+          <a href="help#manage_server">How to manage your server</a><br />
+          <a href="help#upload_files">How to upload files to your server</a><br />
+          <a href="help#manage_files">How to manage files in your server</a><br />
+          <a href="help#exercises_list">-> Exercises List Part</a><br />
+          <a href="help#trash">-> Trash Part</a><br />
+          <a href="help#groups_list">-> Groups List Part</a><br />
+          <a href="help#teacher_token">How to retrieve your teacher token</a><br />
+          <a href="help#access_server">How to access to the server</a><br />
+          <a href="help#shutoff">How to shut off/on a server</a><br />
+          <a href="help#dangerous">Dangerous Actions</a><br />
+          <a href="help#password">-> How to change my password</a><br />
+          <a href="help#delete_server">-> How to delete a server</a><br />
+          <a href="help#disable_account">-> How to disable my account</a><br />
+          <a href="help#delete_account">-> How to delete my account</a><br />
+        </h4>
         <hr />
+        <div id="create_server">
+          <h4>How to create a server</h4>
+          <p id="body">To create your server you simply have to go : <a href="editor" target="_blank">there</a> (click
+            to open in a new page) then enter a name for your server and if you want a reminder of what is your server
+            about. Click on Publish server when you are done. </p>
+          <p id="tips">TIPS : <br />If the server name if already taken don't worry just adapt the name. <br />Special
+            caracters and space (blanks) are not allowed [/*-+%...]</p>
+        </div>
+        <img src="../../assets/images/create_server.png" alt="Example of server creation" width="970">
+        <img src="../../assets/images/create_server_bug.png" alt="Example of server creation bug" width="970">
+        <p>Blanks are not allowed in the server name</p>
+        <img src="../../assets/images/create_server_correct.png" alt="Example of server creation correct" width="970">
+        <hr />
+        <div id="manage_server"></div>
+        <h4>How to manage your server</h4>
+        <p>Click <a href="" target="_blank">here</a> (click to open in a new page) then search for your server, click on
+          it.
+          <img src="../../assets/images/select_server.png" alt="Example of server selection" width="970">
+          Then click on manage server.
+          <img src="../../assets/images/manage_server.png" alt="Example of server management" width="970">
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="upload_files"></div>
+        <h4>How to upload files to your server</h4>
+        <p> When you click on manage server you should jump on a page with this.
+          <img src="../../assets/images/upload_file_empty.png" alt="Example of server management" width="970">
+          You can use two ways to upload your files : Github way or local way.<br />
+          In github way you just have to enter a correct Github URL of the repository you want to add to your server
+          then click on the button.
+          <img src="../../assets/images/upload_file_github.png" alt="Example of server management" width="970">
+          In the local way, browse the files you want to add then select it.
+          <img src="../../assets/images/upload_file_local.png" alt="Example of server management" width="970">
+          The file must be an .zip archive and the exercises must be at the archive root.
+          <img src="../../assets/images/exercises_yes.png" alt="Example of server management"><br />
+          Not in a subdirectory of the root.<br />
+          <img src="../../assets/images/exercises_no.png" alt="Example of server management"><br />
+          Then you should have this screen.
+          <img src="../../assets/images/upload_file_local_example.png" alt="Example of server management"
+            width="970"><br />
+          Click on upload then wait for the status response.
+          <img src="../../assets/images/upload_file_local_example_done.png" alt="Example of server management"
+            width="970"><br />
+          If the status is Success, you can continue. Otherwise may be you have a problem with your .zip
+          archive. Sometimes archives from some softwares on certain distributions are not accepted, just try another
+          archive software and submit again. If the problem persists, please <a href="contact">contact us</a>.
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="manage_files"></div>
+        <h4>How to manage files in your server</h4>
+        <p>
+          When you have no file in your server, it shoul look like this.
+          <img src="../../assets/images/send_file_empty.png" alt="Example of send empty" width="970"><br />
+          If you have uploaded some file in your server you should have them like in this example.
+          <img src="../../assets/images/send_file_example.png" alt="Example of send example" width="970"><br />
+          You have three sections: Trash, Exercises List and Groups List.<br />
+        </p>
+        <h6 id="exercises_list">Exercises List</h6>
+        <p>Exercises List is a section where you can found the exercises you have uploaded to your server but
+          they are not initialized inside the server. Do do it, you must place them inside the Groups List field.<br />
+          Drag your file.
+          <img src="../../assets/images/send_move.png" alt="Example of send move" width="970"><br />
+          Go on the wanted group.
+          <img src="../../assets/images/send_place.png" alt="Example of send place" width="970"><br />
+          Drop your file.
+          <img src="../../assets/images/send_file_place_group.png" alt="Example of send place" width="970"><br />
+        </p>
+        <h6 id="trash">Trash</h6>
+        <p>Trash is a section where you can put files to delete them, for example useless files or corrupted
+          files.<br />
+          To do it juste drag and drop your files inside the Trash field and when YOU ARE SURE ABOUT IT delete them by
+          clicking on the clean button. Files deleted cannot be retrieved.<br />
+          Drag your useless file inside the field.
+          <img src="../../assets/images/send_file_trash_move.png" alt="Example of trash move" width="970"><br />
+          Drop it.
+          <img src="../../assets/images/send_file_trash_place.png" alt="Example of trash place" width="970"><br />
+          Click here when you are sure you want to delete it.<br />
+          <img src="../../assets/images/send_file_clean.png" alt="Example of clean"><br />
+        </p>
+        <h6 id="groups_list">Groups List</h6>
+        <p>Groups List a section where you have the files which are currently used inside your server. To
+          place
+          new files inside just drag and drop them from the Exercises field, give a name to your group then when you are
+          sure about it, click on the send button to initialize them to the server.<br />
+          Drag your file.
+          <img src="../../assets/images/send_file_group_move.png" alt="Example of group move" width="970"><br />
+          Here we create a new group.
+          <img src="../../assets/images/send_file_group_place.png" alt="Example of group place" width="970"><br />
+          To name it click on this field.
+          <img src="../../assets/images/send_file_group_rename_select.png" alt="Example of group rename"
+            width="970"><br />
+          Then replace the default name by something more accurate.
+          <img src="../../assets/images/send_file_group_rename_done.png" alt="Example of group renamed"
+            width="970"><br />
+          Then click outside the field to save the new name.
+
+          If you have made one or more mistakes and you don't know how to revert it, click on the reset button.
+          This button will load the configuration from your last upload/send and revert all the changes you have done
+          (drag & drop and rename changes).<br />
+          <img src="../../assets/images/send_file_reset.png" alt="Example of reset"><br />
+
+          When you are done click on the send button.<br />
+          <img src="../../assets/images/send_file_send.png" alt="Example of send"><br />
+          Your screen would look like this.<br />
+          <img src="../../assets/images/send_file_group_validate.png" alt="Example of group validate" width="970"><br />
+          Click on the button, then wait the time the configuration is sended to the server.<br />
+          <img src="../../assets/images/send_file_wait.png" alt="Example of wait"><br />
+          When the configuration is sended. You should have this window which appears.<br />
+          <img src="../../assets/images/send_file_launch.png" alt="Example of launch"><br />
+          If you are done and you want to launch your LearnOCaml server click on YES.<br />
+          <img src="../../assets/images/send_file_launch_yes.png" alt="Example of launch yes"><br />
+          Then wait the time your server is beeing launched.<br />
+          <img src="../../assets/images/send_file_wait.png" alt="Example of wait"><br />
+          Congratulations ! Your server is now online and ready to be used.
+        </p>
+
+        <a href="help#">go top</a>
+        <hr />
+        <div id="teacher_token"></div>
+        <h4>How to retrieve your teacher token</h4>
+        <p>
+          Retrieving your teacher token is an unique action executed the first time you launch a server.
+          To retrieve it, go at <a href="home" target="_blank">home page</a>. You might have this screen.<br />
+          <img src="../../assets/images/teacher_token.png" alt="Example of teacher token" width="970"><br />
+          Then click on the yellow button.<br />
+          <img src="../../assets/images/teacher_token_click.png" alt="Example of teacher token click" width="970"><br />
+          Then wait, this should not be too long and it's not necessary to click again on the button or to spam
+          it.<br />
+          <img src="../../assets/images/teacher_token_wait.png" alt="Example of teacher token wait" width="970"><br />
+          Finally your token should appear.<br />
+          <img src="../../assets/images/teacher_token_retrieve.png" alt="Example of teacher token success"
+            width="970"><br />
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="access_server"></div>
+        <h4>How to access to the server</h4>
+        <p>
+          Before accessing your server, copy your teacher token.<br />
+          <img src="../../assets/images/teacher_token_copy.png" alt="Example of teacher token copy" width="970"><br />
+          Then click on the link generated for your server.<br />
+          <img src="../../assets/images/access_server.png" alt="Example of access server" width="970"><br />
+          This screen should appear.<br />
+          <img src="../../assets/images/access_server_welcome.png" alt="Example of access server welcome"><br />
+          Paste your teacher token in this field.<br />
+          <img src="../../assets/images/access_server_paste.png" alt="Example of access server paste"><br />
+          Now you should be connected to your LearnOCaml server.<br />
+          <img src="../../assets/images/access_server_done.png" alt="Example of access server done" width="970"><br />
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="shutoff"></div>
+        <h4>How to shut off/on a server</h4>
+        To shut off a server, just go at <a href="home" target="_blank">home page</a> click on your server then click on
+        this button then wait.
+        <img src="../../assets/images/shut_off.png" alt="Example of shut off" width="970"><br />
+        To shut a server on do the same but click here.
+        <img src="../../assets/images/shut_on.png" alt="Example of shut on" width="970"><br />
+        <a href="help#">go top</a>
+        <hr />
+        <div id="dangerous"></div>
+        <h4>Dangerous Actions</h4>
+        <p>
+          They are some dangerous actions which can performed.
+          You can find it at the bottom of your profile settings page.<br />
+          <img src="../../assets/images/dangerous.png" alt="Example of dangerous actions" width="970"><br />
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="password"></div>
+        <h4>How to change my password</h4>
+        <p>
+          To change your password click <a href="reset-password" target="_blank"> here</a> and fill the blank.<br />
+          You should have this screen.<br />
+          <img src="../../assets/images/reset_pass.png" alt="Example of reset password" width="970"><br />
+          In the email verification field, put your current email.<br />
+          In the old password field, put your old password.<br />
+          In the new password field, put the password you want, it must respect the password restrictions above and no
+          special caracters are allowed.<br />
+          In the new password verification field, put a second time your new password.<br />
+          Then click on update password button when you are sure about your modifications.<br />
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="delete_server"></div>
+        <h4>How to delete a server</h4>
+        <p>
+          Deleting a server is an action THAT CAN NOT BE UNDONE. All the data about your server will be erased in
+          accordance with the GDPR.<br />
+          Do not hesitate to ask yourself if this is a good idea or not before doing this. Disable your server to use it
+          later is also a good idea.<br />
+          To delete a server go on the management page of itself, scroll down and you should see this.<br />
+          <img src="../../assets/images/delete_server.png" alt="Example of server delete" width="970"><br />
+          Check each box if you agree with it then click on the red button, it's done.
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="disable_account"></div>
+        <h4>How to disable my account</h4>
+        <p>
+          If you want to take a break, you can disable your account.
+          Disabling your account will automatically disable all your active server.
+          Click <a href="disable-account" target="_blank"> here</a> to have this screen.
+          <img src="../../assets/images/disable_acc.png" alt="Example of account disable" width="970"><br />
+          In the email verification field, put your current email.<br />
+          In the password field, put your current password.<br />
+          In the password verification field, put a second time your password.<br />
+          In the username verification field, put your username.<br />
+          Then check each box if you agree with it.<br />
+          Then click on disable account button when you are sure about it.<br />
+        </p>
+        <a href="help#">go top</a>
+        <hr />
+        <div id="delete_account"></div>
+        <h4>How to delete my account</h4>
+        <p>
+          Deleting your account will automatically delete all your servers with no possibilities to retrieve your
+          data.<br />
+          THIS ACTION CAN NOT BE UNDONE.<br />
+          If you want to delete your account for whatever reason, go <a href="delete-account" target="_blank">here</a>
+          you should have this screen.<br />
+          <img src="../../assets/images/delete_acc.png" alt="Example of account delete" width="970"><br />
+          In the email verification field, put your current email.<br />
+          In the password field, put your current password.<br />
+          In the password verification field, put a second time your password.<br />
+          In the username verification field, put your username.<br />
+          Then check each box if you agree with it.<br />
+          Then click on delete account button when you are sure about it.<br />
+        </p>
+        <a href="help#">go top</a>
       </div>
     </div>
   </div>
