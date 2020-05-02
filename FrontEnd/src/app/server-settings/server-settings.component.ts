@@ -10,6 +10,7 @@ import { ModalService } from '../modal';
 import { environment } from '../../environments/environment';
 import { ConfirmDialogService } from '../confirm';
 const URL = environment.api_url + '/uploads/check';
+const URL_full = environment.api_url + '/uploads/full';
 
 @Component({
   selector: 'app-server-settings-page',
@@ -24,6 +25,7 @@ export class ServerSettingsComponent implements OnInit {
   tmp: string;
   isSubmitting = false;
   uploader: FileUploader;
+  uploader_full: FileUploader;
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
   isDeleting = false;
@@ -65,6 +67,13 @@ export class ServerSettingsComponent implements OnInit {
         //allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
       }
     );
+    this.uploader_full = new FileUploader(
+      {
+        url: URL_full,
+        authToken: `Token ${token}`
+        //allowedMimeType: ['application/zip', 'application/octet-stream'/*, 'application/gzip'*/],
+      }
+    );
   }
 
   updateExercisesDropList() {
@@ -87,6 +96,7 @@ export class ServerSettingsComponent implements OnInit {
     this.loadData();
     this.loadGroups();
     this.uploadPrepare();
+    this.uploadFullPrepare();
     this.router.navigateByUrl('/server-settings/' + this.server.slug);
   }
 
@@ -96,6 +106,7 @@ export class ServerSettingsComponent implements OnInit {
         this.server = data.server;
         // this.serverSettingsForm.patchValue(data.server);
         this.uploader.options.additionalParameter = { server: this.server.slug };
+        this.uploader_full.options.additionalParameter = { server: this.server.slug };
       }
     });
   }
@@ -127,6 +138,19 @@ export class ServerSettingsComponent implements OnInit {
       this.trashesList = [];
       this.loadGroups();
       // move to the next slide
+    };
+  }
+
+  uploadFullPrepare() {
+    this.uploader_full.onAfterAddingFile = (file) => { file.withCredentials = false; };
+    this.uploader_full.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+      console.log('FileUpload:uploaded:', item, status, response);
+      let that = this;
+      this.confirmDialogService.confirmThis("Launch your learnOCaml server now?", function () {
+        that.disableServer();
+      }, function () {
+        alert("The operation has been aborted, you can launch it later");
+      })
     };
   }
 
