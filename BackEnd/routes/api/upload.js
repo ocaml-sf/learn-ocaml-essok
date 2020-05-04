@@ -25,18 +25,18 @@ let storage = multer.diskStorage({
 });
 let upload = multer({ storage: storage });
 
-router.get('/', auth.required, function(req, res) {
+router.get('/', auth.required, function (req, res) {
     res.end('file catcher example');
 });
 
-router.post('/index', auth.required, function(req, res, next) {
-    User.findById(req.payload.id).then(function(user) {
+router.post('/index', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (user.processing) { return res.sendStatus(401); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
-            .then(function(server) {
+            .then(function (server) {
                 if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) {
                     console.log(server.author.username);
@@ -73,14 +73,14 @@ router.post('/index', auth.required, function(req, res, next) {
     }).catch(next);
 });
 
-router.post('/check', auth.required, upload.single('file'), function(req, res, next) {
-    User.findById(req.payload.id).then(function(user) {
+router.post('/check', auth.required, upload.single('file'), function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (user.processing) { return res.sendStatus(401); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
-            .then(function(server) {
+            .then(function (server) {
                 if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) {
                     console.log(server.author.username);
@@ -123,14 +123,73 @@ router.post('/check', auth.required, upload.single('file'), function(req, res, n
     }).catch(next);
 });
 
-router.post('/url', auth.required, function(req, res, next) {
-    User.findById(req.payload.id).then(function(user) {
+
+router.post('/full', auth.required, upload.single('file'), function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (user.processing) { return res.sendStatus(401); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
-            .then(function(server) {
+            .then(function (server) {
+                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+                if ((server.author.username !== user.username) && (!user.isAdmin())) {
+                    console.log(server.author.username);
+                    console.log(user.username);
+                    return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+                }
+                if (!req.file) {
+                    console.log("No file received");
+                    return res.send({
+                        success: false
+                    });
+                } else {
+                    var dest_path = dirPath + server.author.username + '/';
+                    var source_path = dirPath + destPath;
+                    var mimetype = req.file.mimetype;
+                    if (mimetype === 'application/zip' ||
+                        mimetype === 'application/octet-stream' ||
+                        mimetype === 'application/x-zip-compressed') {
+                        console.log('file received');
+                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
+                                upload_functions.archive_traitement_repsync(dest_path + server.slug + '/', safe_folder, server.slug).then(() => {
+                                    console.log(files + ' ok');
+                                    return res.json({
+                                        name: files,
+                                    });
+
+                                }, (err) => {
+                                    console.log('Error archive traitement full !: ' + err);
+                                    return res.status(422).json({ errors: { errors: err } });
+                                });
+
+                            }, (err) => {
+                                console.log('Error archive traitement !: ' + err);
+                                return res.status(422).json({ errors: { errors: err } });
+                            });
+                        }, (err) => {
+                            console.log('Error createArbo !: ' + err);
+                            return res.status(422).json({ errors: { errors: err } });
+                        });
+                    } else {
+                        console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
+                        return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
+                    }
+                }
+            }).catch(next);
+    }).catch(next);
+});
+
+
+router.post('/url', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(401); }
+        Server.findOne({ slug: req.body.server })
+            .populate('author')
+            .then(function (server) {
                 if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
                 console.log(req.body);
@@ -170,14 +229,14 @@ router.post('/url', auth.required, function(req, res, next) {
 });
 
 
-router.post('/send', auth.required, function(req, res, next) {
-    User.findById(req.payload.id).then(function(user) {
+router.post('/send', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (user.processing) { return res.sendStatus(401); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
-            .then(function(server) {
+            .then(function (server) {
                 if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
                 var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
@@ -262,14 +321,14 @@ router.post('/send', auth.required, function(req, res, next) {
     }).catch(next);
 });
 
-router.post('/delete', auth.required, function(req, res, next) {
-    User.findById(req.payload.id).then(function(user) {
+router.post('/delete', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
         if (user.processing) { return res.sendStatus(401); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
-            .then(function(server) {
+            .then(function (server) {
                 if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
                 var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
