@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { User, UserService } from '../../core';
 
 @Component({
-  selector: 'app-layout-header',
+  selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })

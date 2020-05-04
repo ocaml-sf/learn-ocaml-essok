@@ -10,22 +10,15 @@ $ionicons-font-path: "~ionicons/dist/fonts";
 
 /*@import url('//demo.productionready.io/main.css');*/
 
-/* Sand background for NavBar */
-.bg-sand {
-    @include background($color-sand);
+html, body, app-root {
+    height: 100%;
 }
 
-/* Oasis Blue background for Banner */
-.bg-oasis-blue {
-    @include background($color-oasis-blue);
+body {
+    background-color: $desert-sand;
 }
 
-/* Main Orange background for Main Orange */
-.bg-main-orange {
-    @include background($color-main-orange);
-}
-
-/* Wallpaper for the background */
-.bg-body {
-    @extend .bg-main-orange;
+app-root {
+    display: flex;
+    flex-direction: column;
 }
