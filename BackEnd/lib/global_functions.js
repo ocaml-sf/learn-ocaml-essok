@@ -11,6 +11,17 @@ function _asyncFunction(item, cb) {
     }, 100);
 }
 
+/**
+ * create a Promise that wait before returning result
+ * callback must be a function that take no arguments (only unit)
+ */
+async function _timedRun(callback, ms) {
+    let result = await new Promise(resolve => {
+	setTimeout(() => resolve(callback()), ms)
+    });
+    return result;
+}
+
 function _tryFindTeacherToken(log, regexp, regexp_len) {
     var index = log.indexOf(regexp);
     if(index === -1)
@@ -27,7 +38,8 @@ function _tryAllFindTeacherToken(log) {
 
 var global_functions = {
     asyncFunction: _asyncFunction,
-    tryFindTeacherToken: _tryAllFindTeacherToken
-}
+    tryFindTeacherToken: _tryAllFindTeacherToken,
+    timedRun: _timedRun
+};
 
 module.exports = global_functions;

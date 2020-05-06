@@ -25,30 +25,39 @@ function _readNamespacedDeployment(slug, namespace) {
     return k8sApiDeploy.readNamespacedDeployment(slug, namespace);
 };
 
-function _readNamespacedPod(slug, namespace) {
+/**
+ * Return a promise with the list of pods found
+ * an empty list mean no pods found
+ */
+function _listNamespacedPod(slug, namespace, verbose = false) {
     return k8sApi.listNamespacedPod(namespace, undefined, undefined, undefined,
-        undefined, podLabelPrefix + slug);
+				    undefined, podLabelPrefix + slug)
+	.then(res => (verbose) ? res : res.body.items);
 }
 
-function _readNamespacedPodLog(slug, namespace) {
-    var items;
-    var name;
+/**
+ * Find the first pod in the list of pods found
+ * if the list is empty, return an rejected promise
+ */
+function _readNamespacedPod(slug, namespace) {
+    return _listNamespacedPod(slug, namespace)
+	.then(items => {
+	    if(items.length < 1)
+		throw new Error('Pod not found');
+	    return items[0];
+	});
+}
 
+function _readNamespacedPodLog(slug, namespace, verbose = false) {
     return _readNamespacedPod(slug, namespace)
-        .then((res) => {
-            items = res.body.items;
-            if (items.length === 0)
-                throw new Error('Pod not found');
-
-            name = items[0].metadata.name;
-
-            return k8sApi.readNamespacedPodLog(name, namespace);
-        });
+	.then(pod => pod.metadata.name)
+	.then(name => k8sApi.readNamespacedPodLog(name, namespace))
+	.then(res => (verbose) ? res : res.body);
 }
 
 function _tryGetTeacherToken(slug, namespace) {
     return _readNamespacedPodLog(slug, namespace)
-        .then((log) => global_functions.tryFindTeacherToken(log.body));
+        .then(log => global_functions.tryFindTeacherToken(log));
 }
 
 async function _catchTeacherToken(slug, namespace) {
@@ -355,15 +364,18 @@ function _deleteNamespacedService(slug, namespace) {
     });
 };
 
-function _deleteNamespacedDeployment(slug, namespace) {
-    return new Promise(function(resolve, reject) {
-        k8sApiDeploy.readNamespacedDeployment(slug, namespace).then((response) => {
-            return resolve(k8sApiDeploy.deleteNamespacedDeployment(slug, namespace));
-        }, (err) => {
-            console.log('deployment doesnt exist');
-            return resolve('deployment doesnt exist');
-        });
-    });
+async function _deleteNamespacedDeployment(slug, namespace, waitPodDie = true) {
+    async function watchPodDie() {
+	let timedWatchRun = () => global_functions.timedRun(
+	    () => watchPodDie(), intervalTime);
+	return _readNamespacedPod(slug, namespace)
+	    .then(_ => timedWatchRun())
+	    .catch(_ => true);
+    }
+
+    return k8sApiDeploy.deleteNamespacedDeployment(slug, namespace)
+	.then(_ => (waitPodDie) ? watchPodDie() : true)
+	.catch(_ => false);
 };
 
 function _removekubelink(slug, namespace) {
