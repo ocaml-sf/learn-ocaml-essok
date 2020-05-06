@@ -1,6 +1,9 @@
 #+TITLE: TODO List Learn-OCaml-Essok
-* TODO Scrollbar verticale sur les exercices
-* TODO Délai d'extinction des serveurs (lock-unlock le temps de...)
+* DONE Délai d'extinction des serveurs (lock-unlock le temps de...)
+* TODO Un parser, pretty-printer efficaces pour l'index.json
+(et retirer la version ad hoc)
+* TODO Améliorer la fonction qui watch la recherche d'un token
+(utiliser timedRun crée récemment)
 * TODO Temps de timeout d'une requête au Backend à "augmenter"
 * TODO Ajouter un timeout dans la fonction qui lock (et éviter un deadlock)
 * TODO Mise en page du CSS
@@ -12,6 +15,9 @@
 ** TODO Page d'aide (mise en page simple en cours, à améliorer après)
 ** TODO Page de contact
 ** TODO Templates/Classes (pour généraliser les mises en page HTML)
+** TODO Barre de chargement
+(réutilisable le plus possible, en particulier en cas de deadlocks)
+** TODO Scrollbar verticale sur les exercices
 * TODO Feature: upload tout un dépôt learn-ocaml (avec sync et repository)
 * TODO Feature: download tout un dépôt learn-ocaml (avec sync et repository)
 * TODO Watcher pour Backup automatiquement (voir avec Yann)
