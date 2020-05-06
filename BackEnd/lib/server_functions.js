@@ -17,11 +17,11 @@ const upload_functions = require('./upload_functions');
 const podLabelPrefix = 'app=';
 const intervalTime = 5000;
 
-function _createNamespacedDeployment(deployment, namespace) {
+async function _createNamespacedDeployment(deployment, namespace) {
     return k8sApiDeploy.createNamespacedDeployment(namespace, deployment);
 }
 
-function _readNamespacedDeployment(slug, namespace) {
+async function _readNamespacedDeployment(slug, namespace) {
     return k8sApiDeploy.readNamespacedDeployment(slug, namespace);
 };
 
@@ -29,7 +29,7 @@ function _readNamespacedDeployment(slug, namespace) {
  * Return a promise with the list of pods found
  * an empty list mean no pods found
  */
-function _listNamespacedPod(slug, namespace, verbose = false) {
+async function _listNamespacedPod(slug, namespace, verbose = false) {
     return k8sApi.listNamespacedPod(namespace, undefined, undefined, undefined,
 				    undefined, podLabelPrefix + slug)
 	.then(res => (verbose) ? res : res.body.items);
@@ -39,7 +39,7 @@ function _listNamespacedPod(slug, namespace, verbose = false) {
  * Find the first pod in the list of pods found
  * if the list is empty, return an rejected promise
  */
-function _readNamespacedPod(slug, namespace) {
+async function _readNamespacedPod(slug, namespace) {
     return _listNamespacedPod(slug, namespace)
 	.then(items => {
 	    if(items.length < 1)
@@ -48,14 +48,14 @@ function _readNamespacedPod(slug, namespace) {
 	});
 }
 
-function _readNamespacedPodLog(slug, namespace, verbose = false) {
+async function _readNamespacedPodLog(slug, namespace, verbose = false) {
     return _readNamespacedPod(slug, namespace)
 	.then(pod => pod.metadata.name)
 	.then(name => k8sApi.readNamespacedPodLog(name, namespace))
 	.then(res => (verbose) ? res : res.body);
 }
 
-function _tryGetTeacherToken(slug, namespace) {
+async function _tryGetTeacherToken(slug, namespace) {
     return _readNamespacedPodLog(slug, namespace)
         .then(log => global_functions.tryFindTeacherToken(log));
 }
@@ -80,15 +80,15 @@ async function _catchTeacherToken(slug, namespace) {
     return token;
 }
 
-function _createNamespacedService(service, namespace) {
+async function _createNamespacedService(service, namespace) {
     return k8sApi.createNamespacedService(namespace, service);
 };
 
-function _patchNamespacedIngress(_spec, namespace) {
+async function _patchNamespacedIngress(_spec, namespace) {
     return k8sApiIngress.patchNamespacedIngress('learn-ocaml', namespace, { spec: _spec });
 };
 
-function _createNamespacedIngress(rule, namespace) {
+async function _createNamespacedIngress(rule, namespace) {
     return new Promise(function(resolve, reject) {
         k8sApiIngress.readNamespacedIngress('learn-ocaml', namespace, 'true').then(
             (response) => {
@@ -353,7 +353,7 @@ function _deleteNamespacedIngress(slug, namespace) {
     });
 };
 
-function _deleteNamespacedService(slug, namespace) {
+async function _deleteNamespacedService(slug, namespace) {
     return new Promise(function(resolve, reject) {
         k8sApi.readNamespacedService(slug, namespace).then((response) => {
             return resolve(k8sApi.deleteNamespacedService(slug, namespace));
