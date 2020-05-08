@@ -391,13 +391,13 @@ function _getFromSwift(path, slug, target) {
     return new Promise(function (resolve, reject) {
 
         if (target !== 'all') {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target;
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target + ' --skip-identical';
         } else {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path;
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' --skip-identical';
         }
         console.log('downloading...');
 
-        exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 500 }).then(() => {
+        exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 }).then(() => {
 
             return resolve('done');
         }, (err) => {
