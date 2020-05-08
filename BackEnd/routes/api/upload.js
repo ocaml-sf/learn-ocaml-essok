@@ -402,6 +402,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
             console.log(user.username);
             return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
         }
+        req.setTimeout(1800000);
         user.startProcessing().then(() => {
             console.log('user.processing : ' + user.processing);
             var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
