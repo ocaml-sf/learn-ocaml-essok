@@ -98,5 +98,6 @@ app.use(function (err, req, res, next) {
 var server = app.listen(process.env.PORT || 3000, function () {
   console.log('Listening on port ' + server.address().port);
 });
+server.setTimeout(30 * 60 * 1000);
 
 // https.createServer(options, app).listen(8080);
