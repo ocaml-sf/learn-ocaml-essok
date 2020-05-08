@@ -397,7 +397,7 @@ function _getFromSwift(path, slug, target) {
         }
         console.log('downloading...');
 
-        exec(cmd, { shell: '/bin/bash' }).then(() => {
+        exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 500 }).then(() => {
 
             return resolve('done');
         }, (err) => {
