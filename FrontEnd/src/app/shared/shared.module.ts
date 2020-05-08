@@ -15,6 +15,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   imports: [
@@ -27,7 +30,10 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatDialogModule,
     MatListModule,
     FlexLayoutModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule
   ],
   declarations: [
     ServerListComponent,
@@ -58,7 +64,10 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatDialogModule,
     MatListModule,
     FlexLayoutModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule
   ]
 })
 export class SharedModule { }

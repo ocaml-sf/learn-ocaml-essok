@@ -1,15 +1,19 @@
-// import { Injectable } from '@angular/core';
-// import { HttpResponse } from '@angular/common/http';
-// import { Http, ResponseContentType } from '@angular/common/http';
-// import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpHeaders, HttpClient, HttpParams, HttpResponse, HttpEvent, HttpEventType, HttpErrorResponse } from '@angular/common/http';
 
-// @Injectable({ providedIn: 'root' })
-// export class FileService {
+import { Http, ResponseContentType } from '@angular/http';
+import { Observable, throwError } from 'rxjs';
+import { ApiService } from './api.service';
+import { map, tap, last, catchError } from 'rxjs/operators';
+@Injectable({ providedIn: 'root' })
+export class FileService {
 
-//   constructor(private http: Http) { }
+    constructor(private apiService: ApiService) { }
 
-//   downloadFile(): Observable<HttpResponse<Blob>> {
-//     return this.http.get('http://localhost:8080/employees/download', { responseType: ResponseContentType.Blob });
-//   }
+    downloadFile(slug, target): Observable<any> {
 
-// }
+        return this.apiService.download('/uploads/download/' + slug, { target: target });
+
+    }
+
+}

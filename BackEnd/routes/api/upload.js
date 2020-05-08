@@ -8,6 +8,7 @@ var dirPath = './uploads/';
 var destPath = '';
 var save_folder = 'save/';
 var archive_folder = 'archive/';
+var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
 var User = mongoose.model('User');
@@ -24,6 +25,19 @@ let storage = multer.diskStorage({
     }
 });
 let upload = multer({ storage: storage });
+
+// Preload server objects on routes with ':server'
+router.param('server', function (req, res, next, slug) {
+    Server.findOne({ slug: slug })
+        .populate('author')
+        .then(function (server) {
+            if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
+
+            req.server = server;
+
+            return next();
+        }).catch(next);
+});
 
 router.get('/', auth.required, function (req, res) {
     res.end('file catcher example');
@@ -100,7 +114,7 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                         mimetype === 'application/octet-stream' ||
                         mimetype === 'application/x-zip-compressed') {
                         console.log('file received');
-                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                             upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, true, '').then((files) => {
                                 console.log(files);
                                 return res.json({
@@ -151,7 +165,7 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                         mimetype === 'application/octet-stream' ||
                         mimetype === 'application/x-zip-compressed') {
                         console.log('file received');
-                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                             upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
                                 upload_functions.archive_traitement_repsync(dest_path + server.slug + '/', safe_folder, server.slug).then(() => {
                                     console.log(files + ' ok');
@@ -199,7 +213,7 @@ router.post('/url', auth.required, function (req, res, next) {
                 if (upload_functions.parse_url(file_url) !== 'github.com') {
                     return res.status(422).json({ errors: { errors: ': URL invalid' } });
                 }
-                upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder).then((response) => {
+                upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                     upload_functions.createDir(dest_path + server.slug + '/' + DOWNLOAD_DIR).then(() => {
                         upload_functions.download_from_url(file_url, dest_path + server.slug + '/' + DOWNLOAD_DIR).then((source_path) => {
                             upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
@@ -374,6 +388,58 @@ router.post('/delete', auth.required, function (req, res, next) {
                 });
 
             }).catch(next);
+    }).catch(next);
+});
+
+router.post('/download/:server', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(401); }
+        var server = req.server;
+        if ((server.author.username !== user.username) && (!user.isAdmin())) {
+            console.log(server.author.username);
+            console.log(user.username);
+            return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+        }
+        user.startProcessing().then(() => {
+            console.log('user.processing : ' + user.processing);
+            var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
+            // console.log(req);
+            var target = req.body.target;
+            console.log(target);
+            if (!(target === 'all' || target === 'sync' || target === 'repository')) {
+                target = 'all';
+            }
+            upload_functions.createArbo(dirPath + server.author.username + '/', server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
+                upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
+                    var folder_name = target;
+                    upload_functions.create_archive(
+                        dest_path + download_folder, folder_name, 'zip')
+                        .then(() => {
+                            user.endProcessing().then(() => {
+                                console.log('user.processing : ' + user.processing);
+                                res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.zip'));
+                            });
+                        }, (err) => {
+                            console.log('Error create_archive !: ' + err);
+                            user.endProcessing().then(() => {
+                                return res.status(422).json({ errors: { errors: err } });
+                            });
+                        });
+                }, (err) => {
+                    console.log('Error getFromSwift !: ' + err);
+                    user.endProcessing().then(() => {
+                        return res.status(422).json({ errors: { errors: err } });
+                    });
+                });
+            }, (err) => {
+                console.log('Error create arbo !: ' + err);
+                user.endProcessing().then(() => {
+                    return res.status(422).json({ errors: { errors: err } });
+                });
+            });
+        });
     }).catch(next);
 });
 

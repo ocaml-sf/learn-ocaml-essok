@@ -24,5 +24,15 @@
             Server URL : <a href="http://{{server.url}}" target="_blank">{{server.url}}</a>
         </div>
     </h3>
+    <app-list-errors [errors]="errors"></app-list-errors>
+    <mat-radio-group [(ngModel)]="target">
+        <mat-radio-button value="all"> All </mat-radio-button>
+        <mat-radio-button value="repository"> Exercises only </mat-radio-button>
+        <mat-radio-button value="sync"> Sync only </mat-radio-button>
+    </mat-radio-group>
+    <button mat-flat-button color="primary" (click)="download()">Download</button>
+    <mat-progress-spinner class="spinner" [color]="color" [mode]="mode" [value]="value" [diameter]=50>
+    </mat-progress-spinner>
     <hr />
+
 </div>

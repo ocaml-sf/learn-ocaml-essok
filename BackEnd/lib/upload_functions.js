@@ -12,6 +12,10 @@ const separator = '®';
 const new_separator = '';
 const repository = 'repository/';
 const sync = 'sync/';
+const archiver = require('archiver');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+
 
 function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
@@ -145,6 +149,29 @@ function deleteDir(tab_of_dir) {
                 }
             })
         }
+    });
+}
+
+function _create_archive(source, target, format) {
+
+    return new Promise((resolve, reject) => {
+        const archive = archiver(format, { zlib: { level: 9 } });
+        var out = source + target + '.' + format;
+        const stream = fs.createWriteStream(out);
+        if (target === 'all') {
+            archive.directory(source + repository, repository);
+            archive.directory(source + sync, sync);
+        } else {
+            archive.directory(source + target, target);
+        }
+
+        archive
+            .on('error', err => { return reject(err) })
+            .pipe(stream)
+            ;
+
+        stream.on('close', () => { console.log('archive created'); return resolve() });
+        archive.finalize();
     });
 }
 
@@ -360,6 +387,26 @@ function _create_indexJSON(path, tabOfName) {
     });
 }
 
+function _getFromSwift(path, slug, target) {
+    return new Promise(function (resolve, reject) {
+
+        if (target !== 'all') {
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target;
+        } else {
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path;
+        }
+        console.log('downloading...');
+
+        exec(cmd, { shell: '/bin/bash' }).then(() => {
+
+            return resolve('done');
+        }, (err) => {
+            console.log('Error exec !: ' + err);
+            return reject(err);
+        });
+    })
+}
+
 function _sendToSwift(path, slug, remote = '/repository/exercises/') {
     return new Promise(function (resolve, reject) {
         var nameProcessed = 0;
@@ -454,14 +501,19 @@ function _createDir(path) {
     });
 }
 
-function _createArbo(path, server_name, safe_folder, dirt_folder, save_folder) {
+function _createArbo(path, server_name, safe_folder, dirt_folder, save_folder, download_folder) {
     return new Promise(function (resolve, reject) {
         _createDir(path).then(() => {
             _createDir(path + server_name).then(() => {
                 _createDir(path + server_name + safe_folder).then(() => {
                     _createDir(path + server_name + dirt_folder).then(() => {
                         _createDir(path + server_name + save_folder).then(() => {
-                            return resolve('done');
+                            _createDir(path + server_name + download_folder).then(() => {
+                                return resolve('done');
+                            }, (err) => {
+                                console.log('Error creating download_folder !: ' + err);
+                                return reject(err);
+                            });
                         }, (err) => {
                             console.log('Error creating save_folder !: ' + err);
                             return reject(err);
@@ -605,6 +657,8 @@ var upload_functions = {
     create_new_tabOfName: _create_new_tabOfName,
     create_indexJSON: _create_indexJSON,
     sendToSwift: _sendToSwift,
+    getFromSwift: _getFromSwift,
+    create_archive: _create_archive,
     removeDir: _removeDir,
     renameDir: _renameDir,
     createArbo: _createArbo,

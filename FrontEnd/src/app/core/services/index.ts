@@ -5,3 +5,4 @@ export * from './jwt.service';
 export * from './profiles.service';
 export * from './user.service';
 export * from './filter.service';
+export * from './file.service';
