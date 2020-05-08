@@ -17,7 +17,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@kubernetes/client-node": "^0.10.2",
+    "@kubernetes/client-node": "^0.10.3",
+    "archiver": "^4.0.1",
     "body-parser": "^1.19.0",
     "child_process": "^1.0.2",
     "cors": "2.8.5",
@@ -26,31 +27,31 @@
     "express": "^4.17.1",
     "express-generator": "^4.16.1",
     "express-jwt": "5.3.1",
-    "express-session": "^1.16.2",
-    "formidable": "^1.2.1",
+    "express-session": "^1.17.1",
+    "formidable": "^1.2.2",
     "fs-extra": "^8.1.0",
     "fs-readdir-recursive": "^1.1.0",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.2.0",
-    "helmet": "^3.21.2",
+    "helmet": "^3.22.0",
     "jsonwebtoken": "8.5.1",
     "method-override": "3.0.0",
     "methods": "1.1.2",
     "mongoose": "5.6.1",
     "mongoose-unique-validator": "2.0.3",
-    "morgan": "^1.9.1",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "passport": "0.4.0",
     "passport-local": "1.0.0",
-    "pkgcloud": "^2.1.1",
-    "request": "^2.88.0",
-    "rimraf": "^3.0.0",
+    "pkgcloud": "^2.2.0",
+    "request": "^2.88.2",
+    "rimraf": "^3.0.2",
     "slug": "1.1.0",
     "underscore": "1.9.1",
-    "unzipper": "^0.10.7"
+    "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "newman": "^4.5.7",
-    "nodemon": "^1.19.2"
+    "newman": "^4.6.1",
+    "nodemon": "^1.19.4"
   }
 }
