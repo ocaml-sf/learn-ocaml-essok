@@ -12,7 +12,7 @@
       <input type="button" (click)="download()" value="Download Employee Data"/>
     </div>
   -->
-    <div class="row bg-sand">
+    <div class="row">
         <h1 class="col-12 p-2 text-center">{{ server.title }}</h1>
         <app-list-errors [errors]="errors"></app-list-errors>
 
@@ -235,33 +235,33 @@
 
                 <div class="carousel-item container">
                     <div class="row justify-content-around mb-5">
-                        <div class="col-2 card bg-main-orange">
+                        <div class="col-2 card">
                             <h4 class="card-header mb-0">Trash: </h4>
                             <div id="trashes-list" class="card-body list-group p-3" cdkDropList
                                 [cdkDropListData]="trashesList"
                                 [cdkDropListConnectedTo]="trashesDroplist && exercisesDroplist"
                                 (cdkDropListDropped)="dropExercise($event)">
-                                <div class="list-group-item m-2 rounded bg-main-orange"
+                                <div class="list-group-item m-2 rounded"
                                     *ngFor="let exercise of trashesList" cdkDrag>
-                                    <div class="text-center text-white">{{exercise}}</div>
+                                    <div class="text-center">{{exercise}}</div>
                                     <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3 card bg-main-orange">
+                        <div class="col-3 card">
                             <h4 class="card-header mb-0">Exercises List: </h4>
                             <div id="exercises-list" class="card-body list-group p-3" cdkDropList
                                 [cdkDropListData]="exercisesList"
                                 [cdkDropListConnectedTo]="exercisesDroplist && trashesDroplist"
                                 (cdkDropListDropped)="dropExercise($event)">
-                                <div class="list-group-item m-2 rounded bg-main-orange"
+                                <div class="list-group-item m-2 rounded"
                                     *ngFor="let exercise of exercisesList" cdkDrag>
-                                    <div class="text-center text-white">{{exercise}}</div>
+                                    <div class="text-center">{{exercise}}</div>
                                     <div class="placeholder-exercise" *cdkDragPlaceholder></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 card bg-main-orange">
+                        <div class="col-6 card">
                             <h4 class="card-header mb-0">Groups List: </h4>
                             <div class="card-body list-group p-3" cdkDropList (cdkDropListDropped)="dropGroup($event)">
                                 <div class="list-group-item row no-gutters d-flex" *ngFor="let group of groupsList;"
@@ -269,14 +269,14 @@
                                     <div class="placeholder-group" *cdkDragPlaceholder></div>
                                     <input class="col-2 h-100 p-2 m-r-2 form-control" [(ngModel)]="group.title" />
                                     <div id="{{group.id}}"
-                                        class="col-9 overflow-auto list-group p-2 border flex-row bg-light" cdkDropList
+                                        class="col-9 overflow-auto list-group p-2 border flex-row" cdkDropList
                                         cdkDropListOrientation="horizontal" [cdkDropListData]="group.exercises"
                                         [cdkDropListConnectedTo]="exercisesDroplist"
                                         (cdkDropListDropped)="dropExercise($event)">
-                                        <div class="list-group-item m-2 rounded bg-oasis-blue"
+                                        <div class="list-group-item m-2 rounded"
                                             *ngFor="let exercise of group.exercises" cdkDrag>
                                             <div class="placeholder-exercise" *cdkDragPlaceholder></div>
-                                            <div class="text-white">{{exercise}}</div>
+                                            <div class="">{{exercise}}</div>
                                         </div>
                                     </div>
                                 </div>
