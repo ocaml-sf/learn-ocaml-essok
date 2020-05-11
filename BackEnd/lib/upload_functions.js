@@ -390,10 +390,11 @@ function _create_indexJSON(path, tabOfName) {
 function _getFromSwift(path, slug, target) {
     return new Promise(function (resolve, reject) {
 
+        var options = ' --object-threads 15 --container-threads 10 --skip-identical > /dev/null';
         if (target !== 'all') {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target + ' --skip-identical';
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target + options;
         } else {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' --skip-identical';
+            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + options;
         }
         console.log('downloading...');
 
@@ -423,7 +424,7 @@ function _sendToSwift(path, slug, remote = '/repository/exercises/') {
                     return reject(err);
                 });
                 writeStream.on('success', function (file) {
-                    console.log('fileUploaded successful : ' + file);
+                    // console.log('fileUploaded successful : ' + file);
                     nameProcessed++;
                     if (nameProcessed === array.length) {
                         console.log('All file have been uploaded successfully, you can launch your server now !');
