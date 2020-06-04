@@ -262,13 +262,12 @@ router.post('/send', auth.required, function (req, res, next) {
                     return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
                 }
                 var test = false;
-                user.startProcessing().then(() => {
+                user.startProcessing().then(async () => {
                     console.log('user.processing : ' + user.processing);
                     upload_functions.checkFiles(dir + safe_folder).then((files) => {
                         upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
-                            upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then((tabOfName_bis) => {
+                            upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then(async (tabOfName_bis) => {
                                 upload_functions.create_new_tabOfName(dir + save_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
-
                                     if (test) {
 
                                         user.endProcessing().then(() => {
@@ -444,3 +443,4 @@ router.post('/download/:server', auth.required, function (req, res, next) {
 });
 
 module.exports = router;
+

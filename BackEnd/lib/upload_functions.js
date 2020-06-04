@@ -17,6 +17,55 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 
+const path = require('path');
+const fsPromises = fs.promises;
+
+const defaultIndexJsonFilename = 'index.json';
+const defaultIndexJsonPath = '../configs/default_index.json';
+const groupPrefix = 'group-';
+
+const defaultIndexObj = require(defaultIndexJsonPath);
+
+/**
+ * Workaround to convert a tabOfName (a dumb structure of matrix)
+ * the dumb structure is like [ [ "g1", "ex1", "ex2", ...], [ "g2", "ex3", ... ] ]
+ * to a standart list of groups
+ * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ */
+function tabOfNameToGroups(tabOfName) {
+    return tabOfName.map(group => {
+	return { title : group[0], exercices: group.slice(1) };
+    });
+}
+
+/**
+ * Load a index.json file to extract the list of groups
+ * return a promise with the list of groups
+ * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ */
+async function loadIndexJson(dirPath) {
+    const filePath = path.join(dirPath, defaultIndexJsonFilename);
+
+    return fsPromises.readFile(filePath)
+	.then(buffer => JSON.parse(buffer))
+	.then(indexObject => Object.values(indexObject.groups));
+}
+
+/**
+ * Save the index.json from a list of groups object
+ * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ */
+async function saveIndexJson(dirPath, groups) {
+    const indexObject = Object.assign({}, defaultIndexObj);
+    const filePath = path.join(dirPath, defaultIndexJsonFilename);
+
+    for(let i = 0; i < groups.length; i++) {
+	indexObject.groups[groupPrefix + i] = groups[i];
+    }
+    return Promise.resolve(JSON.stringify(indexObject, null, 2))
+	.then(buffer => fsPromises.writeFile(filePath, buffer));
+}
+
 function create_IndexJSON_header() {
     return new Promise(function (resolve, reject) {
         return resolve('{ "learnocaml_version": "1",\n  "groups":\n  {\n');
@@ -279,7 +328,7 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
 
         tabOfName.forEach((element, index, array) => {
             global_functions.asyncFunction(element, () => {
-                addFileInTabOfName(element, tmp).then((response) => {
+                addFileInTabOfName(element, tmp).then(async (response) => {
                     if (response) {
                         console.log('new group in new_tab_of_name : ' + response);
                         new_tabOfName.push(response);
@@ -294,11 +343,9 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
                             return reject(': No correct files found for index.json');
                         }
                         else {
-                            _save_tabOfName(save_path, new_tabOfName).then(() => {
-                                _load_tabOfName(save_path).then(() => {
-                                    return resolve(new_tabOfName);
-                                })
-                            });
+			    var groups = tabOfNameToGroups(new_tabOfName);
+			    await saveIndexJson(save_path, groups);
+			    resolve(new_tabOfName);
                         }
                     }
                 },
@@ -320,7 +367,6 @@ function _save_tabOfName(save_path, tabOfName) {
             });
             line += '\n';
         });
-
         fs.writeFile(save_path + saveFile, line, function (err) {
             if (err) {
                 console.log('error in saving tabofname');
@@ -345,7 +391,6 @@ function _load_tabOfName(save_path) {
                     return reject(err);
                 }
             } else {
-                console.log(data);
                 var res = []
                 var data_ = data.split('\n');
                 for (let index = 0; index < data_.length - 1; index++) {
@@ -361,7 +406,6 @@ function _load_tabOfName(save_path) {
                     }
                     res.push(group);
                 }
-                console.log(res);
                 return resolve(res);
             }
         })
@@ -424,7 +468,7 @@ function _sendToSwift(path, slug, remote = '/repository/exercises/') {
                     return reject(err);
                 });
                 writeStream.on('success', function (file) {
-                    // console.log('fileUploaded successful : ' + file);
+                    console.log('fileUploaded successful : ' + file.name);
                     nameProcessed++;
                     if (nameProcessed === array.length) {
                         console.log('All file have been uploaded successfully, you can launch your server now !');
@@ -671,6 +715,9 @@ var upload_functions = {
     parse_url: function (file_url) {
         return url.parse(file_url).host;
     },
+    saveIndexJson,
+    loadIndexJson,
+    tabOfNameToGroups,
 };
 
 module.exports = upload_functions;
