@@ -480,8 +480,8 @@ router.post('/download/:server', auth.required, function (req, res, next) {
 
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
-                            .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir, folderName,
-											  downloadPathDir + syncArchive)
+                            .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
+                                downloadPathDir + syncArchive)
                                 : undefined)
                             .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
 
