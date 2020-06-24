@@ -473,21 +473,37 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                         let allPathDir = allPath + '/';
                         upload_functions.removeDir(allPath + '.' + archive_extension)
                             .then(() => upload_functions.removeDir(allPathDir))
-                            .catch(err => { throw { fun: 'removeDir', status: 422, err }; })
+                            .catch(err => {
+				if (err.fun === undefined) {
+				    throw { fun: 'removeDir', status: 422, err };
+				}
+			    })
 
                             .then(() => upload_functions.createDir(allPathDir))
-                            .catch(err => { throw { fun: 'createDir', status: 422, err }; })
+                            .catch(err => {
+				if (err.fun === undefined) {
+				    throw { fun: 'createDir', status: 422, err };
+				}
+			    })
 
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
                             .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
                                 downloadPathDir + syncArchive)
                                 : undefined)
-                            .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
+                            .catch(err => {
+				if (err.fun === undefined) {
+				    throw { fun: 'desarchived', status: 422, err };
+				}
+			    })
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, folderName,
 										    archive_extension, allPath))
-                            .catch(err => { throw { fun: 'createArchiveFromDirectory', status: 422, err: err }; })
+                            .catch(err => {
+				if (err.fun === undefined) {
+				    throw { fun: 'createArchiveFromDirectory', status: 422, err: err };
+				}
+			    })
 
                             .then(() => user.endProcessing())
                             .then(() => console.log('user.processing : ' + user.processing))
