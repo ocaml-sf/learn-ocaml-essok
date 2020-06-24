@@ -62,38 +62,38 @@ router.post('/index', auth.required, function (req, res, next) {
                 }
                 var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
                 upload_functions.loadIndexJson(dest_path + save_folder)
-		    .catch(error => {
-			if(error.code === 'ENOENT') {
-			    return [];
-			} else {
-			    throw error;
-			}
-		    })
-		    .then((groups) => {
-                    upload_functions.checkFiles(dest_path + dirt_folder).then((files_sended) => {
-                        var files = [];
-                        upload_functions.checkFiles(dest_path + safe_folder).then((files_saved) => {
-                            files_saved.forEach(element => {
-                                if (!files_sended.includes(element)) {
-                                    files.push(element);
-                                }
-                            });
-                            return res.json({
-                                name: files,
-                                group: groups
+                    .catch(error => {
+                        if (error.code === 'ENOENT') {
+                            return [];
+                        } else {
+                            throw error;
+                        }
+                    })
+                    .then((groups) => {
+                        upload_functions.checkFiles(dest_path + dirt_folder).then((files_sended) => {
+                            var files = [];
+                            upload_functions.checkFiles(dest_path + safe_folder).then((files_saved) => {
+                                files_saved.forEach(element => {
+                                    if (!files_sended.includes(element)) {
+                                        files.push(element);
+                                    }
+                                });
+                                return res.json({
+                                    name: files,
+                                    group: groups
+                                });
+                            }, (err) => {
+                                console.log('Error checkFiles !: ' + err);
+                                return res.status(422).json({ errors: { errors: err } });
                             });
                         }, (err) => {
                             console.log('Error checkFiles !: ' + err);
                             return res.status(422).json({ errors: { errors: err } });
                         });
                     }, (err) => {
-                        console.log('Error checkFiles !: ' + err);
+                        console.log('Error loading tabofName !: ' + err);
                         return res.status(422).json({ errors: { errors: err } });
                     });
-                }, (err) => {
-                    console.log('Error loading tabofName !: ' + err);
-                    return res.status(422).json({ errors: { errors: err } });
-                });
             }).catch(next);
     }).catch(next);
 });
@@ -294,41 +294,49 @@ router.post('/send', auth.required, function (req, res, next) {
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
                                             // return res.status(422).json({ errors: { file: "index.json created" } });
                                             upload_functions.copyFile(dir + save_folder + defaultIndexJsonFilename, dir + dirt_folder + defaultIndexJsonFilename).then(() => {
-                                                upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
-                                                    upload_functions.create_archive(dir + dirt_folder, dir + dirt_folder + archive_folder, archive_extension, repository_name).then(() => {
-                                                        upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
-                                                            upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
-                                                                user.endProcessing().then(() => {
-                                                                    console.log('user.processing : ' + user.processing);
-                                                                    return res.send({
-                                                                        success: true,
-                                                                        message: 'ok'
+                                                upload_functions.create_archive(dir + dirt_folder, dir + dirt_folder, archive_extension, repository_name + '/' + safe_folder).then(() => {
+                                                    upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
+                                                        upload_functions.moveDir(dir + dirt_folder + repository_name + '.' + archive_extension, dir + dirt_folder + archive_folder + repository_name + '.' + archive_extension).then(() => {
+                                                            upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
+                                                                upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
+                                                                    user.endProcessing().then(() => {
+                                                                        console.log('user.processing : ' + user.processing);
+                                                                        return res.send({
+                                                                            success: true,
+                                                                            message: 'ok'
+                                                                        });
+                                                                    });
+                                                                }, (err) => {
+                                                                    console.log('Error removeDir !: ' + err);
+                                                                    user.endProcessing().then(() => {
+                                                                        return res.status(422).json({ errors: { errors: err } });
                                                                     });
                                                                 });
                                                             }, (err) => {
-                                                                console.log('Error removeDir !: ' + err);
+                                                                console.log('Error sendToSwift !: ' + err);
                                                                 user.endProcessing().then(() => {
                                                                     return res.status(422).json({ errors: { errors: err } });
                                                                 });
                                                             });
                                                         }, (err) => {
-                                                            console.log('Error sendToSwift !: ' + err);
+                                                            console.log('Error moveDir !: ' + err);
                                                             user.endProcessing().then(() => {
                                                                 return res.status(422).json({ errors: { errors: err } });
                                                             });
                                                         });
                                                     }, (err) => {
-                                                        console.log('Error createArchive !: ' + err);
+                                                        console.log('Error createDir !: ' + err);
                                                         user.endProcessing().then(() => {
                                                             return res.status(422).json({ errors: { errors: err } });
                                                         });
                                                     });
                                                 }, (err) => {
-                                                    console.log('Error createDir !: ' + err);
+                                                    console.log('Error createArchive !: ' + err);
                                                     user.endProcessing().then(() => {
                                                         return res.status(422).json({ errors: { errors: err } });
                                                     });
                                                 });
+
                                             }, (err) => {
                                                 console.log('Error copyFile !: ' + err);
                                                 user.endProcessing().then(() => {
