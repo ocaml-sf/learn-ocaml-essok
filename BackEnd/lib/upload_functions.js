@@ -178,6 +178,7 @@ function file_to_delete(path, element, useless, tabOfName) {
         });
     });
 }
+
 function deleteDir(tab_of_dir) {
     return new Promise(function (resolve, reject) {
         var tmp = tab_of_dir.length;
@@ -200,11 +201,17 @@ function deleteDir(tab_of_dir) {
         }
     });
 }
-
+/**
+ * 
+ * @param {*} source 
+ * @param {*} dest 
+ * @param {*} format 
+ * @param {*} archive_name 
+ */
 async function createArchiveFromDirectory(source, dest, format, archive_name) {
     var files = read(source).map(file => [path.join(source, file), path.join(dest, file)]);
     if (files === []) {
-	throw 'empty files list';
+        throw 'empty files list';
     }
     await createArchive(files, format, archive_name);
 }
