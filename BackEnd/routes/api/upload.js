@@ -468,38 +468,38 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                 upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
                     var folder_name = target;
                     if (folder_name === 'all') {
-			let downloadPathDir = dest_path + download_folder;
-			let allPath = downloadPathDir + folder_name;
-			let allPathDir = allPath + '/';
+                        let downloadPathDir = dest_path + download_folder;
+                        let allPath = downloadPathDir + folder_name;
+                        let allPathDir = allPath + '/';
                         upload_functions.removeDir(allPath + '.' + archive_extension)
-			    .then(() => upload_functions.removeDir(allPathDir))
-			    .catch(err => { throw { fun : 'removeDir', status: 422, err };})
+                            .then(() => upload_functions.removeDir(allPathDir))
+                            .catch(err => { throw { fun: 'removeDir', status: 422, err }; })
 
-			    .then(() => upload_functions.createDir(allPathDir))
-			    .catch(err => { throw { fun : 'createDir', status: 422, err };})
+                            .then(() => upload_functions.createDir(allPathDir))
+                            .catch(err => { throw { fun: 'createDir', status: 422, err }; })
 
-			    .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
-			    .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
-			    .then(syncExist => (syncExist) ? upload_functions(allPathDir, downloadPathDir + syncArchive)
-				  : undefined)
-			    .catch(err => { throw { fun : 'desarchived', status: 422, err};})
+                            .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
+                            .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
+                            .then(syncExist => (syncExist) ? upload_functions(allPathDir, downloadPathDir + syncArchive)
+                                : undefined)
+                            .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
 
-			    .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
-										    archive_extension, allPath))
-			    .catch(err => { throw { fun : 'createArchive', status : 422, err: err};})
+                            .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
+                                archive_extension, allPath))
+                            .catch(err => { throw { fun: 'createArchive', status: 422, err: err }; })
 
                             .then(() => user.endProcessing())
-			    .then(() => console.log('user.processing : ' + user.processing))
-			    .then(() => res.sendFile(path.resolve(allPath + '.' + archive_extension)))
+                            .then(() => console.log('user.processing : ' + user.processing))
+                            .then(() => res.sendFile(path.resolve(allPath + '.' + archive_extension)))
 
-			    .catch(err => {
-				if(err.fun !== undefined) {
-				    console.log('Error ' + err.fun + ': ' + err.err);
-				    res.status(err.status).json({ errors: { errors: err } });
-				} else {
-				    throw err;
-				}
-			    });
+                            .catch(err => {
+                                if (err.fun !== undefined) {
+                                    console.log('Error ' + err.fun + ': ' + err.err);
+                                    res.status(err.status).json({ errors: { errors: err } });
+                                } else {
+                                    throw err;
+                                }
+                            });
                     } else {
                         user.endProcessing().then(() => {
                             console.log('user.processing : ' + user.processing);
