@@ -487,7 +487,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
 										    archive_extension, allPath))
-                            .catch(err => { throw { fun: 'createArchive', status: 422, err: err }; })
+                            .catch(err => { throw { fun: 'createArchiveFromDirectory', status: 422, err: err }; })
 
                             .then(() => user.endProcessing())
                             .then(() => console.log('user.processing : ' + user.processing))
