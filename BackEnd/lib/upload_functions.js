@@ -30,18 +30,18 @@ const defaultIndexObj = require(defaultIndexJsonPath);
  * Workaround to convert a tabOfName (a dumb structure of matrix)
  * the dumb structure is like [ [ "g1", "ex1", "ex2", ...], [ "g2", "ex3", ... ] ]
  * to a standart list of groups
- * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
 function tabOfNameToGroups(tabOfName) {
     return tabOfName.map(group => {
-        return { title: group[0], exercices: group.slice(1) };
+	return { title : group[0], exercises: group.slice(1) };
     });
 }
 
 /**
  * Load a index.json file to extract the list of groups
  * return a promise with the list of groups
- * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
 async function loadIndexJson(dirPath) {
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
@@ -53,7 +53,7 @@ async function loadIndexJson(dirPath) {
 
 /**
  * Save the index.json from a list of groups object
- * a group has a structure like { title: "g1", exercices: ["ex1", "ex2", ...] }
+ * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
 async function saveIndexJson(dirPath, groups) {
     const indexObject = Object.assign({}, defaultIndexObj);
