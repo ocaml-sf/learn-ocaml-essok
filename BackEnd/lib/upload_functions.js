@@ -212,11 +212,18 @@ async function _create_archive(files , format, archive_name = 'archive') {
     const stream = fs.createWriteStream(archive_name + '.' + format);
     const archive = archiver(format, {});
 
-    archive.pipe(stream);
-    files.forEach(file => {
-	archive.file(file[0], { name: file[1] });
+    await new Promise(resolve => {
+	stream.on('close', function() {
+	    console.log('archive ' + archive + ' created');
+	    resolve();
+	});
+
+	archive.pipe(stream);
+	files.forEach(file => {
+	    archive.file(file[0], { name: file[1] });
+	});
+	archive.finalize();
     });
-    archive.finalize();
 }
 
 function _desarchived(dest_path, source_path) {
