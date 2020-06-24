@@ -201,21 +201,22 @@ function deleteDir(tab_of_dir) {
     });
 }
 
-function _create_archive(source, dest, format, archive_name = 'archive') {
+/**
+ * Create an archive from list of files
+ * files : list of pairs of [path_to_file, archive_path_of_file]
+ *         (ex: ['dir1/file1', 'dir2/dir3/file1'])
+ * format : format of compression (ex: 'zip')
+ * archive_name : the name of the archive
+ */
+async function _create_archive(files , format, archive_name = 'archive') {
+    const stream = fs.createWriteStream(archive_name + '.' + format);
+    const archive = archiver(format, {});
 
-    return new Promise((resolve, reject) => {
-        const archive = archiver(format, { zlib: { level: 9 } });
-        var out = dest + archive_name + '.' + format;
-        const stream = fs.createWriteStream(out);
-        archive.directory(source, archive_name);
-        archive
-            .on('error', err => { return reject(err) })
-            .pipe(stream)
-            ;
-
-        stream.on('close', () => { console.log('archive created'); return resolve() });
-        archive.finalize();
+    archive.pipe(stream);
+    files.forEach(file => {
+	archive.file(file[0], { name: file[1] });
     });
+    archive.finalize();
 }
 
 function _desarchived(dest_path, source_path) {
