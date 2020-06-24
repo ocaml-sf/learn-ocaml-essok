@@ -481,12 +481,12 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
                             .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
-											  downloadPathDir + syncArchive)
+                                downloadPathDir + syncArchive)
                                 : undefined)
                             .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
-										    archive_extension, allPath))
+                                archive_extension, allPath))
                             .catch(err => { throw { fun: 'createArchiveFromDirectory', status: 422, err: err }; })
 
                             .then(() => user.endProcessing())
