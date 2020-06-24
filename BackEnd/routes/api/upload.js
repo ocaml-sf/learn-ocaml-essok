@@ -307,7 +307,6 @@ router.post('/send', auth.required, function (req, res, next) {
                                                     // return res.status(422).json({ errors: { file: "index.json created" } });
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
                                                         upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repository_name).then(() => {
->>>>>>> 9d94dcf95307a11bbc1d05e8aa7c309ba27c5cc0
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
                                                                 upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
                                                                     user.endProcessing().then(() => {
@@ -481,7 +480,10 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                             });
                         });
                     } else {
-                        res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
+                        user.endProcessing().then(() => {
+                            console.log('user.processing : ' + user.processing);
+                            res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
+                        });
                     }
                 }, (err) => {
                     console.log('Error getFromSwift !: ' + err);
