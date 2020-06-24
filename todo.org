@@ -2,13 +2,16 @@
 * DONE Délai d'extinction des serveurs (lock-unlock le temps de...)
 * TODO Un parser, pretty-printer efficaces pour l'index.json
 (et retirer la version ad hoc)
+* TODO Changer la structure d'un dépôt sur Swift
+** Une archive qui contient les exercices (dossier repository)
+** Une archive qui contient les donnees (dossier sync)
 * TODO Améliorer la fonction qui watch la recherche d'un token
 (utiliser timedRun crée récemment)
 * TODO Temps de timeout d'une requête au Backend à "augmenter"
 * TODO Ajouter un timeout dans la fonction qui lock (et éviter un deadlock)
 * TODO Mise en page du CSS
 ** TODO Remplacer le Carousel par des onglets
-** TODO NgBootstrap 
+** TODO NgBootstrap (ou utiliser Angular material)
 (sensé remplacer JQuery, ne pas mettre si pas besoin de JQuery)
 ** TODO Update la page Admin (un peu comme la page Home)
 ** TODO Changer les couleurs (couleurs du désert)
