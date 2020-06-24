@@ -201,6 +201,14 @@ function deleteDir(tab_of_dir) {
     });
 }
 
+async function createArchiveFromDirectory(source, dest, format, archive_name) {
+    var files = read(source).map(file => [path.join(source, file), path.join(dest, file)]);
+    if (files === []) {
+	throw 'empty files list';
+    }
+    await createArchive(files, format, archive_name);
+}
+
 /**
  * Create an archive from list of files
  * files : list of pairs of [path_to_file, archive_path_of_file]
@@ -208,8 +216,8 @@ function deleteDir(tab_of_dir) {
  * format : format of compression (ex: 'zip')
  * archive_name : the name of the archive
  */
-async function _create_archive(files, format, dest, archive_name = 'archive') {
-    const stream = fs.createWriteStream(dest + archive_name + '.' + format);
+async function createArchive(files, format, archive_name = 'archive') {
+    const stream = fs.createWriteStream(archive_name + '.' + format);
     const archive = archiver(format, {});
 
     await new Promise(resolve => {
@@ -740,7 +748,8 @@ var upload_functions = {
     create_indexJSON: _create_indexJSON,
     sendToSwift: _sendToSwift,
     getFromSwift: _getFromSwift,
-    create_archive: _create_archive,
+    createArchive,
+    createArchiveFromDirectory,
     removeDir: _removeDir,
     renameDir: _renameDir,
     createArbo: _createArbo,

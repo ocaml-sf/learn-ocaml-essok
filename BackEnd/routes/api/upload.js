@@ -304,7 +304,7 @@ router.post('/send', auth.required, function (req, res, next) {
                                                 });
                                             } else {
                                                 // return res.status(422).json({ errors: { file: "index.json created" } });
-                                                upload_functions.create_archive(files, archive_extension, dir + dirt_folder, repository_name).then(() => {
+                                                upload_functions.createArchive(files, archive_extension, dir + dirt_folder, repository_name).then(() => {
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
                                                         upload_functions.moveDir(dir + dirt_folder + repository_name + '.' + archive_extension, dir + dirt_folder + archive_folder + repository_name + '.' + archive_extension).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
@@ -466,7 +466,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                     var folder_name = target;
                     if (folder_name === 'all') {
                         upload_functions.removeDir(dest_path + download_folder + folder_name + '.' + archive_extension).then(() => {
-                            upload_functions.create_archive(
+                            upload_functions.createArchive(
                                 dest_path + download_folder, dest_path + download_folder, archive_extension, folder_name)
                                 .then(() => {
                                     user.endProcessing().then(() => {
@@ -474,7 +474,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                                         res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
                                     });
                                 }, (err) => {
-                                    console.log('Error create_archive !: ' + err);
+                                    console.log('Error createArchive !: ' + err);
                                     user.endProcessing().then(() => {
                                         return res.status(422).json({ errors: { errors: err } });
                                     });
