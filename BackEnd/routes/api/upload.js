@@ -466,10 +466,10 @@ router.post('/download/:server', auth.required, function (req, res, next) {
             }
             upload_functions.createArbo(dirPath + server.author.username + '/', server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                 upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
-                    var folder_name = target;
-                    if (folder_name === 'all') {
+                    var folderName = target;
+                    if (folderName === 'all') {
                         let downloadPathDir = dest_path + download_folder;
-                        let allPath = downloadPathDir + folder_name;
+                        let allPath = downloadPathDir + folderName;
                         let allPathDir = allPath + '/';
                         upload_functions.removeDir(allPath + '.' + archive_extension)
                             .then(() => upload_functions.removeDir(allPathDir))
@@ -480,12 +480,12 @@ router.post('/download/:server', auth.required, function (req, res, next) {
 
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
-                            .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
+                            .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir, folderName,
 											  downloadPathDir + syncArchive)
                                 : undefined)
                             .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
 
-                            .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
+                            .then(() => upload_functions.createArchiveFromDirectory(allPathDir, folderName,
 										    archive_extension, allPath))
                             .catch(err => { throw { fun: 'createArchiveFromDirectory', status: 422, err: err }; })
 
@@ -504,7 +504,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                     } else {
                         user.endProcessing().then(() => {
                             console.log('user.processing : ' + user.processing);
-                            res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
+                            res.sendFile(path.resolve(dest_path + download_folder + folderName + '.' + archive_extension));
                         });
                     }
                 }, (err) => {
