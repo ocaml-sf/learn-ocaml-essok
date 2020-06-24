@@ -4,18 +4,27 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const auth = require('../auth');
 const path = require('path');
+
 var dirPath = './uploads/';
 var destPath = '';
+
 var save_folder = 'save/';
 var archive_folder = 'archive/';
 var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
-const repositoryFolder = 'repository/';
-const exercisesFolder = repositoryFolder + 'exercises/';
+
 const defaultIndexJsonFilename = 'index.json';
-const repository_name = 'repository';
 const archive_extension = 'zip';
+
+const repositoryName = 'repository';
+const repositoryDir = repositoryName + '/';
+const repositoryArchive = repositoryName + '.' + archive_extension;
+const syncName = 'sync';
+const syncArchive = syncName + '.' + archive_extension;
+
+const exercisesDir = repositoryDir + 'exercises/';
+
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
 const upload_functions = require('../../lib/upload_functions');
@@ -296,9 +305,9 @@ router.post('/send', auth.required, function (req, res, next) {
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
                                             .then(_ => {
                                                 let files = upload_functions.read(dir + dirt_folder)
-                                                    .map(file => [dir + dirt_folder + file, exercisesFolder + file]);
+                                                    .map(file => [dir + dirt_folder + file, exercisesDir + file]);
                                                 files.push([dir + save_folder + defaultIndexJsonFilename,
-                                                repositoryFolder + defaultIndexJsonFilename]);
+                                                repositoryDir + defaultIndexJsonFilename]);
                                                 if (files.length === 0) {
                                                     user.endProcessing().then(() => {
                                                         return res.status(422).json({ errors: { errors: 'empty list of exercises' } });
@@ -306,8 +315,7 @@ router.post('/send', auth.required, function (req, res, next) {
                                                 } else {
                                                     // return res.status(422).json({ errors: { file: "index.json created" } });
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
-                                                        upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repository_name).then(() => {
->>>>>>> 9d94dcf95307a11bbc1d05e8aa7c309ba27c5cc0
+                                                        upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repositoryName).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
                                                                 upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
                                                                     user.endProcessing().then(() => {
@@ -460,26 +468,38 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                 upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
                     var folder_name = target;
                     if (folder_name === 'all') {
-                        upload_functions.removeDir(dest_path + download_folder + folder_name + '.' + archive_extension).then(() => {
-                            upload_functions.createArchive(
-                                dest_path + download_folder, dest_path + download_folder, archive_extension, folder_name)
-                                .then(() => {
-                                    user.endProcessing().then(() => {
-                                        console.log('user.processing : ' + user.processing);
-                                        res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
-                                    });
-                                }, (err) => {
-                                    console.log('Error createArchive !: ' + err);
-                                    user.endProcessing().then(() => {
-                                        return res.status(422).json({ errors: { errors: err } });
-                                    });
-                                });
-                        }, (err) => {
-                            console.log('Error removeDir !: ' + err);
-                            user.endProcessing().then(() => {
-                                return res.status(422).json({ errors: { errors: err } });
-                            });
-                        });
+			let downloadPathDir = dest_path + download_folder;
+			let allPath = downloadPathDir + folder_name;
+			let allPathDir = allPath + '/';
+                        upload_functions.removeDir(allPath + '.' + archive_extension)
+			    .then(() => upload_functions.removeDir(allPathDir))
+			    .catch(err => { throw { fun : 'removeDir', status: 422, err };})
+
+			    .then(() => upload_functions.createDir(allPathDir))
+			    .catch(err => { throw { fun : 'createDir', status: 422, err };})
+
+			    .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
+			    .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
+			    .then(syncExist => (syncExist) ? upload_functions(allPathDir, downloadPathDir + syncArchive)
+				  : undefined)
+			    .catch(err => { throw { fun : 'desarchived', status: 422, err};})
+
+			    .then(() => upload_functions.createArchiveFromDirectory(allPathDir, allPathDir,
+										    archive_extension, allPath))
+			    .catch(err => { throw { fun : 'createArchive', status : 422, err: err};})
+
+                            .then(() => user.endProcessing())
+			    .then(() => console.log('user.processing : ' + user.processing))
+			    .then(() => res.sendFile(path.resolve(allPath + '.' + archive_extension)))
+
+			    .catch(err => {
+				if(err.fun !== undefined) {
+				    console.log('Error ' + err.fun + ': ' + err.err);
+				    res.status(err.status).json({ errors: { errors: err } });
+				} else {
+				    throw err;
+				}
+			    });
                     } else {
                         res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
                     }
