@@ -58,7 +58,7 @@ router.post('/index', auth.required, function (req, res, next) {
                     return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
                 }
                 var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
-                upload_functions.load_tabOfName(dest_path + save_folder).then((groups) => {
+                upload_functions.loadIndexJson(dest_path + save_folder).then((groups) => {
                     upload_functions.checkFiles(dest_path + dirt_folder).then((files_sended) => {
                         var files = [];
                         upload_functions.checkFiles(dest_path + safe_folder).then((files_saved) => {
