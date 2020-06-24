@@ -486,7 +486,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                             .catch(err => { throw { fun: 'desarchived', status: 422, err }; })
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, folderName,
-										    archive_extension, allPath))
+                                archive_extension, allPath))
                             .catch(err => { throw { fun: 'createArchiveFromDirectory', status: 422, err: err }; })
 
                             .then(() => user.endProcessing())
