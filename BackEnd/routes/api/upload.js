@@ -11,6 +11,9 @@ var archive_folder = 'archive/';
 var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
+const defaultIndexJsonFilename = 'index.json';
+const repository_name = 'repository';
+const archive_extension = 'zip';
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
 const upload_functions = require('../../lib/upload_functions');
@@ -282,16 +285,44 @@ router.post('/send', auth.required, function (req, res, next) {
 
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
                                             // return res.status(422).json({ errors: { file: "index.json created" } });
-                                            upload_functions.sendToSwift(dir + dirt_folder, server.slug).then((success) => {
-                                                user.endProcessing().then(() => {
-                                                    console.log('user.processing : ' + user.processing);
-                                                    return res.send({
-                                                        success: true,
-                                                        message: 'ok'
+                                            upload_functions.copyFile(dir + save_folder + defaultIndexJsonFilename, dir + dirt_folder + defaultIndexJsonFilename).then(() => {
+                                                upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
+                                                    upload_functions.create_archive(dir + dirt_folder, dir + dirt_folder + archive_folder, archive_extension, repository_name).then(() => {
+                                                        upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
+                                                            upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
+                                                                user.endProcessing().then(() => {
+                                                                    console.log('user.processing : ' + user.processing);
+                                                                    return res.send({
+                                                                        success: true,
+                                                                        message: 'ok'
+                                                                    });
+                                                                });
+                                                            }, (err) => {
+                                                                console.log('Error removeDir !: ' + err);
+                                                                user.endProcessing().then(() => {
+                                                                    return res.status(422).json({ errors: { errors: err } });
+                                                                });
+                                                            });
+                                                        }, (err) => {
+                                                            console.log('Error sendToSwift !: ' + err);
+                                                            user.endProcessing().then(() => {
+                                                                return res.status(422).json({ errors: { errors: err } });
+                                                            });
+                                                        });
+                                                    }, (err) => {
+                                                        console.log('Error createArchive !: ' + err);
+                                                        user.endProcessing().then(() => {
+                                                            return res.status(422).json({ errors: { errors: err } });
+                                                        });
+                                                    });
+                                                }, (err) => {
+                                                    console.log('Error createDir !: ' + err);
+                                                    user.endProcessing().then(() => {
+                                                        return res.status(422).json({ errors: { errors: err } });
                                                     });
                                                 });
                                             }, (err) => {
-                                                console.log('Error sendToSwift !: ' + err);
+                                                console.log('Error copyFile !: ' + err);
                                                 user.endProcessing().then(() => {
                                                     return res.status(422).json({ errors: { errors: err } });
                                                 });
@@ -413,19 +444,30 @@ router.post('/download/:server', auth.required, function (req, res, next) {
             upload_functions.createArbo(dirPath + server.author.username + '/', server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                 upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
                     var folder_name = target;
-                    upload_functions.create_archive(
-                        dest_path + download_folder, folder_name, 'zip')
-                        .then(() => {
-                            user.endProcessing().then(() => {
-                                console.log('user.processing : ' + user.processing);
-                                res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.zip'));
-                            });
+                    if (folder_name === 'all') {
+                        upload_functions.removeDir(dest_path + download_folder + folder_name + '.' + archive_extension).then(() => {
+                            upload_functions.create_archive(
+                                dest_path + download_folder, dest_path + download_folder, archive_extension, folder_name)
+                                .then(() => {
+                                    user.endProcessing().then(() => {
+                                        console.log('user.processing : ' + user.processing);
+                                        res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
+                                    });
+                                }, (err) => {
+                                    console.log('Error create_archive !: ' + err);
+                                    user.endProcessing().then(() => {
+                                        return res.status(422).json({ errors: { errors: err } });
+                                    });
+                                });
                         }, (err) => {
-                            console.log('Error create_archive !: ' + err);
+                            console.log('Error removeDir !: ' + err);
                             user.endProcessing().then(() => {
                                 return res.status(422).json({ errors: { errors: err } });
                             });
                         });
+                    } else {
+                        res.sendFile(path.resolve(dest_path + download_folder + folder_name + '.' + archive_extension));
+                    }
                 }, (err) => {
                     console.log('Error getFromSwift !: ' + err);
                     user.endProcessing().then(() => {
