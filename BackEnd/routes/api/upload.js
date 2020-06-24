@@ -306,7 +306,7 @@ router.post('/send', auth.required, function (req, res, next) {
                                             } else {
                                                 // return res.status(422).json({ errors: { file: "index.json created" } });
                                                 upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
-                                                    upload_functions.createArchive(files, archive_extension, dir + dirt_folder, dir + dirt_folder + archive_folder + repository_name).then(() => {
+                                                    upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repository_name).then(() => {
                                                         upload_functions.moveDir(dir + dirt_folder + repository_name + '.' + archive_extension, dir + dirt_folder + archive_folder + repository_name + '.' + archive_extension).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
                                                                 upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
