@@ -730,6 +730,7 @@ function _archive_traitement_repsync(dest_path, safe_folder, slug) {
 }
 
 var upload_functions = {
+    read,
     desarchived: _desarchived,
     checkFiles: _checkFiles,
     unlinkSync: _unlinkSync,

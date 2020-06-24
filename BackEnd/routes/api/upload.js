@@ -11,6 +11,8 @@ var archive_folder = 'archive/';
 var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
+const repositoryFolder = 'repository/';
+const exercisesFolder = repositoryFolder + 'exercises/';
 const defaultIndexJsonFilename = 'index.json';
 const repository_name = 'repository';
 const archive_extension = 'zip';
@@ -292,9 +294,15 @@ router.post('/send', auth.required, function (req, res, next) {
                                     } else {
 
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
+					    let files = upload_functions.read(dir + dirt_folder).map(file =>
+						[dir + dirt_folder + file, exercisesFolder + file]);
+					    files.push([dir + save_folder + defaultIndexJsonFilename,
+							repositoryFolder + defaultIndexJsonFilename]);
+					    if (files.length === 0) {
+						throw 'empty list of exercises';
+					    }
                                             // return res.status(422).json({ errors: { file: "index.json created" } });
-                                            upload_functions.copyFile(dir + save_folder + defaultIndexJsonFilename, dir + dirt_folder + defaultIndexJsonFilename).then(() => {
-                                                upload_functions.create_archive(dir + dirt_folder, dir + dirt_folder, archive_extension, repository_name + '/' + safe_folder).then(() => {
+                                                upload_functions.create_archive(files, archive_extension, repository_name).then(() => {
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
                                                         upload_functions.moveDir(dir + dirt_folder + repository_name + '.' + archive_extension, dir + dirt_folder + archive_folder + repository_name + '.' + archive_extension).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
