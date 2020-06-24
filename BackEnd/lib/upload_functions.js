@@ -34,7 +34,7 @@ const defaultIndexObj = require(defaultIndexJsonPath);
  */
 function tabOfNameToGroups(tabOfName) {
     return tabOfName.map(group => {
-	return { title : group[0], exercises: group.slice(1) };
+        return { title: group[0], exercises: group.slice(1) };
     });
 }
 
@@ -208,21 +208,21 @@ function deleteDir(tab_of_dir) {
  * format : format of compression (ex: 'zip')
  * archive_name : the name of the archive
  */
-async function _create_archive(files , format, archive_name = 'archive') {
-    const stream = fs.createWriteStream(archive_name + '.' + format);
+async function _create_archive(files, format, dest, archive_name = 'archive') {
+    const stream = fs.createWriteStream(dest + archive_name + '.' + format);
     const archive = archiver(format, {});
 
     await new Promise(resolve => {
-	stream.on('close', function() {
-	    console.log('archive ' + archive + ' created');
-	    resolve();
-	});
+        stream.on('close', function () {
+            console.log('archive ' + archive + ' created');
+            resolve();
+        });
 
-	archive.pipe(stream);
-	files.forEach(file => {
-	    archive.file(file[0], { name: file[1] });
-	});
-	archive.finalize();
+        archive.pipe(stream);
+        files.forEach(file => {
+            archive.file(file[0], { name: file[1] });
+        });
+        archive.finalize();
     });
 }
 

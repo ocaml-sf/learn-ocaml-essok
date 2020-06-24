@@ -294,15 +294,17 @@ router.post('/send', auth.required, function (req, res, next) {
                                     } else {
 
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName).then((response) => {
-					    let files = upload_functions.read(dir + dirt_folder).map(file =>
-						[dir + dirt_folder + file, exercisesFolder + file]);
-					    files.push([dir + save_folder + defaultIndexJsonFilename,
-							repositoryFolder + defaultIndexJsonFilename]);
-					    if (files.length === 0) {
-						throw 'empty list of exercises';
-					    }
-                                            // return res.status(422).json({ errors: { file: "index.json created" } });
-                                                upload_functions.create_archive(files, archive_extension, repository_name).then(() => {
+                                            let files = upload_functions.read(dir + dirt_folder).map(file =>
+                                                [dir + dirt_folder + file, exercisesFolder + file]);
+                                            files.push([dir + save_folder + defaultIndexJsonFilename,
+                                            repositoryFolder + defaultIndexJsonFilename]);
+                                            if (files.length === 0) {
+                                                user.endProcessing().then(() => {
+                                                    return res.status(422).json({ errors: { errors: 'empty list of exercises' } });
+                                                });
+                                            } else {
+                                                // return res.status(422).json({ errors: { file: "index.json created" } });
+                                                upload_functions.create_archive(files, archive_extension, dir + dirt_folder, repository_name).then(() => {
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
                                                         upload_functions.moveDir(dir + dirt_folder + repository_name + '.' + archive_extension, dir + dirt_folder + archive_folder + repository_name + '.' + archive_extension).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
@@ -344,13 +346,7 @@ router.post('/send', auth.required, function (req, res, next) {
                                                         return res.status(422).json({ errors: { errors: err } });
                                                     });
                                                 });
-
-                                            }, (err) => {
-                                                console.log('Error copyFile !: ' + err);
-                                                user.endProcessing().then(() => {
-                                                    return res.status(422).json({ errors: { errors: err } });
-                                                });
-                                            });
+                                            }
                                         }, (err) => {
                                             console.log('Error create index.json !: ' + err);
                                             user.endProcessing().then(() => {
