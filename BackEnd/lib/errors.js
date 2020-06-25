@@ -48,7 +48,8 @@ var errors = {
 
     unwrap_error: function (res, err) {
 	if(err.fun !== undefined) {
-	    console.log('Error ' + err.fun + ': ' + err.err);
+	    console.log('Error ' + err.fun + ': ');
+	    console.log(err.err);
 	    res.status(err.status).json({ errors: { errors: err.err } });
 	} else {
 	    throw err;
