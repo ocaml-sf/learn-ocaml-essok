@@ -320,7 +320,7 @@ router.post('/send', auth.required, function (req, res, next) {
 												    repositoryPath))
 					    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
 
-					    .then(() => upload_functions.sendToSwift(archivePath, server.slug, ''))
+					    .then(() => upload_functions.sendToSwift(archivePath, server.slug))
 					    .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
 
 					    .then(() => upload_functions.removeDir(archivePath))

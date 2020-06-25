@@ -489,7 +489,7 @@ function _getFromSwift(path, slug, target) {
     })
 }
 
-function _sendToSwift(path, slug, remote = '/repository/exercises/') {
+function _sendToSwift(path, slug, remote = '') {
     return new Promise(function (resolve, reject) {
         var nameProcessed = 0;
         console.log(read(path));
