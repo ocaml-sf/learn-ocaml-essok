@@ -185,16 +185,16 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                     });
                 } else {
                     let userDirPath = dirPath + server.author.username + '/';
-		    let serverDir = server.slug + '/';
-		    let serverDirPath = userDirPath + serverDir;
+                    let serverDir = server.slug + '/';
+                    let serverDirPath = userDirPath + serverDir;
                     let archiveFilePath = dirPath + destPath;
-		    let uploadDirPath = serverDirPath + uploadDir;
-		    let swiftDirPath = uploadDirPath + archive_folder;
+                    let uploadDirPath = serverDirPath + uploadDir;
+                    let swiftDirPath = uploadDirPath + archive_folder;
 
-		    let repositoryDirPath = uploadDirPath + repositoryDir;
-		    let repositoryNamePath = swiftDirPath + repositoryName;
-		    let syncDirPath = uploadDirPath + syncDir;
-		    let syncNamePath = swiftDirPath + syncName;
+                    let repositoryDirPath = uploadDirPath + repositoryDir;
+                    let repositoryNamePath = swiftDirPath + repositoryName;
+                    let syncDirPath = uploadDirPath + syncDir;
+                    let syncNamePath = swiftDirPath + syncName;
 
                     let mimetype = req.file.mimetype;
                     if (mimetype === 'application/zip' ||
@@ -202,34 +202,34 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                         mimetype === 'application/x-zip-compressed') {
                         console.log('full archive file received');
                         upload_functions.createArbo(userDirPath, serverDir, safe_folder,
-						    dirt_folder, save_folder, download_folder)
-			    .catch(err => upload_errors.wrap_error('createArbo', 422, err))
+                            dirt_folder, save_folder, download_folder)
+                            .catch(err => upload_errors.wrap_error('createArbo', 422, err))
 
-			    .then(() => upload_functions.removeDir(uploadDirPath))
-			    .catch(err => upload_errors.wrap_error('removeDir', 422, err))
+                            .then(() => upload_functions.removeDir(uploadDirPath))
+                            .catch(err => upload_errors.wrap_error('removeDir', 422, err))
 
-			    .then(() => upload_functions.createDir(uploadDirPath))
-			    .then(() => upload_functions.createDir(swiftDirPath))
-			    .catch(err => upload_errors.wrap_error('createDir', 422, err))
+                            .then(() => upload_functions.createDir(uploadDirPath))
+                            .then(() => upload_functions.createDir(swiftDirPath))
+                            .catch(err => upload_errors.wrap_error('createDir', 422, err))
 
-			    .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
-			    .catch(err => upload_errors.wrap_error('desarchived', 422, err))
+                            .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
+                            .catch(err => upload_errors.wrap_error('desarchived', 422, err))
 
-			    .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
-										    archive_extension, repositoryNamePath))
-			    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory repository', 422, err))
+                            .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
+                                archive_extension, repositoryNamePath))
+                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory repository', 422, err))
 
-			    .then(() => upload_functions.fileExists(syncDirPath))
-			    .then(syncExists => (syncExists) ?
-				  upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
-									      syncNamePath) : undefined)
-			    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', 422, err))
+                            .then(() => upload_functions.fileExists(syncDirPath))
+                            .then(syncExists => (syncExists) ?
+                                upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
+                                    syncNamePath) : undefined)
+                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', 422, err))
 
-			    .then(() => upload_functions.sendToSwift(swiftDirPath, server.slug, ''))
-			    .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+                            .then(() => upload_functions.sendToSwift(swiftDirPath, server.slug))
+                            .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
 
-			    .then(() => res.sendStatus(204))
-			    .catch(err => upload_errors.unwrap_error(res, err));
+                            .then(() => res.sendStatus(204))
+                            .catch(err => upload_errors.unwrap_error(res, err));
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
                         return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
@@ -323,35 +323,35 @@ router.post('/send', auth.required, function (req, res, next) {
                                         });
 
                                     } else {
-					let sourcePath = dir + dirt_folder;
-					let destPath = repositoryDir + exercisesDir;
-					let archivePath = sourcePath + archive_folder;
-					let repositoryPath = archivePath + repositoryName;
+                                        let sourcePath = dir + dirt_folder;
+                                        let destPath = repositoryDir + exercisesDir;
+                                        let archivePath = sourcePath + archive_folder;
+                                        let repositoryPath = archivePath + repositoryName;
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
-					    .catch(err => upload_errors.wrap_error('create_indexJSON', 422, err))
+                                            .catch(err => upload_errors.wrap_error('create_indexJSON', 422, err))
 
                                             .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
-					    .catch(err => upload_errors.wrap_error('createDir', 422, err))
+                                            .catch(err => upload_errors.wrap_error('createDir', 422, err))
 
-					    .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
-										  sourcePath + indexJSON))
-					    .catch(err => upload_errors.wrap_error('copyFile index.json', 422, err))
+                                            .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
+                                                sourcePath + indexJSON))
+                                            .catch(err => upload_errors.wrap_error('copyFile index.json', 422, err))
 
-					    .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
-												    archive_extension,
-												    repositoryPath))
-					    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
+                                            .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
+                                                archive_extension,
+                                                repositoryPath))
+                                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
 
-					    .then(() => upload_functions.sendToSwift(archivePath, server.slug))
-					    .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+                                            .then(() => upload_functions.sendToSwift(archivePath, server.slug))
+                                            .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
 
-					    .then(() => upload_functions.removeDir(archivePath))
-					    .catch(err => upload_errors.wrap_error('archivePath', 422, err))
+                                            .then(() => upload_functions.removeDir(archivePath))
+                                            .catch(err => upload_errors.wrap_error('archivePath', 422, err))
 
-					    .then(() => user.endProcessing())
-					    .then(() => console.log('user.processing : ' + user.processing))
-					    .then(() => res.send({ success: true, message: 'ok'}))
-					    .catch(err => upload_errors.unwrap_error(res, err));
+                                            .then(() => user.endProcessing())
+                                            .then(() => console.log('user.processing : ' + user.processing))
+                                            .then(() => res.send({ success: true, message: 'ok' }))
+                                            .catch(err => upload_errors.unwrap_error(res, err));
 
                                     }
 
@@ -477,12 +477,12 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
                             .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
-											  downloadPathDir + syncArchive)
+                                downloadPathDir + syncArchive)
                                 : undefined)
                             .catch(err => upload_errors.wrap_error('desarchived', 422, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, folderName,
-										    archive_extension, allPath))
+                                archive_extension, allPath))
                             .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
 
                             .then(() => user.endProcessing())
