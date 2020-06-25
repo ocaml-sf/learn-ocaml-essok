@@ -689,7 +689,7 @@ function _archive_traitement(dest_path, source_path, archive_folder, safe_folder
         });
     });
 }
-function _archive_traitement_repsync(dest_path, safe_folder, slug) {
+function _archive_complete_traitement(dest_path, safe_folder, slug) {
     return new Promise(function (resolve, reject) {
         var fileProcessed = 0;
         _checkFiles(dest_path + safe_folder + repository).then((files) => {
@@ -766,7 +766,7 @@ var upload_functions = {
     fileExists: _fileExists,
     load_tabOfName: _load_tabOfName,
     archive_traitement: _archive_traitement,
-    archive_traitement_repsync: _archive_traitement_repsync,
+    archive_complete_traitement: _archive_complete_traitement,
     createDir: _createDir,
     parse_url: function (file_url) {
         return url.parse(file_url).host;

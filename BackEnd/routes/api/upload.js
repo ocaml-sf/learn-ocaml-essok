@@ -189,7 +189,7 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                         console.log('file received');
                         upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                             upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
-                                upload_functions.archive_traitement_repsync(dest_path + server.slug + '/', safe_folder, server.slug).then(() => {
+                                upload_functions.archive_complete_traitement(dest_path + server.slug + '/', safe_folder, server.slug).then(() => {
                                     console.log(files + ' ok');
                                     return res.json({
                                         name: files,
