@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  api_url: 'http://api.essok.learnocaml.site'
+  api_url: 'https://api.essok.learnocaml.site'
 };

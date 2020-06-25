@@ -9,8 +9,8 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 import { ModalService } from '../modal';
 import { environment } from '../../environments/environment';
 import { ConfirmDialogService } from '../confirm';
-const URL = environment.api_url + '/api/uploads/check';
-const URL_full = environment.api_url + '/api/uploads/full';
+const URL = environment.api_url + '/uploads/check';
+const URL_full = environment.api_url + '/uploads/full';
 
 @Component({
   selector: 'app-server-settings-page',
