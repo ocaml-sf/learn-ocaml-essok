@@ -23,7 +23,7 @@ const repositoryArchive = repositoryName + '.' + archive_extension;
 const syncName = 'sync';
 const syncArchive = syncName + '.' + archive_extension;
 
-const exercisesDir = repositoryDir + 'exercises/';
+const exercisesDir = 'exercises/';
 
 var User = mongoose.model('User');
 var Server = mongoose.model('Server');
