@@ -343,11 +343,11 @@
 
                 <p>TO DELETE YOUR SERVER :</p>
                 <form (ngSubmit)="deleteServer()">
-                    <input type="checkbox" (click)="understandDelete()"> I confirm I understand I'll lost all my
+                    <input type="checkbox" (click)="understandDelete()"> I confirm I understand I will lose ALL my
                     server's data and there are no way to have it back !
                     <br />
-                    <input type="checkbox" (click)="assumeDelete()"> I assume I know what I'm doing and to DISABLE my
-                    server is NOT what I want
+                    <input type="checkbox" (click)="assumeDelete()"> I assume I know what I am doing and to DISABLE my
+                    server is NOT what I want !
                     <br />
                     <br />
                     <button class="btn btn-sm btn-outline-danger" [ngClass]="{disabled: isDeleting}" type="submit">
