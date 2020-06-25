@@ -306,10 +306,10 @@ router.post('/send', auth.required, function (req, res, next) {
 					let archivePath = sourcePath + archive_folder;
 					let repositoryPath = archivePath + repositoryName;
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
-					    .catch(err => { upload_errors.wrap_error('create_indexJSON', 422, err); })
+					    .catch(err => upload_errors.wrap_error('create_indexJSON', 422, err))
 
                                             .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
-					    .catch(err => { upload_errors.wrap_error('createDir', 422, err); })
+					    .catch(err => upload_errors.wrap_error('createDir', 422, err))
 
 					    .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
 												    archive_extension,
