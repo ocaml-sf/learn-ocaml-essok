@@ -196,6 +196,11 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                     let syncDirPath = uploadDirPath + syncDir;
                     let syncNamePath = swiftDirPath + syncName;
 
+		    let indexJSONPath = repositoryDirPath + indexJSON;
+		    let saveIndexJSONPath = serverDirPath + save_folder + indexJSON;
+		    let exercisesPath = serverDirPath + safe_folder;
+		    let sandboxPath = serverDirPath + dirt_folder;
+
                     let mimetype = req.file.mimetype;
                     if (mimetype === 'application/zip' ||
                         mimetype === 'application/octet-stream' ||
@@ -215,10 +220,17 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                             .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
                             .catch(err => upload_errors.wrap_error('desarchived', 422, err))
 
-                            .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
-                                archive_extension, repositoryNamePath))
-                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory repository', 422, err))
+			    .then(() => upload_functions.removeDir(archiveFilePath))
 
+			    .then(() => upload_functions.copyFile(indexJSONPath, saveIndexJSONPath))
+			    .catch(err => upload_errors.wrap_error('copyFile', 422, err))
+
+			    .then(() => upload_functions.copyDir(repositoryDirPath, exercisesPath))
+			    .then(() => upload_functions.copyDir(repositoryDirPath, sandboxPath))
+			    .catch(err => upload_errors.wrap_error('copyDir', 422, err))
+
+                            .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
+										    archive_extension, repositoryNamePath))
                             .then(() => upload_functions.fileExists(syncDirPath))
                             .then(syncExists => (syncExists) ?
                                 upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
