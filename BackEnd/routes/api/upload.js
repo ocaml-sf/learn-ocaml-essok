@@ -313,7 +313,6 @@ router.post('/send', auth.required, function (req, res, next) {
                                                         return res.status(422).json({ errors: { errors: 'empty list of exercises' } });
                                                     });
                                                 } else {
-                                                    // return res.status(422).json({ errors: { file: "index.json created" } });
                                                     upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
                                                         upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repositoryName).then(() => {
                                                             upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
