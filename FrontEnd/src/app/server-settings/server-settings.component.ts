@@ -219,16 +219,6 @@ export class ServerSettingsComponent implements OnInit {
   understandDelete() {
     this.isChecked = !this.isChecked;
   }
-  // download() {
-  //   this.fileService.downloadFile().subscribe(response => {
-  //     // let blob:any = new Blob([response.blob()], { type: 'text/json; charset=utf-8' });
-  //     // const url= window.URL.createObjectURL(blob);
-  //     // window.open(url);
-  //     window.location.href = response.url;
-  //     // fileSaver.saveAs(blob, 'employees.json');
-  //   }, error => console.log('Error downloading the file'),
-  //     () => console.log('File downloaded successfully'));
-  // }
 
   send() {
     var groups = [[]];
