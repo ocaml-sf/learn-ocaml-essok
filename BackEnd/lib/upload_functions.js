@@ -493,6 +493,7 @@ function _sendToSwift(path, slug, remote = '') {
     return new Promise(function (resolve, reject) {
         var nameProcessed = 0;
         console.log(read(path));
+        console.log('server name:' + slug);
         read(path).forEach((element, index, array) => {
             global_functions.asyncFunction(element, () => {
                 var readStream = fs.createReadStream(path + element);
