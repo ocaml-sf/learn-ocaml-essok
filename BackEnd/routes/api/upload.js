@@ -195,11 +195,12 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                     let repositoryNamePath = swiftDirPath + repositoryName;
                     let syncDirPath = uploadDirPath + syncDir;
                     let syncNamePath = swiftDirPath + syncName;
+		    let exercisesPath = repositoryDirPath + exercisesDir;
 
-		    let indexJSONPath = repositoryDirPath + indexJSON;
+		    let indexJSONPath = exercisesPath + indexJSON;
 		    let saveIndexJSONPath = serverDirPath + save_folder + indexJSON;
-		    let exercisesPath = serverDirPath + safe_folder;
-		    let sandboxPath = serverDirPath + dirt_folder;
+		    let safePath = serverDirPath + safe_folder;
+		    let dirtPath = serverDirPath + dirt_folder;
 
                     let mimetype = req.file.mimetype;
                     if (mimetype === 'application/zip' ||
@@ -225,8 +226,8 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
 			    .then(() => upload_functions.copyFile(indexJSONPath, saveIndexJSONPath))
 			    .catch(err => upload_errors.wrap_error('copyFile', 422, err))
 
-			    .then(() => upload_functions.copyDir(repositoryDirPath, exercisesPath))
-			    .then(() => upload_functions.copyDir(repositoryDirPath, sandboxPath))
+			    .then(() => upload_functions.copyDir(exercisesPath, safePath))
+			    .then(() => upload_functions.copyDir(exercisesPath, dirtPath))
 			    .catch(err => upload_errors.wrap_error('copyDir', 422, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
