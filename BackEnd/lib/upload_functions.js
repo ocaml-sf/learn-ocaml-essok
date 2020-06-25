@@ -34,7 +34,7 @@ const defaultIndexObj = require(defaultIndexJsonPath);
  */
 function tabOfNameToGroups(tabOfName) {
     return tabOfName.map(group => {
-	return { title : group[0], exercices: group.slice(1) };
+        return { title: group[0], exercices: group.slice(1) };
     });
 }
 
@@ -47,8 +47,8 @@ async function loadIndexJson(dirPath) {
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
     return fsPromises.readFile(filePath)
-	.then(buffer => JSON.parse(buffer))
-	.then(indexObject => Object.values(indexObject.groups));
+        .then(buffer => JSON.parse(buffer))
+        .then(indexObject => Object.values(indexObject.groups));
 }
 
 /**
@@ -59,11 +59,11 @@ async function saveIndexJson(dirPath, groups) {
     const indexObject = Object.assign({}, defaultIndexObj);
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
-    for(let i = 0; i < groups.length; i++) {
-	indexObject.groups[groupPrefix + i] = groups[i];
+    for (let i = 0; i < groups.length; i++) {
+        indexObject.groups[groupPrefix + i] = groups[i];
     }
     return Promise.resolve(JSON.stringify(indexObject, null, 2))
-	.then(buffer => fsPromises.writeFile(filePath, buffer));
+        .then(buffer => fsPromises.writeFile(filePath, buffer));
 }
 
 function create_IndexJSON_header() {
@@ -343,9 +343,9 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
                             return reject(': No correct files found for index.json');
                         }
                         else {
-			    var groups = tabOfNameToGroups(new_tabOfName);
-			    await saveIndexJson(save_path, groups);
-			    resolve(new_tabOfName);
+                            var groups = tabOfNameToGroups(new_tabOfName);
+                            await saveIndexJson(save_path, groups);
+                            resolve(new_tabOfName);
                         }
                     }
                 },
@@ -638,7 +638,7 @@ function _archive_traitement(dest_path, source_path, archive_folder, safe_folder
         });
     });
 }
-function _archive_traitement_repsync(dest_path, safe_folder, slug) {
+function _archive_complete_traitement(dest_path, safe_folder, slug) {
     return new Promise(function (resolve, reject) {
         var fileProcessed = 0;
         _checkFiles(dest_path + safe_folder + repository).then((files) => {
@@ -710,7 +710,7 @@ var upload_functions = {
     copyDir: _copyDir,
     load_tabOfName: _load_tabOfName,
     archive_traitement: _archive_traitement,
-    archive_traitement_repsync: _archive_traitement_repsync,
+    archive_complete_traitement: _archive_complete_traitement,
     createDir: _createDir,
     parse_url: function (file_url) {
         return url.parse(file_url).host;
