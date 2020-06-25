@@ -14,6 +14,9 @@ var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
 
+/** Used when uploading a "ready to launch" archive */
+const uploadDir = 'upload/';
+
 const indexJSON = 'index.json';
 const archive_extension = 'zip';
 
@@ -21,6 +24,7 @@ const repositoryName = 'repository';
 const repositoryDir = repositoryName + '/';
 const repositoryArchive = repositoryName + '.' + archive_extension;
 const syncName = 'sync';
+const syncDir = syncName + '/';
 const syncArchive = syncName + '.' + archive_extension;
 
 const exercisesDir = 'exercises/';
@@ -180,34 +184,52 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                         success: false
                     });
                 } else {
-                    var dest_path = dirPath + server.author.username + '/';
-                    var source_path = dirPath + destPath;
-                    var mimetype = req.file.mimetype;
+                    let userDirPath = dirPath + server.author.username + '/';
+		    let serverDir = server.slug + '/';
+		    let serverDirPath = userDirPath + serverDir;
+                    let archiveFilePath = dirPath + destPath;
+		    let uploadDirPath = serverDirPath + uploadDir;
+		    let swiftDirPath = uploadDirPath + archive_folder;
+
+		    let repositoryDirPath = uploadDirPath + repositoryDir;
+		    let repositoryNamePath = swiftDirPath + repositoryName;
+		    let syncDirPath = uploadDirPath + syncDir;
+		    let syncNamePath = swiftDirPath + syncName;
+
+                    let mimetype = req.file.mimetype;
                     if (mimetype === 'application/zip' ||
                         mimetype === 'application/octet-stream' ||
                         mimetype === 'application/x-zip-compressed') {
-                        console.log('file received');
-                        upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
-                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
-                                upload_functions.archive_complete_traitement(dest_path + server.slug + '/', safe_folder, server.slug).then(() => {
-                                    console.log(files + ' ok');
-                                    return res.json({
-                                        name: files,
-                                    });
+                        console.log('full archive file received');
+                        upload_functions.createArbo(userDirPath, serverDir, safe_folder,
+						    dirt_folder, save_folder, download_folder)
+			    .catch(err => upload_errors.wrap_error('createArbo', 422, err))
 
-                                }, (err) => {
-                                    console.log('Error archive traitement full !: ' + err);
-                                    return res.status(422).json({ errors: { errors: err } });
-                                });
+			    .then(() => upload_functions.removeDir(uploadDirPath))
+			    .catch(err => upload_errors.wrap_error('removeDir', 422, err))
 
-                            }, (err) => {
-                                console.log('Error archive traitement !: ' + err);
-                                return res.status(422).json({ errors: { errors: err } });
-                            });
-                        }, (err) => {
-                            console.log('Error createArbo !: ' + err);
-                            return res.status(422).json({ errors: { errors: err } });
-                        });
+			    .then(() => upload_functions.createDir(uploadDirPath))
+			    .then(() => upload_functions.createDir(swiftDirPath))
+			    .catch(err => upload_errors.wrap_error('createDir', 422, err))
+
+			    .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
+			    .catch(err => upload_errors.wrap_error('desarchived', 422, err))
+
+			    .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
+										    archive_extension, repositoryNamePath))
+			    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory repository', 422, err))
+
+			    .then(() => upload_functions.fileExists(syncDirPath))
+			    .then(syncExists => (syncExists) ?
+				  upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
+									      syncNamePath) : undefined)
+			    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', 422, err))
+
+			    .then(() => upload_functions.sendToSwift(swiftDirPath, server.slug, ''))
+			    .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+
+			    .then(() => res.sendStatus(204))
+			    .catch(err => upload_errors.unwrap_error(res, err));
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
                         return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
