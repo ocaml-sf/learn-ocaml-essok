@@ -1,4 +1,5 @@
 var errors = {
+
     wget_error: function (code) {
         var message = '';
         switch (code) {
@@ -38,11 +39,11 @@ var errors = {
     },
 
     wrap_error: function (fun, status, err) {
-	if (err.fun === undefined) {
-	    throw { fun, status, err };
-	} else {
-	    throw err;
-	}
+        if (err.fun === undefined) {
+            throw { fun, status, err };
+        } else {
+            throw err;
+        }
     },
 
     unwrap_error: function (res, err) {
@@ -54,4 +55,5 @@ var errors = {
 	}
     }
 };
+
 module.exports = errors;
