@@ -301,61 +301,30 @@ router.post('/send', auth.required, function (req, res, next) {
                                         });
 
                                     } else {
-
+					let sourcePath = dir + dirt_folder;
+					let destPath = repositoryDir + exercisesDir;
+					let archivePath = sourcePath + archive_folder;
+					let repositoryPath = archivePath + repositoryName;
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
-                                            .then(_ => {
-                                                let files = upload_functions.read(dir + dirt_folder)
-                                                    .map(file => [dir + dirt_folder + file, exercisesDir + file]);
-                                                files.push([dir + save_folder + defaultIndexJsonFilename,
-                                                repositoryDir + defaultIndexJsonFilename]);
-                                                if (files.length === 0) {
-                                                    user.endProcessing().then(() => {
-                                                        return res.status(422).json({ errors: { errors: 'empty list of exercises' } });
-                                                    });
-                                                } else {
-                                                    upload_functions.createDir(dir + dirt_folder + archive_folder).then(() => {
-                                                        upload_functions.createArchive(files, archive_extension, dir + dirt_folder + archive_folder + repositoryName).then(() => {
-                                                            upload_functions.sendToSwift(dir + dirt_folder + archive_folder, server.slug, '').then((success) => {
-                                                                upload_functions.removeDir(dir + dirt_folder + archive_folder).then(() => {
-                                                                    user.endProcessing().then(() => {
-                                                                        console.log('user.processing : ' + user.processing);
-                                                                        return res.send({
-                                                                            success: true,
-                                                                            message: 'ok'
-                                                                        });
-                                                                    });
-                                                                }, (err) => {
-                                                                    console.log('Error removeDir !: ' + err);
-                                                                    user.endProcessing().then(() => {
-                                                                        return res.status(422).json({ errors: { errors: err } });
-                                                                    });
-                                                                });
-                                                            }, (err) => {
-                                                                console.log('Error sendToSwift !: ' + err);
-                                                                user.endProcessing().then(() => {
-                                                                    return res.status(422).json({ errors: { errors: err } });
-                                                                });
-                                                            });
-                                                        }, (err) => {
-                                                            console.log('Error createArchive !: ' + err);
-                                                            user.endProcessing().then(() => {
-                                                                return res.status(422).json({ errors: { errors: err } });
-                                                            });
-                                                        });
-                                                    }, (err) => {
-                                                        console.log('Error createDir !: ' + err);
-                                                        user.endProcessing().then(() => {
-                                                            return res.status(422).json({ errors: { errors: err } });
-                                                        });
-                                                    });
-                                                }
-                                            }, (err) => {
-                                                console.log('Error create index.json !: ' + err);
-                                                user.endProcessing().then(() => {
-                                                    return res.status(422).json({ errors: { errors: err } });
-                                                });
-                                            });
+					    .catch(err => { upload_errors.wrap_error('create_indexJSON', 422, err); })
 
+                                            .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
+					    .catch(err => { upload_errors.wrap_error('createDir', 422, err); })
+
+					    .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
+												    archive_extension,
+												    repositoryPath))
+					    .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
+
+					    .then(() => upload_functions.sendToSwift(archivePath, server.slug, ''))
+					    .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+
+					    .then(() => upload_functions.removeDir(archivePath))
+					    .catch(err => upload_errors.wrap_error('archivePath', 422, err))
+
+					    .then(() => user.endProcessing())
+					    .then(() => console.log('user.processing : ' + user.processing))
+					    .then(() => res.send({ success: true, message: 'ok'}));
                                     }
 
                                 }, (err) => {
