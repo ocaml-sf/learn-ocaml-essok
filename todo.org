@@ -32,3 +32,4 @@ voir si chaque module est bien activé sans erreurs
 ** TODO Script de mise à jour
 *** FrontEnd (git pull + copier à Nginx)
 *** BackEnd (git pull + update pm2)
+*TODO Nouvelle branche pour travailler sur les archives

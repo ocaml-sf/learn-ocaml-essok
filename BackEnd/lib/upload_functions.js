@@ -34,7 +34,7 @@ const defaultIndexObj = require(defaultIndexJsonPath);
  */
 function tabOfNameToGroups(tabOfName) {
     return tabOfName.map(group => {
-	return { title : group[0], exercises: group.slice(1) };
+        return { title: group[0], exercises: group.slice(1) };
     });
 }
 
@@ -47,8 +47,8 @@ async function loadIndexJson(dirPath) {
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
     return fsPromises.readFile(filePath)
-	.then(buffer => JSON.parse(buffer))
-	.then(indexObject => Object.values(indexObject.groups));
+        .then(buffer => JSON.parse(buffer))
+        .then(indexObject => Object.values(indexObject.groups));
 }
 
 /**
@@ -59,11 +59,11 @@ async function saveIndexJson(dirPath, groups) {
     const indexObject = Object.assign({}, defaultIndexObj);
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
-    for(let i = 0; i < groups.length; i++) {
-	indexObject.groups[groupPrefix + i] = groups[i];
+    for (let i = 0; i < groups.length; i++) {
+        indexObject.groups[groupPrefix + i] = groups[i];
     }
     return Promise.resolve(JSON.stringify(indexObject, null, 2))
-	.then(buffer => fsPromises.writeFile(filePath, buffer));
+        .then(buffer => fsPromises.writeFile(filePath, buffer));
 }
 
 function create_IndexJSON_header() {
@@ -178,6 +178,7 @@ function file_to_delete(path, element, useless, tabOfName) {
         });
     });
 }
+
 function deleteDir(tab_of_dir) {
     return new Promise(function (resolve, reject) {
         var tmp = tab_of_dir.length;
@@ -200,26 +201,42 @@ function deleteDir(tab_of_dir) {
         }
     });
 }
+/**
+ * 
+ * @param {*} source 
+ * @param {*} dest 
+ * @param {*} format 
+ * @param {*} archive_name 
+ */
+async function createArchiveFromDirectory(source, dest, format, archive_name) {
+    var files = read(source).map(file => [path.join(source, file), path.join(dest, file)]);
+    if (files === []) {
+        throw 'empty files list';
+    }
+    await createArchive(files, format, archive_name);
+}
 
-function _create_archive(source, target, format) {
+/**
+ * Create an archive from list of files
+ * files : list of pairs of [path_to_file, archive_path_of_file]
+ *         (ex: ['dir1/file1', 'dir2/dir3/file1'])
+ * format : format of compression (ex: 'zip')
+ * archive_name : the name of the archive
+ */
+async function createArchive(files, format, archive_name = 'archive') {
+    const stream = fs.createWriteStream(archive_name + '.' + format);
+    const archive = archiver(format, {});
 
-    return new Promise((resolve, reject) => {
-        const archive = archiver(format, { zlib: { level: 9 } });
-        var out = source + target + '.' + format;
-        const stream = fs.createWriteStream(out);
-        if (target === 'all') {
-            archive.directory(source + repository, repository);
-            archive.directory(source + sync, sync);
-        } else {
-            archive.directory(source + target, target);
-        }
+    await new Promise(resolve => {
+        stream.on('close', function () {
+            console.log('archive ' + archive + ' created');
+            resolve();
+        });
 
-        archive
-            .on('error', err => { return reject(err) })
-            .pipe(stream)
-            ;
-
-        stream.on('close', () => { console.log('archive created'); return resolve() });
+        archive.pipe(stream);
+        files.forEach(file => {
+            archive.file(file[0], { name: file[1] });
+        });
         archive.finalize();
     });
 }
@@ -254,6 +271,12 @@ function _checkFiles(path) {
     });
 }
 
+function _fileExists(path) {
+    return new Promise(function (resolve, reject) {
+        return resolve(fs.existsSync(path));
+    })
+}
+
 function _unlinkSync(path) {
     return new Promise(function (resolve, reject) {
         if (fs.existsSync(path)) {
@@ -265,6 +288,20 @@ function _unlinkSync(path) {
             return resolve('deleted');
         }
     });
+}
+
+function _copyFile(source, dest) {
+    return new Promise(function (resolve, reject) {
+        if (fs.existsSync(source)) {
+            fs.copyFile(source, dest, (err) => {
+                if (err) return reject(err);
+                console.log(source + 'was copied to ' + dest);
+                return resolve();
+            });
+        } else {
+            return reject('Source file doesnt exist');
+        }
+    })
 }
 
 function _download_from_url(file_url, dest_path) {
@@ -343,9 +380,9 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
                             return reject(': No correct files found for index.json');
                         }
                         else {
-			    var groups = tabOfNameToGroups(new_tabOfName);
-			    await saveIndexJson(save_path, groups);
-			    resolve(new_tabOfName);
+                            var groups = tabOfNameToGroups(new_tabOfName);
+                            await saveIndexJson(save_path, groups);
+                            resolve(new_tabOfName);
                         }
                     }
                 },
@@ -596,6 +633,20 @@ function _copyDir(source, destination) {
     })
 }
 
+function _moveDir(source, destination) {
+    return new Promise(function (resolve, reject) {
+        fsDir.move(source, destination, function (err) {
+            if (err) {
+                console.log('An error occured while moving the folder.')
+                return reject(err);
+            }
+            console.log(source + ' folder has been succefully moved in ' + destination);
+            return resolve("ok");
+        });
+    })
+
+}
+
 function _archive_traitement(dest_path, source_path, archive_folder, safe_folder) {
     return new Promise(function (resolve, reject) {
         _desarchived(dest_path + archive_folder, source_path).then((response) => {
@@ -694,6 +745,7 @@ function _archive_traitement_repsync(dest_path, safe_folder, slug) {
 }
 
 var upload_functions = {
+    read,
     desarchived: _desarchived,
     checkFiles: _checkFiles,
     unlinkSync: _unlinkSync,
@@ -703,11 +755,15 @@ var upload_functions = {
     create_indexJSON: _create_indexJSON,
     sendToSwift: _sendToSwift,
     getFromSwift: _getFromSwift,
-    create_archive: _create_archive,
+    createArchive,
+    createArchiveFromDirectory,
     removeDir: _removeDir,
     renameDir: _renameDir,
     createArbo: _createArbo,
+    copyFile: _copyFile,
     copyDir: _copyDir,
+    moveDir: _moveDir,
+    fileExists: _fileExists,
     load_tabOfName: _load_tabOfName,
     archive_traitement: _archive_traitement,
     archive_traitement_repsync: _archive_traitement_repsync,
