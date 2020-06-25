@@ -14,7 +14,7 @@ var download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
 
-const defaultIndexJsonFilename = 'index.json';
+const indexJSON = 'index.json';
 const archive_extension = 'zip';
 
 const repositoryName = 'repository';
@@ -311,6 +311,10 @@ router.post('/send', auth.required, function (req, res, next) {
                                             .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
 					    .catch(err => upload_errors.wrap_error('createDir', 422, err))
 
+					    .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
+										  sourcePath + indexJSON))
+					    .catch(err => upload_errors.wrap_error('copyFile index.json', 422, err))
+
 					    .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
 												    archive_extension,
 												    repositoryPath))
@@ -325,15 +329,8 @@ router.post('/send', auth.required, function (req, res, next) {
 					    .then(() => user.endProcessing())
 					    .then(() => console.log('user.processing : ' + user.processing))
 					    .then(() => res.send({ success: true, message: 'ok'}))
+					    .catch(err => upload_errors.unwrap_error(res, err));
 
-					    .catch(err => {
-						if (err.fun !== undefined) {
-						    console.log('Error ' + err.fun + ': ' + err.err);
-						    res.status(err.status).json({ errors: { errors: err } });
-						} else {
-						    throw err;
-						}
-					    });
                                     }
 
                                 }, (err) => {
@@ -470,14 +467,7 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                             .then(() => console.log('user.processing : ' + user.processing))
                             .then(() => res.sendFile(path.resolve(allPath + '.' + archive_extension)))
 
-                            .catch(err => {
-                                if (err.fun !== undefined) {
-                                    console.log('Error ' + err.fun + ': ' + err.err);
-                                    res.status(err.status).json({ errors: { errors: err } });
-                                } else {
-                                    throw err;
-                                }
-                            });
+                            .catch(err => upload_errors.unwrap_error(res, err));
                     } else {
                         user.endProcessing().then(() => {
                             console.log('user.processing : ' + user.processing);
