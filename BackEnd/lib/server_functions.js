@@ -66,12 +66,12 @@ async function _catchTeacherToken(slug, namespace) {
 
 	return _tryGetTeacherToken(slug, namespace)
 	    .catch(err => {
-		console.log("error here");
-		console.log(err);
-		if(err === global_functions.tokenObj.errorNotFound)
+		if(err === global_functions.tokenObj.errorNotFound) {
+		    console.log("Token not found, retrying...");
 		    return timedWatchCatch();
-		else
+		} else {
 		    throw err;
+		}
 	    });
     }
 
