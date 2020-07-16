@@ -61,23 +61,21 @@ async function _tryGetTeacherToken(slug, namespace) {
 }
 
 async function _catchTeacherToken(slug, namespace) {
-    var token = undefined;
+    async function watchCatchTeacherToken() {
+	let timedWatchCatch = () => global_functions.timedRun(watchCatchTeacherToken, intervalTime);
 
-    while (token === undefined) {
-        token = await new Promise((resolve, reject) => {
-            setTimeout(() => {
-                _tryGetTeacherToken(slug, namespace)
-                    .then(resolve)
-                    .catch(reject);
-            }, intervalTime);
-        }).catch((err) => {
-            console.log(err);
-            return 'error';
-        });
+	return _tryGetTeacherToken(slug, namespace)
+	    .catch(err => {
+		console.log("error here");
+		console.log(err);
+		if(err === global_functions.tokenObj.errorNotFound)
+		    return timedWatchCatch();
+		else
+		    throw err;
+	    });
     }
-    if (token === 'error')
-        token = undefined;
-    return token;
+
+    return watchCatchTeacherToken();
 }
 
 async function _createNamespacedService(service, namespace) {
@@ -366,8 +364,7 @@ async function _deleteNamespacedService(slug, namespace) {
 
 async function _deleteNamespacedDeployment(slug, namespace, waitPodDie = true) {
     async function watchPodDie() {
-	let timedWatchRun = () => global_functions.timedRun(
-	    () => watchPodDie(), intervalTime);
+	let timedWatchRun = () => global_functions.timedRun(watchPodDie, intervalTime);
 	return _readNamespacedPod(slug, namespace)
 	    .then(_ => timedWatchRun())
 	    .catch(_ => true);

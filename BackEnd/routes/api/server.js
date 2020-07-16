@@ -6,6 +6,7 @@ var auth = require('../auth');
 var events = require('events');
 const server_functions = require('../../lib/server_functions');
 const log_functions = require('../../lib/log_functions');
+const errors_functions = require('../../lib/errors');
 
 const defaultContainerName = require('../../configs/OS').defaultContainerName;
 
@@ -337,28 +338,27 @@ router.post('/token/:server', auth.required, function(req, res, next) {
                 console.log(req.server.token);
                 return res.status(422).send({ errors: 'teacher token already retrieve' });
             } else {
-                user.startProcessing().then(async() => {
-                    var slug = req.server.slug;
-                    var namespace = 'default';
-                    req.server.token = await server_functions.catchTeacherToken(slug, namespace);
-                    if (req.server.token !== undefined)
-                        log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server)
-                    return req.server.save().then(function() {
-                        user.endProcessing().then(() => {
-                            return res.json({ server: req.server.toJSONFor(user) });
-                        }, (err) => {
-                            user.endProcessing().then(() => {
-                                log_functions.create('error', 'post /server/',
-                                    'user failed to retrieve his token teacher for the server:' + req.server.slug, user, req.server);
-                                return res.status(422).send({ errors: { err } });
-                            });
-                        });
-                    });
-                });
+		var slug = req.server.slug;
+		var namespace = 'default';
+                user.startProcessing().then(() => server_functions.catchTeacherToken(slug, namespace))
+		    .then(token => {
+                        log_functions.create('bin', 'post /server/token:' + req.server.slug, 'user retrieved his token', user, req.server);
+			req.server.token = token;
+			return req.server.save();
+		    })
+		    .then(() => user.endProcessing())
+		    .then(() => res.json({ server : req.server.toJSONFor(user)}))
+		    .catch(async err => {
+			await user.endProcessing();
+                        log_functions.create('error', 'post /server/',
+					     'user failed to retrieve his token teacher for the server:' + req.server.slug,
+					     user, req.server);
+			return res.status(422).send({ errors: { err } });
+		    });
             }
         } else {
             log_functions.create('error', 'get /server/disable/:' + req.server.slug,
-                'user unauthorized to access the server, his is trying to access a not owned server', user, req.server);
+                'user unauthorized to access the server, he is trying to access a not owned server', user, req.server);
             return res.sendStatus(403);
         }
     }).catch(next);

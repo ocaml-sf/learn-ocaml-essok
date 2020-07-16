@@ -1,11 +1,12 @@
 #+TITLE: TODO List Learn-OCaml-Essok
 * DONE Délai d'extinction des serveurs (lock-unlock le temps de...)
-* TODO Un parser, pretty-printer efficaces pour l'index.json
-(et retirer la version ad hoc)
-* TODO Changer la structure d'un dépôt sur Swift
+* Un parser, pretty-printer efficaces pour l'index.json
+** DONE Retirer la version ad hoc index_saved.txt
+** TODO Retirer la structure des matrices de groupes
+* DONE Changer la structure d'un dépôt sur Swift
 ** Une archive qui contient les exercices (dossier repository)
 ** Une archive qui contient les donnees (dossier sync)
-* TODO Améliorer la fonction qui watch la recherche d'un token
+* DONE Améliorer la fonction qui watch la recherche d'un token
 (utiliser timedRun crée récemment)
 * TODO Temps de timeout d'une requête au Backend à "augmenter"
 * TODO Ajouter un timeout dans la fonction qui lock (et éviter un deadlock)

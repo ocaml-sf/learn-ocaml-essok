@@ -1,8 +1,11 @@
-const token_regexp1 = 'Initial teacher token created: ';
-const token_regexp1_len = token_regexp1.length;
-const token_regexp2 = 'Found the following teacher tokens:\n  - ';
-const token_regexp2_len = token_regexp2.length;
-const token_len = 17;
+const tokenObj = {
+    regexps : [
+    'Initial teacher token created: ',
+    'Found the following teacher tokens:\n  - ',
+    ],
+    length : 17,
+    errorNotFound : 'Token not found',
+};
 
 function _asyncFunction(item, cb) {
     setTimeout(() => {
@@ -17,26 +20,35 @@ function _asyncFunction(item, cb) {
  */
 async function _timedRun(callback, ms) {
     let result = await new Promise(resolve => {
-	setTimeout(() => resolve(callback()), ms)
+	setTimeout(() => resolve(callback()), ms);
     });
     return result;
 }
 
-function _tryFindTeacherToken(log, regexp, regexp_len) {
+async function _tryFindTeacherToken(log, regexp, regexpLen) {
     var index = log.indexOf(regexp);
     if(index === -1)
-	return undefined;
-    return log.substr(index + regexp_len, token_len);
+	throw tokenObj.errorNotFound;
+    return log.substr(index + regexpLen, tokenObj.length);
 }
 
-function _tryAllFindTeacherToken(log) {
-    var try1 = _tryFindTeacherToken(log, token_regexp1, token_regexp1_len);
-    if(try1 !== undefined)
-	return try1;
-    return _tryFindTeacherToken(log, token_regexp2, token_regexp2_len);
+async function _tryAllFindTeacherToken(log) {
+    async function _tryFindIter(regexps) {
+	let regexp = regexps[0];
+
+	return _tryFindTeacherToken(log, regexp, regexp.length)
+	    .catch(err => {
+		if(err === tokenObj.errorNotFound && regexps.length > 1)
+		    return _tryFindIter(regexps.slice(1));
+		else
+		    throw err;
+	    });
+    }
+    return _tryFindIter(tokenObj.regexps);
 }
 
 var global_functions = {
+    tokenObj,
     asyncFunction: _asyncFunction,
     tryFindTeacherToken: _tryAllFindTeacherToken,
     timedRun: _timedRun
