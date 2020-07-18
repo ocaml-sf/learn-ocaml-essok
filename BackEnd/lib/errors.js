@@ -50,7 +50,7 @@ var errors = {
         if (err.fun !== undefined) {
             console.log('Error ' + err.fun + ': ');
             console.log(err.err);
-            res.status(err.status).json({ errors: { errors: err.err } });
+            res.status(err.status).json({ errors: { errors: err.err.message } });
         } else {
             throw err;
         }

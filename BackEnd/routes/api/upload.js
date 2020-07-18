@@ -100,15 +100,15 @@ router.post('/index', auth.required, function (req, res, next) {
                                 });
                             }, (err) => {
                                 console.log('Error checkFiles !: ' + err);
-                                return res.status(api_code.error).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err.message } });
                             });
                         }, (err) => {
                             console.log('Error checkFiles !: ' + err);
-                            return res.status(api_code.error).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err.message } });
                         });
                     }, (err) => {
                         console.log('Error loading tabofName !: ' + err);
-                        return res.status(api_code.error).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err.message } });
                     });
             }).catch(next);
     }).catch(next);
@@ -149,11 +149,11 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                                 });
                             }, (err) => {
                                 console.log('Error archive traitement !: ' + err);
-                                return res.status(api_code.error).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err.message } });
                             });
                         }, (err) => {
                             console.log('Error createArbo !: ' + err);
-                            return res.status(api_code.error).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err.message } });
                         });
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
@@ -281,15 +281,15 @@ router.post('/url', auth.required, function (req, res, next) {
                                 });
                             }, (err) => {
                                 console.log('Error archive traitement !: ' + err);
-                                return res.status(api_code.error).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: err });
                             });
                         }, (err) => {
                             console.log('Error createArbo !: ' + err);
-                            return res.status(api_code.error).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err.message } });
                         });
                     }, (err) => {
                         console.log('Error getRepo !: ' + err);
-                        return res.status(api_code.error).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err.message } });
                     });
                 }, (err) => {
                     console.log('Error download from url !: ' + err);
@@ -372,25 +372,25 @@ router.post('/send', auth.required, function (req, res, next) {
                                 }, (err) => {
                                     console.log('Error create newTabOfName !: ' + err);
                                     user.endProcessing().then(() => {
-                                        return res.status(api_code.error).json({ errors: { errors: err } });
+                                        return res.status(api_code.error).json({ errors: { errors: err.message } });
                                     });
                                 });
                             }, (err) => {
                                 console.log('Error delete useless file !: ' + err);
                                 user.endProcessing().then(() => {
-                                    return res.status(api_code.error).json({ errors: { errors: err } });
+                                    return res.status(api_code.error).json({ errors: { errors: err.message } });
                                 });
                             });
                         }, (err) => {
                             console.log('Error copy directory !: ' + err);
                             user.endProcessing().then(() => {
-                                return res.status(api_code.error).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err.message } });
                             });
                         });
                     }, (err) => {
                         console.log('Error checkfiles !: ' + err);
                         user.endProcessing().then(() => {
-                            return res.status(api_code.error).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err.message } });
                         });
                     });
                 });
@@ -426,14 +426,14 @@ router.post('/delete', auth.required, function (req, res, next) {
                             }, (err) => {
                                 console.log('Error removeDir !: ' + err);
                                 user.endProcessing().then(() => {
-                                    return res.status(api_code.error).json({ errors: { errors: err } });
+                                    return res.status(api_code.error).json({ errors: { errors: err.message } });
                                 });
                             });
 
                         }, (err) => {
                             console.log('Error removeDir !: ' + err);
                             user.endProcessing().then(() => {
-                                return res.status(api_code.error).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err.message } });
                             });
                         });
 
@@ -446,7 +446,7 @@ router.post('/delete', auth.required, function (req, res, next) {
                 }, (err) => {
                     console.log('Error unlinkSync !: ' + err);
                     user.endProcessing().then(() => {
-                        return res.status(api_code.error).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err.message } });
                     });
                 });
 
@@ -513,13 +513,13 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                 }, (err) => {
                     console.log('Error getFromSwift !: ' + err);
                     user.endProcessing().then(() => {
-                        return res.status(api_code.error).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err.message } });
                     });
                 });
             }, (err) => {
                 console.log('Error create arbo !: ' + err);
                 user.endProcessing().then(() => {
-                    return res.status(api_code.error).json({ errors: { errors: err } });
+                    return res.status(api_code.error).json({ errors: { errors: err.message } });
                 });
             });
         });
