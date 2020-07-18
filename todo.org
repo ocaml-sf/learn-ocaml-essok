@@ -6,24 +6,30 @@
 * DONE Changer la structure d'un dépôt sur Swift
 ** Une archive qui contient les exercices (dossier repository)
 ** Une archive qui contient les donnees (dossier sync)
+* DONE Optimiser la taille du dossier de données "sync" avec "git gc"
+** La commande utilisée était
+   for i in $(find -mindepth 4 -maxdepth 4 -type d -not -path "\./\.git*";
+   do cd $i; git gc; cd -; done
 * DONE Améliorer la fonction qui watch la recherche d'un token
 (utiliser timedRun crée récemment)
 * TODO Temps de timeout d'une requête au Backend à "augmenter"
 * TODO Ajouter un timeout dans la fonction qui lock (et éviter un deadlock)
 * TODO Mise en page du CSS
-** TODO Remplacer le Carousel par des onglets
-** TODO NgBootstrap (ou utiliser Angular material)
-(sensé remplacer JQuery, ne pas mettre si pas besoin de JQuery)
+** TODO Migrer totalement vers Angular material (et retirer Bootstrap)
 ** TODO Update la page Admin (un peu comme la page Home)
+** TODO Remplacer le Carousel par des onglets
 ** TODO Changer les couleurs (couleurs du désert)
 ** TODO Page d'aide (mise en page simple en cours, à améliorer après)
 ** TODO Page de contact
 ** TODO Templates/Classes (pour généraliser les mises en page HTML)
 ** TODO Barre de chargement
-(réutilisable le plus possible, en particulier en cas de deadlocks)
+   (réutilisable le plus possible, en particulier en cas de deadlocks)
 ** TODO Scrollbar verticale sur les exercices
-* TODO Feature: upload tout un dépôt learn-ocaml (avec sync et repository)
-* TODO Feature: download tout un dépôt learn-ocaml (avec sync et repository)
+* DONE Feature: upload tout un dépôt learn-ocaml (avec sync et repository)
+** DONE Un upload de plus d'1 Mo marche partiellement, résoudre le problème
+        La source du problème semble venir de Nginx, il fallait changer
+        une variable dans un fichier de config
+* DONE Feature: download tout un dépôt learn-ocaml (avec sync et repository)
 * TODO Watcher pour Backup automatiquement (voir avec Yann)
 * TODO Scripts VPS (en Bash)
 ** TODO Script d'installation
