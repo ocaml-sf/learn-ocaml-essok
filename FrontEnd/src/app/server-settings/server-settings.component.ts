@@ -166,17 +166,14 @@ export class ServerSettingsComponent implements OnInit {
 
   submitForm() {
     this.isSubmitting = true;
-    this.modalService.open('pleaseWait2');
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
-        this.modalService.close('pleaseWait2');
         this.useless = JSON.parse(JSON.stringify(data));
         this.exercisesList = this.useless.name;
         this.loadGroups();
       },
       err => {
-        this.modalService.close('pleaseWait2');
         this.errors = err;
         this.isSubmitting = false;
       }
