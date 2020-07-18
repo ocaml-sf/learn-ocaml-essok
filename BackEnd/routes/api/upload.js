@@ -196,12 +196,12 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                     let repositoryNamePath = swiftDirPath + repositoryName;
                     let syncDirPath = uploadDirPath + syncDir;
                     let syncNamePath = swiftDirPath + syncName;
-		    let exercisesPath = repositoryDirPath + exercisesDir;
+                    let exercisesPath = repositoryDirPath + exercisesDir;
 
-		    let indexJSONPath = exercisesPath + indexJSON;
-		    let saveIndexJSONPath = serverDirPath + save_folder + indexJSON;
-		    let safePath = serverDirPath + safe_folder;
-		    let dirtPath = serverDirPath + dirt_folder;
+                    let indexJSONPath = exercisesPath + indexJSON;
+                    let saveIndexJSONPath = serverDirPath + save_folder + indexJSON;
+                    let safePath = serverDirPath + safe_folder;
+                    let dirtPath = serverDirPath + dirt_folder;
 
                     let mimetype = req.file.mimetype;
                     if (mimetype === 'application/zip' ||
@@ -222,17 +222,17 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                             .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
                             .catch(err => upload_errors.wrap_error('desarchived', api_code.error, err))
 
-			    .then(() => upload_functions.removeDir(archiveFilePath))
+                            .then(() => upload_functions.removeDir(archiveFilePath))
 
-			    .then(() => upload_functions.copyFile(indexJSONPath, saveIndexJSONPath))
-			    .catch(err => upload_errors.wrap_error('copyFile', api_code.error, err))
+                            .then(() => upload_functions.copyFile(indexJSONPath, saveIndexJSONPath))
+                            .catch(err => upload_errors.wrap_error('copyFile', api_code.error, err))
 
-			    .then(() => upload_functions.copyDir(exercisesPath, safePath))
-			    .then(() => upload_functions.copyDir(exercisesPath, dirtPath))
-			    .catch(err => upload_errors.wrap_error('copyDir', api_code.error, err))
+                            .then(() => upload_functions.copyDir(exercisesPath, safePath))
+                            .then(() => upload_functions.copyDir(exercisesPath, dirtPath))
+                            .catch(err => upload_errors.wrap_error('copyDir', api_code.error, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
-										    archive_extension, repositoryNamePath))
+                                archive_extension, repositoryNamePath))
                             .then(() => upload_functions.fileExists(syncDirPath))
                             .then(syncExists => (syncExists) ?
                                 upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,

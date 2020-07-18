@@ -221,7 +221,7 @@ router.post('/users/disable', auth.required, function (req, res, next) {
 
       user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
-        if(servers.length == 0) {
+        if (servers.length == 0) {
           author.active = !author.active;
           console.log('user status up to date');
           author.save();
@@ -231,7 +231,7 @@ router.post('/users/disable', auth.required, function (req, res, next) {
           else {
             return res.json({ user: user.toAuthJSON() });
           }
-	}
+        }
         var itemsProcessed = 0;
 
         servers.forEach((server, index, array) => {
@@ -322,10 +322,10 @@ router.post('/users/delete', auth.required, function (req, res, next) {
       console.log('author = ' + author);
       user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
         var servers = results[0];
-        if(servers.length == 0) {
+        if (servers.length == 0) {
           author.remove();
-            return res.sendStatus(api_code.ok);
-	}
+          return res.sendStatus(api_code.ok);
+        }
         console.log('author = ' + author);
         var namespace = 'default';
         var itemsProcessed = 0;
