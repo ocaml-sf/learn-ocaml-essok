@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const auth = require('../auth');
 const path = require('path');
+const api_code = require('../../configs/api_code');
 
 var dirPath = './uploads/';
 var destPath = '';
@@ -49,7 +50,7 @@ router.param('server', function (req, res, next, slug) {
     Server.findOne({ slug: slug })
         .populate('author')
         .then(function (server) {
-            if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
+            if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
 
             req.server = server;
 
@@ -63,17 +64,17 @@ router.get('/', auth.required, function (req, res) {
 
 router.post('/index', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) {
                     console.log(server.author.username);
                     console.log(user.username);
-                    return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+                    return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
                 }
                 var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
                 upload_functions.loadIndexJson(dest_path + save_folder)
@@ -99,15 +100,15 @@ router.post('/index', auth.required, function (req, res, next) {
                                 });
                             }, (err) => {
                                 console.log('Error checkFiles !: ' + err);
-                                return res.status(422).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err } });
                             });
                         }, (err) => {
                             console.log('Error checkFiles !: ' + err);
-                            return res.status(422).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err } });
                         });
                     }, (err) => {
                         console.log('Error loading tabofName !: ' + err);
-                        return res.status(422).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err } });
                     });
             }).catch(next);
     }).catch(next);
@@ -115,17 +116,17 @@ router.post('/index', auth.required, function (req, res, next) {
 
 router.post('/check', auth.required, upload.single('file'), function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) {
                     console.log(server.author.username);
                     console.log(user.username);
-                    return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+                    return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
                 }
                 if (!req.file) {
                     console.log("No file received");
@@ -148,15 +149,15 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                                 });
                             }, (err) => {
                                 console.log('Error archive traitement !: ' + err);
-                                return res.status(422).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err } });
                             });
                         }, (err) => {
                             console.log('Error createArbo !: ' + err);
-                            return res.status(422).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err } });
                         });
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-                        return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
+                        return res.status(api_code.error).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
                     }
                 }
             }).catch(next);
@@ -166,17 +167,17 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
 
 router.post('/full', auth.required, upload.single('file'), function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server not found' } }); }
                 if ((server.author.username !== user.username) && (!user.isAdmin())) {
                     console.log(server.author.username);
                     console.log(user.username);
-                    return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+                    return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
                 }
                 if (!req.file) {
                     console.log("No file received");
@@ -209,26 +210,26 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                         console.log('full archive file received');
                         upload_functions.createArbo(userDirPath, serverDir, safe_folder,
                             dirt_folder, save_folder, download_folder)
-                            .catch(err => upload_errors.wrap_error('createArbo', 422, err))
+                            .catch(err => upload_errors.wrap_error('createArbo', api_code.error, err))
 
                             .then(() => upload_functions.removeDir(uploadDirPath))
-                            .catch(err => upload_errors.wrap_error('removeDir', 422, err))
+                            .catch(err => upload_errors.wrap_error('removeDir', api_code.error, err))
 
                             .then(() => upload_functions.createDir(uploadDirPath))
                             .then(() => upload_functions.createDir(swiftDirPath))
-                            .catch(err => upload_errors.wrap_error('createDir', 422, err))
+                            .catch(err => upload_errors.wrap_error('createDir', api_code.error, err))
 
                             .then(() => upload_functions.desarchived(uploadDirPath, archiveFilePath))
-                            .catch(err => upload_errors.wrap_error('desarchived', 422, err))
+                            .catch(err => upload_errors.wrap_error('desarchived', api_code.error, err))
 
 			    .then(() => upload_functions.removeDir(archiveFilePath))
 
 			    .then(() => upload_functions.copyFile(indexJSONPath, saveIndexJSONPath))
-			    .catch(err => upload_errors.wrap_error('copyFile', 422, err))
+			    .catch(err => upload_errors.wrap_error('copyFile', api_code.error, err))
 
 			    .then(() => upload_functions.copyDir(exercisesPath, safePath))
 			    .then(() => upload_functions.copyDir(exercisesPath, dirtPath))
-			    .catch(err => upload_errors.wrap_error('copyDir', 422, err))
+			    .catch(err => upload_errors.wrap_error('copyDir', api_code.error, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
 										    archive_extension, repositoryNamePath))
@@ -236,16 +237,16 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                             .then(syncExists => (syncExists) ?
                                 upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
                                     syncNamePath) : undefined)
-                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', 422, err))
+                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', api_code.error, err))
 
                             .then(() => upload_functions.sendToSwift(swiftDirPath, server.slug))
-                            .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+                            .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err))
 
-                            .then(() => res.sendStatus(204))
+                            .then(() => res.sendStatus(api_code.ok))
                             .catch(err => upload_errors.unwrap_error(res, err));
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-                        return res.status(422).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
+                        return res.status(api_code.error).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
                     }
                 }
             }).catch(next);
@@ -255,20 +256,20 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
 
 router.post('/url', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Server not found' } }); }
-                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server not found' } }); }
+                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
                 console.log(req.body);
                 var file_url = req.body.url.url + '/archive/master.zip';
                 var DOWNLOAD_DIR = './downloads/';
                 var dest_path = dirPath + server.author.username + '/';
                 if (upload_functions.parse_url(file_url) !== 'github.com') {
-                    return res.status(422).json({ errors: { errors: ': URL invalid' } });
+                    return res.status(api_code.error).json({ errors: { errors: ': URL invalid' } });
                 }
                 upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                     upload_functions.createDir(dest_path + server.slug + '/' + DOWNLOAD_DIR).then(() => {
@@ -280,20 +281,20 @@ router.post('/url', auth.required, function (req, res, next) {
                                 });
                             }, (err) => {
                                 console.log('Error archive traitement !: ' + err);
-                                return res.status(422).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err } });
                             });
                         }, (err) => {
                             console.log('Error createArbo !: ' + err);
-                            return res.status(422).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err } });
                         });
                     }, (err) => {
                         console.log('Error getRepo !: ' + err);
-                        return res.status(422).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err } });
                     });
                 }, (err) => {
                     console.log('Error download from url !: ' + err);
                     var message = upload_errors.wget_error(err.code) + err.message;
-                    return res.status(422).send({ errors: { message } });
+                    return res.status(api_code.error).send({ errors: { message } });
                 });
             }).catch(next);
     }).catch(next);
@@ -302,21 +303,21 @@ router.post('/url', auth.required, function (req, res, next) {
 
 router.post('/send', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
-                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Not found' } }); }
+                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
                 var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
                 var tabOfName = req.body.list;
                 if (!tabOfName || tabOfName === undefined || !tabOfName.length || (tabOfName.length == 1 && tabOfName[0].length < 2)) {
-                    return res.status(422).send({ errors: { file: ": No groups received" } });
+                    return res.status(api_code.error).send({ errors: { file: ": No groups received" } });
                 }
                 if (upload_errors.group_duplicate(tabOfName)) {
-                    return res.status(422).send({ errors: { file: ": Error in groups names, duplicate name" } });
+                    return res.status(api_code.error).send({ errors: { file: ": Error in groups names, duplicate name" } });
                 }
                 var test = false;
                 user.startProcessing().then(async () => {
@@ -341,25 +342,25 @@ router.post('/send', auth.required, function (req, res, next) {
                                         let archivePath = sourcePath + archive_folder;
                                         let repositoryPath = archivePath + repositoryName;
                                         upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
-                                            .catch(err => upload_errors.wrap_error('create_indexJSON', 422, err))
+                                            .catch(err => upload_errors.wrap_error('create_indexJSON', api_code.error, err))
 
                                             .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
-                                            .catch(err => upload_errors.wrap_error('createDir', 422, err))
+                                            .catch(err => upload_errors.wrap_error('createDir', api_code.error, err))
 
                                             .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
                                                 sourcePath + indexJSON))
-                                            .catch(err => upload_errors.wrap_error('copyFile index.json', 422, err))
+                                            .catch(err => upload_errors.wrap_error('copyFile index.json', api_code.error, err))
 
                                             .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
                                                 archive_extension,
                                                 repositoryPath))
-                                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
+                                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', api_code.error, err))
 
                                             .then(() => upload_functions.sendToSwift(archivePath, server.slug))
-                                            .catch(err => upload_errors.wrap_error('sendToSwift', 422, err))
+                                            .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err))
 
                                             .then(() => upload_functions.removeDir(archivePath))
-                                            .catch(err => upload_errors.wrap_error('archivePath', 422, err))
+                                            .catch(err => upload_errors.wrap_error('archivePath', api_code.error, err))
 
                                             .then(() => user.endProcessing())
                                             .then(() => console.log('user.processing : ' + user.processing))
@@ -371,25 +372,25 @@ router.post('/send', auth.required, function (req, res, next) {
                                 }, (err) => {
                                     console.log('Error create newTabOfName !: ' + err);
                                     user.endProcessing().then(() => {
-                                        return res.status(422).json({ errors: { errors: err } });
+                                        return res.status(api_code.error).json({ errors: { errors: err } });
                                     });
                                 });
                             }, (err) => {
                                 console.log('Error delete useless file !: ' + err);
                                 user.endProcessing().then(() => {
-                                    return res.status(422).json({ errors: { errors: err } });
+                                    return res.status(api_code.error).json({ errors: { errors: err } });
                                 });
                             });
                         }, (err) => {
                             console.log('Error copy directory !: ' + err);
                             user.endProcessing().then(() => {
-                                return res.status(422).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err } });
                             });
                         });
                     }, (err) => {
                         console.log('Error checkfiles !: ' + err);
                         user.endProcessing().then(() => {
-                            return res.status(422).json({ errors: { errors: err } });
+                            return res.status(api_code.error).json({ errors: { errors: err } });
                         });
                     });
                 });
@@ -399,18 +400,18 @@ router.post('/send', auth.required, function (req, res, next) {
 
 router.post('/delete', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         Server.findOne({ slug: req.body.server })
             .populate('author')
             .then(function (server) {
-                if (!server) { return res.sendStatus(404).json({ errors: { errors: 'Not found' } }); }
-                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Not found' } }); }
+                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
                 var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
                 var tabOfName = req.body.trash;
                 if (!tabOfName || tabOfName === undefined || !tabOfName.length || tabOfName.length == 0) {
-                    return res.status(422).send({ errors: { file: ": No groups received" } });
+                    return res.status(api_code.error).send({ errors: { file: ": No groups received" } });
                 }
                 user.startProcessing().then(() => {
                     console.log('user.processing : ' + user.processing);
@@ -425,14 +426,14 @@ router.post('/delete', auth.required, function (req, res, next) {
                             }, (err) => {
                                 console.log('Error removeDir !: ' + err);
                                 user.endProcessing().then(() => {
-                                    return res.status(422).json({ errors: { errors: err } });
+                                    return res.status(api_code.error).json({ errors: { errors: err } });
                                 });
                             });
 
                         }, (err) => {
                             console.log('Error removeDir !: ' + err);
                             user.endProcessing().then(() => {
-                                return res.status(422).json({ errors: { errors: err } });
+                                return res.status(api_code.error).json({ errors: { errors: err } });
                             });
                         });
 
@@ -440,12 +441,12 @@ router.post('/delete', auth.required, function (req, res, next) {
                     user.endProcessing().then(() => {
                         console.log('user.processing : ' + user.processing);
 
-                        return res.sendStatus(204);
+                        return res.sendStatus(api_code.ok);
                     });
                 }, (err) => {
                     console.log('Error unlinkSync !: ' + err);
                     user.endProcessing().then(() => {
-                        return res.status(422).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err } });
                     });
                 });
 
@@ -455,14 +456,14 @@ router.post('/delete', auth.required, function (req, res, next) {
 
 router.post('/download/:server', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(401); }
+        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+        if (user.processing) { return res.sendStatus(api_code.forbidden); }
         var server = req.server;
         if ((server.author.username !== user.username) && (!user.isAdmin())) {
             console.log(server.author.username);
             console.log(user.username);
-            return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } });
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
         }
         user.startProcessing().then(() => {
             console.log('user.processing : ' + user.processing);
@@ -482,21 +483,21 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                         let allPathDir = allPath + '/';
                         upload_functions.removeDir(allPath + '.' + archive_extension)
                             .then(() => upload_functions.removeDir(allPathDir))
-                            .catch(err => upload_errors.wrap_error('removeDir', 422, err))
+                            .catch(err => upload_errors.wrap_error('removeDir', api_code.error, err))
 
                             .then(() => upload_functions.createDir(allPathDir))
-                            .catch(err => upload_errors.wrap_error('createDir', 422, err))
+                            .catch(err => upload_errors.wrap_error('createDir', api_code.error, err))
 
                             .then(() => upload_functions.desarchived(allPathDir, downloadPathDir + repositoryArchive))
                             .then(() => upload_functions.fileExists(downloadPathDir + syncArchive))
                             .then(syncExist => (syncExist) ? upload_functions.desarchived(allPathDir,
                                 downloadPathDir + syncArchive)
                                 : undefined)
-                            .catch(err => upload_errors.wrap_error('desarchived', 422, err))
+                            .catch(err => upload_errors.wrap_error('desarchived', api_code.error, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(allPathDir, '',
                                 archive_extension, allPath))
-                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', 422, err))
+                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', api_code.error, err))
 
                             .then(() => user.endProcessing())
                             .then(() => console.log('user.processing : ' + user.processing))
@@ -512,13 +513,13 @@ router.post('/download/:server', auth.required, function (req, res, next) {
                 }, (err) => {
                     console.log('Error getFromSwift !: ' + err);
                     user.endProcessing().then(() => {
-                        return res.status(422).json({ errors: { errors: err } });
+                        return res.status(api_code.error).json({ errors: { errors: err } });
                     });
                 });
             }, (err) => {
                 console.log('Error create arbo !: ' + err);
                 user.endProcessing().then(() => {
-                    return res.status(422).json({ errors: { errors: err } });
+                    return res.status(api_code.error).json({ errors: { errors: err } });
                 });
             });
         });

@@ -7,10 +7,11 @@ var events = require('events');
 const user_functions = require('../../lib/user_functions');
 const server_functions = require('../../lib/server_functions');
 const global_functions = require('../../lib/global_functions');
+const api_code = require('../../configs/api_code');
 
 router.get('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
 
     return res.json({ user: user.toAuthJSON() });
   }).catch(next);
@@ -42,7 +43,7 @@ router.get('/users', auth.required, function (req, res, next) {
   }
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
     if (user.isAdmin()) {
 
       return user.findAllUsers(query, limit, offset).then(function (results) {
@@ -55,16 +56,16 @@ router.get('/users', auth.required, function (req, res, next) {
         });
       });
     } else {
-      return res.sendStatus(403).json({ errors: { errors: 'Unauthorized' } });
+      return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
     }
   }).catch(next);
 });
 
 router.put('/user', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.active) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
 
     var userToMdify = 'undefined';
 
@@ -109,11 +110,11 @@ router.put('/user', auth.required, function (req, res, next) {
 
 router.post('/users/login', function (req, res, next) {
   if (!req.body.user.email) {
-    return res.status(422).json({ errors: { email: "can't be blank" } });
+    return res.status(api_code.error).json({ errors: { email: "can't be blank" } });
   }
 
   if (!req.body.user.password) {
-    return res.status(422).json({ errors: { password: "can't be blank" } });
+    return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
   }
 
   passport.authenticate('local', { session: false }, function (err, user, info) {
@@ -123,7 +124,7 @@ router.post('/users/login', function (req, res, next) {
       user.token = user.generateJWT();
       return res.json({ user: user.toAuthJSON() });
     } else {
-      return res.status(422).json(info);
+      return res.status(api_code.error).json(info);
     }
   })(req, res, next);
 });
@@ -131,37 +132,37 @@ router.post('/users/login', function (req, res, next) {
 router.post('/reset-password', auth.required, function (req, res, next) {
 
   if (!req.body.reset.new_password) {
-    return res.status(422).json({ errors: { password: "can't be blank" } });
+    return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
   }
 
   if (!req.body.reset.new_password_verification) {
-    return res.status(422).json({ errors: { password: "can't be blank" } });
+    return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
   }
 
   if (req.body.reset.new_password !== req.body.reset.new_password_verification) {
-    return res.status(422).json({ errors: { password: "verification mismatch" } });
+    return res.status(api_code.error).json({ errors: { password: "verification mismatch" } });
   }
 
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
 
-    if (!user.active) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.active) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
 
     if (!req.body.user.email) {
-      return res.status(422).json({ errors: { email: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { email: "can't be blank" } });
     }
 
     if (req.body.user.email !== user.email) {
-      return res.status(422).json({ errors: { email: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { email: "does not correspond" } });
     }
 
     if (!req.body.user.password) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
     }
 
     if (!user.validPassword(req.body.user.password)) {
-      return res.status(422).json({ errors: { password: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { password: "does not correspond" } });
     }
 
     user.setPassword(req.body.reset.new_password);
@@ -175,40 +176,40 @@ router.post('/reset-password', auth.required, function (req, res, next) {
 //disable or enable an user
 router.post('/users/disable', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401).json({ errors: { errors: 'Unauthorized' } }); }
-    if (user.processing) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
+    if (user.processing) { return res.sendStatus(api_code.forbidden); }
 
     if (!req.body.user.email) {
-      return res.status(422).json({ errors: { email: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { email: "can't be blank" } });
     }
 
     if (req.body.user.email !== user.email) {
-      return res.status(422).json({ errors: { email: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { email: "does not correspond" } });
     }
 
     if (!req.body.user.password) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
     }
 
     if (!user.validPassword(req.body.user.password)) {
-      return res.status(422).json({ errors: { password: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { password: "does not correspond" } });
     }
 
     if (!req.body.disable.password_verification) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
     }
 
     if (req.body.user.password !== req.body.disable.password_verification) {
-      return res.status(422).json({ errors: { password: "verification mismatch" } });
+      return res.status(api_code.error).json({ errors: { password: "verification mismatch" } });
     }
     if (!req.body.disable.username_verification) {
-      return res.status(422).json({ errors: { username: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { username: "can't be blank" } });
     }
 
     if (!user.isAdmin()) {
       if (req.body.disable.username_verification !== user.username) {
-        return res.status(422).json({ errors: { username: "verification mismatch" } });
+        return res.status(api_code.error).json({ errors: { username: "verification mismatch" } });
       }
     }
 
@@ -245,7 +246,7 @@ router.post('/users/disable', auth.required, function (req, res, next) {
                 server.save();
 
               }, (err) => {
-                // return res.status(422).send({ errors: { err } });
+                // return res.status(api_code.error).send({ errors: { err } });
                 console.log(err);
               });
             }
@@ -277,39 +278,39 @@ router.post('/users/disable', auth.required, function (req, res, next) {
 //delete an user
 router.post('/users/delete', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(401); }
-    if (user.processing) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(api_code.forbidden); }
+    if (!user.authorized && !user.isAdmin()) { return res.sendStatus(api_code.forbidden); }
+    if (user.processing) { return res.sendStatus(api_code.forbidden); }
 
     if (!req.body.user.email) {
-      return res.status(422).json({ errors: { email: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { email: "can't be blank" } });
     }
 
     if (req.body.user.email !== user.email) {
-      return res.status(422).json({ errors: { email: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { email: "does not correspond" } });
     }
 
     if (!req.body.user.password) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
     }
 
     if (!user.validPassword(req.body.user.password)) {
-      return res.status(422).json({ errors: { password: "does not correspond" } });
+      return res.status(api_code.error).json({ errors: { password: "does not correspond" } });
     }
 
     if (!req.body.disable.password_verification) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { password: "can't be blank" } });
     }
 
     if (req.body.user.password !== req.body.disable.password_verification) {
-      return res.status(422).json({ errors: { password: "verification mismatch" } });
+      return res.status(api_code.error).json({ errors: { password: "verification mismatch" } });
     }
     if (!req.body.disable.username_verification) {
-      return res.status(422).json({ errors: { username: "can't be blank" } });
+      return res.status(api_code.error).json({ errors: { username: "can't be blank" } });
     }
     if (!user.isAdmin()) {
       if (req.body.disable.username_verification !== user.username) {
-        return res.status(422).json({ errors: { username: "verification mismatch" } });
+        return res.status(api_code.error).json({ errors: { username: "verification mismatch" } });
       }
     }
 
@@ -323,7 +324,7 @@ router.post('/users/delete', auth.required, function (req, res, next) {
         var servers = results[0];
         if(servers.length == 0) {
           author.remove();
-            return res.sendStatus(204);
+            return res.sendStatus(api_code.ok);
 	}
         console.log('author = ' + author);
         var namespace = 'default';
@@ -340,7 +341,7 @@ router.post('/users/delete', auth.required, function (req, res, next) {
             });
           }, (err) => {
             console.log(err);
-            // return res.status(422).send({ errors: { err } });
+            // return res.status(api_code.error).send({ errors: { err } });
           });
           itemsProcessed++;
           if (itemsProcessed === array.length) {
@@ -349,7 +350,7 @@ router.post('/users/delete', auth.required, function (req, res, next) {
                 clearInterval(userInChange);
                 console.log('all servers are done');
                 author.remove();
-                return res.sendStatus(204);
+                return res.sendStatus(api_code.ok);
               }
               console.log('itemToDelete : ' + itemToDelete);
             }, 5000);
@@ -388,8 +389,8 @@ router.post('/users', function (req, res, next) {
 
 router.post('/user/activate', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin()) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(api_code.forbidden); }
+    if (!user.isAdmin()) { return res.sendStatus(api_code.forbidden); }
     user.findAnUser(req.body.user.username).then(function (userToActivate) {
       userToActivate[0].authorized = true;
       userToActivate[0].active = true;
@@ -402,8 +403,8 @@ router.post('/user/activate', auth.required, function (req, res, next) {
 
 router.post('/user/authorize', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
-    if (!user) { return res.sendStatus(401); }
-    if (!user.isAdmin()) { return res.sendStatus(401); }
+    if (!user) { return res.sendStatus(api_code.forbidden); }
+    if (!user.isAdmin()) { return res.sendStatus(api_code.forbidden); }
     user.findAnUser(req.body.user.username).then(function (userToActivate) {
       userToActivate[0].authorized = true;
       userToActivate[0].processing = false;

@@ -1,3 +1,4 @@
+// rename this file OS.js
 // var OS = {
 //     provider: '',
 //     identityApiVersion: '',
