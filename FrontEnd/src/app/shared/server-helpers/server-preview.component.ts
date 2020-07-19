@@ -29,12 +29,18 @@ export class ServerPreviewComponent {
     );
   }
   download() {
-    this.value = 0;
-    this.fileService.downloadFile(this.server.slug, this.target).subscribe(response => {
-      this.mode = 'determinate'; this.color = 'accent'; this.value = 100
-      let blob: any = new Blob([response]);
-      fileSaver.saveAs(blob, this.server.slug + '.zip');
-    }), error => this.errors = error; this.mode = 'determinate'; this.color = 'warn'; this.value = 100,
-      () => console.info('File downloaded successfully'); this.mode = 'indeterminate'; this.color = 'primary';
+    this.value = 0; this.mode = 'indeterminate'; this.color = 'primary';
+    this.fileService
+      .downloadFile(this.server.slug, this.target)
+      .subscribe(
+        data => {
+          () => console.info('File downloaded successfully');
+          this.mode = 'determinate'; this.color = 'accent'; this.value = 100;
+          let blob: any = new Blob([data]);
+          fileSaver.saveAs(blob, this.server.slug + '.zip');
+        }), err => {
+          this.errors = err;
+          this.mode = 'determinate'; this.color = 'warn'; this.value = 100;
+        }
   }
 }

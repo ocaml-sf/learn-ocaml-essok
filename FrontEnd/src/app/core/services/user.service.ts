@@ -110,7 +110,8 @@ export class UserService {
       .post(
         '/users/delete',
         { user: credentialsLogin, disable: credentialsDisable }
-      );
+      )
+      .pipe(map(data => data));
   }
 
   query(config: UserListConfig): Observable<{ users: User[], usersCount: number }> {

@@ -31,8 +31,8 @@ async function _readNamespacedDeployment(slug, namespace) {
  */
 async function _listNamespacedPod(slug, namespace, verbose = false) {
     return k8sApi.listNamespacedPod(namespace, undefined, undefined, undefined,
-				    undefined, podLabelPrefix + slug)
-	.then(res => (verbose) ? res : res.body.items);
+        undefined, podLabelPrefix + slug)
+        .then(res => (verbose) ? res : res.body.items);
 }
 
 /**
@@ -41,18 +41,18 @@ async function _listNamespacedPod(slug, namespace, verbose = false) {
  */
 async function _readNamespacedPod(slug, namespace) {
     return _listNamespacedPod(slug, namespace)
-	.then(items => {
-	    if(items.length < 1)
-		throw new Error('Pod not found');
-	    return items[0];
-	});
+        .then(items => {
+            if (items.length < 1)
+                throw new Error('Pod not found');
+            return items[0];
+        });
 }
 
 async function _readNamespacedPodLog(slug, namespace, verbose = false) {
     return _readNamespacedPod(slug, namespace)
-	.then(pod => pod.metadata.name)
-	.then(name => k8sApi.readNamespacedPodLog(name, namespace))
-	.then(res => (verbose) ? res : res.body);
+        .then(pod => pod.metadata.name)
+        .then(name => k8sApi.readNamespacedPodLog(name, namespace))
+        .then(res => (verbose) ? res : res.body);
 }
 
 async function _tryGetTeacherToken(slug, namespace) {
@@ -62,17 +62,17 @@ async function _tryGetTeacherToken(slug, namespace) {
 
 async function _catchTeacherToken(slug, namespace) {
     async function watchCatchTeacherToken() {
-	let timedWatchCatch = () => global_functions.timedRun(watchCatchTeacherToken, intervalTime);
+        let timedWatchCatch = () => global_functions.timedRun(watchCatchTeacherToken, intervalTime);
 
-	return _tryGetTeacherToken(slug, namespace)
-	    .catch(err => {
-		if(err === global_functions.tokenObj.errorNotFound) {
-		    console.log("Token not found, retrying...");
-		    return timedWatchCatch();
-		} else {
-		    throw err;
-		}
-	    });
+        return _tryGetTeacherToken(slug, namespace)
+            .catch(err => {
+                if (err === global_functions.tokenObj.errorNotFound) {
+                    console.log("Token not found, retrying...");
+                    return timedWatchCatch();
+                } else {
+                    throw err;
+                }
+            });
     }
 
     return watchCatchTeacherToken();
@@ -87,7 +87,7 @@ async function _patchNamespacedIngress(_spec, namespace) {
 };
 
 async function _createNamespacedIngress(rule, namespace) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         k8sApiIngress.readNamespacedIngress('learn-ocaml', namespace, 'true').then(
             (response) => {
                 response.body.spec.rules.push(rule);
@@ -132,41 +132,41 @@ function _createObjectDeployment(slug) {
                             containerPort: 8080
                         }],
                         env: [{
-                                name: 'OS_AUTH_URL',
-                                value: OS.authUrl
-                            },
-                            {
-                                name: 'ST_AUTH_VERION',
-                                value: OS.identityApiVersion
-                            },
-                            {
-                                name: 'OS_USERNAME',
-                                value: OS.username
-                            },
-                            {
-                                name: 'OS_USER_DOMAIN_NAME',
-                                value: OS.domainName
-                            },
-                            {
-                                name: 'OS_PASSWORD',
-                                value: OS.password
-                            },
-                            {
-                                name: 'OS_PROJECT_NAME',
-                                value: OS.projectName
-                            },
-                            {
-                                name: 'OS_PROJECT_DOMAIN_NAME',
-                                value: OS.domainName
-                            },
-                            {
-                                name: 'OS_REGION_NAME',
-                                value: OS.region
-                            }
+                            name: 'OS_AUTH_URL',
+                            value: OS.authUrl
+                        },
+                        {
+                            name: 'ST_AUTH_VERION',
+                            value: OS.identityApiVersion
+                        },
+                        {
+                            name: 'OS_USERNAME',
+                            value: OS.username
+                        },
+                        {
+                            name: 'OS_USER_DOMAIN_NAME',
+                            value: OS.domainName
+                        },
+                        {
+                            name: 'OS_PASSWORD',
+                            value: OS.password
+                        },
+                        {
+                            name: 'OS_PROJECT_NAME',
+                            value: OS.projectName
+                        },
+                        {
+                            name: 'OS_PROJECT_DOMAIN_NAME',
+                            value: OS.domainName
+                        },
+                        {
+                            name: 'OS_REGION_NAME',
+                            value: OS.region
+                        }
                         ],
                         args: [slug]
                     }],
-		    terminationGracePeriodSeconds: 900
+                    terminationGracePeriodSeconds: 900
                 }
             }
         }
@@ -219,22 +219,22 @@ function _createObjectContainer(slug) {
 }
 
 function _createkubelink(slug, username, namespace) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         var deployment = _createObjectDeployment(slug);
         var service = _createObjectService(slug);
         var rule = _createObjectRule(slug, username);
         _createNamespacedDeployment(deployment, namespace).then((response) => {
-                _createNamespacedService(service, namespace).then((response) => {
-                    _createNamespacedIngress(rule, namespace).then((response) => {
-                        console.log('kubelink created');
-                        return resolve('done');
-                    }, (err) => {
-                        return reject(err);
-                    });
+            _createNamespacedService(service, namespace).then((response) => {
+                _createNamespacedIngress(rule, namespace).then((response) => {
+                    console.log('kubelink created');
+                    return resolve('done');
                 }, (err) => {
                     return reject(err);
                 });
-            },
+            }, (err) => {
+                return reject(err);
+            });
+        },
             (err) => {
                 return reject(err);
             });
@@ -242,8 +242,8 @@ function _createkubelink(slug, username, namespace) {
 };
 
 function _createSwiftContainer(slug) {
-    return new Promise(function(resolve, reject) {
-        swiftClient.createContainer(_createObjectContainer(slug), function(err, container) {
+    return new Promise(function (resolve, reject) {
+        swiftClient.createContainer(_createObjectContainer(slug), function (err, container) {
             if (err) return reject(err);
             return resolve(container);
         });
@@ -251,8 +251,8 @@ function _createSwiftContainer(slug) {
 };
 
 function _getSwiftContainer(slug) {
-    return new Promise(function(resolve, reject) {
-        swiftClient.getContainers(function(err, containers) {
+    return new Promise(function (resolve, reject) {
+        swiftClient.getContainers(function (err, containers) {
             if (err) return reject(err);
             else {
                 for (let i = 0; i < containers.length; i++) {
@@ -298,9 +298,9 @@ function _copySwiftContainer(containerSrc, containerDst) {
 }
 
 function _destroySwiftContainer(slug) {
-    return new Promise(function(resolve, reject) {
-        _getSwiftContainer(slug).then(function(response) {
-            swiftClient.destroyContainer(response, function(err, result) {
+    return new Promise(function (resolve, reject) {
+        _getSwiftContainer(slug).then(function (response) {
+            swiftClient.destroyContainer(response, function (err, result) {
                 if (err) return reject(err);
                 return resolve(result);
             });
@@ -312,7 +312,7 @@ function _destroySwiftContainer(slug) {
 };
 
 function _removeIngressFile(rules, slug) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
         for (let index = 0; index < rules.length; index++) {
             if (rules[index].http.paths[0].backend.serviceName === slug) {
@@ -328,7 +328,7 @@ function _removeIngressFile(rules, slug) {
 };
 
 function _deleteNamespacedIngress(slug, namespace) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         k8sApiIngress.readNamespacedIngress('learn-ocaml', namespace, 'true').then(
             (response) => {
                 var rules = response.body.spec.rules;
@@ -352,7 +352,7 @@ function _deleteNamespacedIngress(slug, namespace) {
 };
 
 async function _deleteNamespacedService(slug, namespace) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         k8sApi.readNamespacedService(slug, namespace).then((response) => {
             return resolve(k8sApi.deleteNamespacedService(slug, namespace));
         }, (err) => {
@@ -364,19 +364,19 @@ async function _deleteNamespacedService(slug, namespace) {
 
 async function _deleteNamespacedDeployment(slug, namespace, waitPodDie = true) {
     async function watchPodDie() {
-	let timedWatchRun = () => global_functions.timedRun(watchPodDie, intervalTime);
-	return _readNamespacedPod(slug, namespace)
-	    .then(_ => timedWatchRun())
-	    .catch(_ => true);
+        let timedWatchRun = () => global_functions.timedRun(watchPodDie, intervalTime);
+        return _readNamespacedPod(slug, namespace)
+            .then(_ => timedWatchRun())
+            .catch(_ => true);
     }
 
     return k8sApiDeploy.deleteNamespacedDeployment(slug, namespace)
-	.then(_ => (waitPodDie) ? watchPodDie() : true)
-	.catch(_ => false);
+        .then(_ => (waitPodDie) ? watchPodDie() : true)
+        .catch(_ => false);
 };
 
 function _removekubelink(slug, namespace) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         _deleteNamespacedIngress(slug, namespace).then((response) => {
             console.log('ingress removed');
             _deleteNamespacedService(slug, namespace).then((response) => {
@@ -397,7 +397,7 @@ function _removekubelink(slug, namespace) {
 };
 
 function _delete(slug, namespace, path) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         _removekubelink(slug, namespace).then((response) => {
             console.log('kubelink removed');
             _destroySwiftContainer(slug).then((response) => {

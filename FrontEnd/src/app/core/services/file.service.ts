@@ -12,8 +12,8 @@ export class FileService {
 
     downloadFile(slug, target): Observable<any> {
 
-        return this.apiService.download('/uploads/download/' + slug, { target: target });
-
+        return this.apiService
+            .download('/uploads/download/' + slug, { target: target })
+            .pipe(map(data => data));
     }
-
 }

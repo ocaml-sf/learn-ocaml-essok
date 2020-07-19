@@ -112,21 +112,23 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   loadGroups() {
-    this.serversService.getGroups(this.server.slug).subscribe(
-      data => {
-        this.useless = JSON.parse(JSON.stringify(data));
-        this.groupsList = this.useless.group.map(
-          group => { return { ...group, id: this.generateGroupID() }; });
-        this.updateExercisesDropList()
-        this.updateTrashesDropList()
-        this.exercisesList = this.useless.name;
-        this.trashesList = [];
-        this.errors = {};
-      },
-      err => {
-        this.errors = err;
-      }
-    )
+    this.serversService
+      .getGroups(this.server.slug)
+      .subscribe(
+        data => {
+          this.useless = JSON.parse(JSON.stringify(data));
+          this.groupsList = this.useless.group.map(
+            group => { return { ...group, id: this.generateGroupID() }; });
+          this.updateExercisesDropList()
+          this.updateTrashesDropList()
+          this.exercisesList = this.useless.name;
+          this.trashesList = [];
+          this.errors = {};
+        },
+        err => {
+          this.errors = err;
+        }
+      )
   }
 
   uploadPrepare() {
@@ -164,17 +166,14 @@ export class ServerSettingsComponent implements OnInit {
 
   submitForm() {
     this.isSubmitting = true;
-    this.modalService.open('pleaseWait2');
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
-        this.modalService.close('pleaseWait2');
         this.useless = JSON.parse(JSON.stringify(data));
         this.exercisesList = this.useless.name;
         this.loadGroups();
       },
       err => {
-        this.modalService.close('pleaseWait2');
         this.errors = err;
         this.isSubmitting = false;
       }
