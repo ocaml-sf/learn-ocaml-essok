@@ -10,6 +10,7 @@ import { ShowAuthedDirective } from './show-authed.directive';
 import { ShowAdminDirective } from './show-admin.directive';
 import { UserListComponent, UserPreviewComponent } from './user-helpers';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -27,6 +28,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     HttpClientModule,
     RouterModule,
     MatButtonModule,
+    MatCardModule,
     MatDialogModule,
     MatListModule,
     FlexLayoutModule,
@@ -61,6 +63,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     ShowAuthedDirective,
     ShowAdminDirective,
     MatButtonModule,
+    MatCardModule,
     MatDialogModule,
     MatListModule,
     FlexLayoutModule,
