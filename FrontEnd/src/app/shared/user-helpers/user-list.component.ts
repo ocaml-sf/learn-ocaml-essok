@@ -21,7 +21,6 @@ export class UserListComponent {
   }
 
   query: UserListConfig;
-
   loading = false;
   results: User[];
   // Paginator start at page 0

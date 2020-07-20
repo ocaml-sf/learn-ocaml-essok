@@ -1,23 +1,22 @@
-<app-server-preview *ngFor="let server of results" [server]="server">
-</app-server-preview>
-
-<div class="list-group-item" [hidden]="!loading">
-  Loading servers...
+<div [hidden]="!loading">
+  <h4>Loading servers...</h4>
 </div>
 
-<div class="list-group-item" [hidden]="loading || results.length">
-  No servers are here... yet.
+<div [hidden]="loading || results.length != 0">
+  <h4>No servers are here... yet.</h4>
 </div>
 
-<nav [hidden]="loading || totalPages.length <= 1">
-  <ul class="pagination justify-content-center">
-
-    <li class="page-item" [ngClass]="{'active': pageNumber === currentPage}" *ngFor="let pageNumber of totalPages"
-      (click)="setPageTo(pageNumber)">
-
-      <a class="page-link">{{ pageNumber }}</a>
-
-    </li>
-
-  </ul>
-</nav>
+<mat-list class="servers-list" [hidden]="loading || results.length == 0">
+  <div mat-subheader>Servers list</div>
+  <mat-list-item *ngFor="let server of results">
+    <app-server-preview [server]="server"></app-server-preview>
+    <mat-divider></mat-divider>
+  </mat-list-item>
+</mat-list>
+<mat-paginator [hidden]="loading || results.length == 0"
+               [length]="serversCount"
+               [pageSize]="pageSize"
+               [pageSizeOptions]="pageSizeOptions"
+               (page)="updatePage($event)"
+               showFirstLastButtons>
+</mat-paginator>

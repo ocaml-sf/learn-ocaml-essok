@@ -7,6 +7,7 @@
 </div>
 
 <mat-list class="users-list" [hidden]="loading || results.length == 0">
+  <div mat-subheader>Users list</div>
   <mat-list-item *ngFor="let user of results">
     <app-user-preview [user]="user"></app-user-preview>
     <mat-divider></mat-divider>
