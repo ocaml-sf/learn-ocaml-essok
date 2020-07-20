@@ -14,8 +14,6 @@ export class UserListComponent {
 
   @Input()
   set config(config: UserListConfig) {
-      console.log("config");
-      console.log(config);
     if (config) {
       this.query = config;
       this.runQuery();
@@ -43,10 +41,6 @@ export class UserListComponent {
     this.results = [];
     this.query.filters.limit = this.pageSize;
     this.query.filters.offset = this.pageSize * this.pageIndex;
-      console.log("offset");
-      console.log(this.query.filters.offset);
-      console.log("limit");
-      console.log(this.pageSize);
   }
 
   runQuery() {
