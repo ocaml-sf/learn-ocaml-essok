@@ -6,7 +6,7 @@
   <h4>No users are here... yet.</h4>
 </div>
 
-<mat-list [hidden]="loading || results.length == 0">
+<mat-list class="users-list" [hidden]="loading || results.length == 0">
   <mat-list-item *ngFor="let user of results">
     <app-user-preview [user]="user"></app-user-preview>
     <mat-divider></mat-divider>
