@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 
 import { User, UserListConfig, UserService } from '../../core';
 @Component({
@@ -11,35 +12,41 @@ export class UserListComponent {
     private usersService: UserService
   ) { }
 
-  @Input() limit: number;
   @Input()
   set config(config: UserListConfig) {
+      console.log("config");
+      console.log(config);
     if (config) {
       this.query = config;
-      this.currentPage = 1;
       this.runQuery();
     }
   }
 
   query: UserListConfig;
-  results: User[];
-  loading = false;
-  currentPage = 1;
-  totalPages: Array<number> = [1];
 
-  setPageTo(pageNumber) {
-    this.currentPage = pageNumber;
+  loading = false;
+  results: User[];
+  // Paginator start at page 0
+  pageIndex = 0;
+  pageSizeOptions : number[] = [5, 10, 15];
+  pageSize : number = 5;
+  usersCount : number;
+
+  updatePage(pageEvent : PageEvent) {
+    this.pageIndex = pageEvent.pageIndex;
+    this.pageSize = pageEvent.pageSize;
     this.runQuery();
   }
 
   prepareQuery() {
     this.loading = true;
     this.results = [];
-    // Create limit and offset filter (if necessary)
-    if (this.limit) {
-      this.query.filters.limit = this.limit;
-      this.query.filters.offset = (this.limit * (this.currentPage - 1));
-    }
+    this.query.filters.limit = this.pageSize;
+    this.query.filters.offset = this.pageSize * this.pageIndex;
+      console.log("offset");
+      console.log(this.query.filters.offset);
+      console.log("limit");
+      console.log(this.pageSize);
   }
 
   runQuery() {
@@ -48,9 +55,7 @@ export class UserListComponent {
       .subscribe(data => {
         this.loading = false;
         this.results = data.users;
-
-        // Used from http://www.jstips.co/en/create-range-0...n-easily-using-one-line/
-        this.totalPages = Array.from(new Array(Math.ceil(data.usersCount / this.limit)), (val, index) => index + 1);
+        this.usersCount = data.usersCount;
       });
   }
 }

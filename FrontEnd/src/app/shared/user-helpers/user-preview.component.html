@@ -1,12 +1,4 @@
-<div class="user-preview">
-
-  <a [routerLink]="['/profile', user.username]" class="preview-link" *ngIf="user.active">
-    <h1>{{ user.username }}</h1>
-    <hr/>
-  </a>
-  <a [routerLink]="['/profile', user.username]" class="preview-link-archived" *ngIf="!user.active">
-    <i>Archived</i>
-    <h1>{{ user.username }}</h1>
-    <hr/>
-  </a>
-</div>
+<a [routerLink]="['/profile', user.username]">
+  <i *ngIf="!user.active">Archived</i>
+  <h1>{{ user.username }}</h1>
+</a>
