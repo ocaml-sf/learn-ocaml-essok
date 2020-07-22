@@ -1,0 +1,20 @@
+@mixin slide-toggle-color($color) {
+    @include border-color($color);
+}
+
+@each $color-key, $color-value in $palette {
+    .mat-slide-toggle.mat-#{$color-key} {
+        @include slide-toggle-color(nth($color-value, 1));
+        &.mat-checked {
+            .mat-slide-toggle-bar,
+            .mat-slide-toggle-thumb,
+            .mat-ripple-element {
+                background-color: nth($color-value, 1);
+            }
+        }
+    }
+}
+
+.mat-slide-toggle-label {
+    justify-content: center;
+}

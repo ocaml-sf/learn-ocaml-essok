@@ -24,10 +24,10 @@
               </button>
             </div>
             <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="2rem">
-              <button fxFlex="25%" mat-stroked-button color="info"
-                      (click)="getActived()">
-                <i class="ion-settings"></i> Filter by Active : {{ isActive }}
-              </button>
+              <mat-slide-toggle fxFlex="25%" color="info"
+                                labelPosition='before' (click)="getActived()">
+                Filter by Active
+              </mat-slide-toggle>
               <button fxFlex="25%" mat-stroked-button color="info"
                       [disabled]="isServer" (click)="getAuthorized()">
                 <i class="ion-settings"></i> Filter by Authorized : {{ isAuthorized }}

@@ -15,6 +15,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -35,6 +36,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     FlexLayoutModule,
     MatPaginatorModule,
     MatProgressBarModule,
+    MatSlideToggleModule,
     MatCheckboxModule,
     MatRadioModule,
     MatProgressSpinnerModule
@@ -71,6 +73,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     FlexLayoutModule,
     MatPaginatorModule,
     MatProgressBarModule,
+    MatSlideToggleModule,
     MatCheckboxModule,
     MatRadioModule,
     MatProgressSpinnerModule
