@@ -1,0 +1,23 @@
+@mixin button-color($color, $light-text:false) {
+    @include border-color($color);
+
+    transition: color 0.15s ease-in-out,
+                background-color 0.15s ease-in-out,
+                border-color 0.15s ease-in-out,
+                box-shadow 0.15s ease-in-out;
+
+    &:hover {
+        @if($light-text) {
+            color: $color-white;
+        } @else {
+            color: $color-gray;
+        }
+        background-color: $color;
+    }
+}
+
+@each $colorkey, $colorvalue in $palette {
+    .mat-stroked-button.mat-#{$colorkey} {
+        @include button-color($colorvalue...);
+    }
+}

@@ -1,0 +1,22 @@
+html, body, app-root {
+    height: 100%;
+}
+
+body {
+    background-color: $color-desert-sand;
+}
+
+app-root {
+    display: flex;
+    flex-direction: column;
+}
+
+.thecontainer {
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 2rem;
+}
+
+.banner {
+    background-color: $color-brown-sand;
+}

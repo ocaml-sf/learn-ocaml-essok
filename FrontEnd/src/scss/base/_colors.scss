@@ -1,0 +1,39 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+$color-main-orange: #F67220; // Main Orange
+$color-oasis-blue: #3B55F2; // Oasis Blue
+$color-sand: #F6EBE3; // Sand
+$color-desert-sand: #EDC9AF; // Desert Sand
+$color-brown-sand: #C2B280; // Brown Sand
+$color-white : white;
+$color-gray: mat-color($mat-grey, 900);
+
+$color-primary: mat-color($mat-blue, 500);
+$color-accent: mat-color($mat-red, 500);
+$color-warn: mat-color($mat-amber, 500);
+$color-success: mat-color($mat-green, 500);
+$color-info: mat-color($mat-cyan, 500);
+
+/**
+ * Palette used for every material component
+ * each item is a list with:
+ * - a color value $color-primary
+ * - a boolean value $light-text to set text color in hover
+ *   to white if true or black if false
+ */
+$palette: ("primary": ($color-primary, true),
+           "accent" : ($color-accent, true),
+           "warn": ($color-warn, false),
+           "success": ($color-success, true),
+           "info": ($color-info, true));
+
+
+// TODO: check if changing angular palette is usefull
+/*
+$mat-primary: mat-palette($mat-blue, 500);
+$mat-accent: mat-palette($mat-red, 500);
+$mat-warn: mat-palette($mat-warn, 500);
+$custom-theme: mat-light-theme($custom-primary, $custom-accent, $custom-warn);
+@include angular-material-theme($custom-theme);
+*/
