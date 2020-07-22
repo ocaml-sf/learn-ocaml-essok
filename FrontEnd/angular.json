@@ -22,8 +22,7 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "src/scss/styles.scss",
-              "src/scss/custom-theme.scss",
+              "src/scss/main.scss",
             ],
             "scripts": [
 	      "node_modules/jquery/dist/jquery.js",
