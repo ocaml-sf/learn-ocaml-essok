@@ -16,5 +16,7 @@ $ionicons-font-path: "~ionicons/dist/fonts";
 @import 'components/buttons',
         'components/slide-toggle';
 
+@import 'pages/app';
+
 // TODO: remove all contents of shame.scss
 @import 'shame';

@@ -1,0 +1,6 @@
+// Next sibling
+router-outlet + * {
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 2rem;
+}
