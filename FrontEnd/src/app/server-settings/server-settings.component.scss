@@ -35,6 +35,12 @@ html, body {
   text-align: center;
 }
 
+.warning {
+    border-style: dashed;
+    border-color: rgb(220, 183, 20);
+    background-color: #ffffe6;
+}
+
 .danger {
   border-style: dashed;
   border-color: crimson;
