@@ -1,0 +1,4 @@
+<a [routerLink]="['/profile', user.username]">
+  <i *ngIf="!user.active">Archived</i>
+  <h1>{{ user.username }}</h1>
+</a>

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { User, UserService, Profile } from '../core';
-import { concatMap ,  tap } from 'rxjs/operators';
+import { concatMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-page',
@@ -26,7 +26,7 @@ export class ProfileComponent implements OnInit {
         return this.userService.currentUser.pipe(tap(
           (userData: User) => {
             this.currentUser = userData;
-            this.isUser = (this.currentUser.username === this.profile.username);
+            this.isUser = (this.currentUser.username === this.profile.username) || this.currentUser.admin;
           }
         ));
       })

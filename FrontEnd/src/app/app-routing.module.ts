@@ -3,29 +3,45 @@ import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
+  },
+  {
     path: 'profile-settings',
-    loadChildren: './profile-settings/profile-settings.module#ProfileSettingsModule'
+    loadChildren: () => import('./profile-settings/profile-settings.module').then(m => m.ProfileSettingsModule)
   },
   {
     path: 'profile',
-    loadChildren: './profile/profile.module#ProfileModule'
+    loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule)
   },
   {
     path: 'editor',
-    loadChildren: './editor/editor.module#EditorModule'
+    loadChildren: () => import('./editor/editor.module').then(m => m.EditorModule)
   },
   {
-    path: 'server-settings',
-    loadChildren: './server-settings/server-settings.module#ServerSettingsModule'
+    path: 'reset-password',
+    loadChildren: () => import('./reset-password/reset-password.module').then(m => m.ResetPasswordModule)
+  },
+  {
+    path: 'delete-account',
+    loadChildren: () => import('./delete-account/delete-account.module').then(m => m.DeleteAccountModule)
+  },
+  {
+    path: 'disable-account',
+    loadChildren: () => import('./disable-account/disable-account.module').then(m => m.DisableAccountModule)
   },
   {
     path: 'server',
-    loadChildren: './server/server.module#ServerModule'
+    loadChildren: () => import('./server/server.module').then(m => m.ServerModule)
   },
   {
-    path: 'help',
-    loadChildren: './help/help.module#HelpModule'
-  }
+    path: 'server-settings',
+    loadChildren: () => import('./server-settings/server-settings.module').then(m => m.ServerSettingsModule)
+  },
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  { path: '**', redirectTo: '/', pathMatch: 'full' }
+
+  // { path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({
@@ -37,4 +53,4 @@ const routes: Routes = [
   })],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

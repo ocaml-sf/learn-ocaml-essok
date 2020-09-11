@@ -1,4 +1,5 @@
 export interface User {
+  admin: boolean;
   email: string;
   token: string;
   username: string;
@@ -6,4 +7,6 @@ export interface User {
   place: string;
   goal: string;
   image: string;
+  active: boolean;
+  authorized: boolean;
 }

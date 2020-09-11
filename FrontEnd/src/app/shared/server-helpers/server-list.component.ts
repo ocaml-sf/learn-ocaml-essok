@@ -1,54 +1,54 @@
 import { Component, Input } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 
 import { Server, ServerListConfig, ServersService } from '../../core';
 @Component({
   selector: 'app-server-list',
-  styleUrls: ['server-list.component.css'],
+  styleUrls: ['server-list.component.scss'],
   templateUrl: './server-list.component.html'
 })
 export class ServerListComponent {
-  constructor (
+  constructor(
     private serversService: ServersService
-  ) {}
+  ) { }
 
-  @Input() limit: number;
   @Input()
   set config(config: ServerListConfig) {
     if (config) {
       this.query = config;
-      this.currentPage = 1;
       this.runQuery();
     }
   }
 
   query: ServerListConfig;
-  results: Server[];
   loading = false;
-  currentPage = 1;
-  totalPages: Array<number> = [1];
+  results: Server[];
+  pageIndex = 0;
+  pageSizeOptions : number[] = [5, 10, 15];
+  pageSize : number = 5;
+  serversCount : number;
 
-  setPageTo(pageNumber) {
-    this.currentPage = pageNumber;
+  updatePage(pageEvent : PageEvent) {
+    this.pageIndex = pageEvent.pageIndex;
+    this.pageSize = pageEvent.pageSize;
     this.runQuery();
   }
 
-  runQuery() {
+  prepareQuery() {
     this.loading = true;
     this.results = [];
+    // Create limit and offset filter
+    this.query.filters.limit = this.pageSize;
+    this.query.filters.offset = this.pageSize * this.pageIndex;
+  }
 
-    // Create limit and offset filter (if necessary)
-    if (this.limit) {
-      this.query.filters.limit = this.limit;
-      this.query.filters.offset =  (this.limit * (this.currentPage - 1));
-    }
-
+  runQuery() {
+    this.prepareQuery();
     this.serversService.query(this.query)
-    .subscribe(data => {
-      this.loading = false;
-      this.results = data.servers;
-
-      // Used from http://www.jstips.co/en/create-range-0...n-easily-using-one-line/
-      this.totalPages = Array.from(new Array(Math.ceil(data.serversCount / this.limit)), (val, index) => index + 1);
-    });
+      .subscribe(data => {
+        this.loading = false;
+        this.results = data.servers;
+        this.serversCount = data.serversCount;
+      });
   }
 }

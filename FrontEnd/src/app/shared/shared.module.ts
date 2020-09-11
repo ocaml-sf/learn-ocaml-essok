@@ -7,6 +7,20 @@ import { RouterModule } from '@angular/router';
 import { ServerListComponent, ServerMetaComponent, ServerPreviewComponent } from './server-helpers';
 import { ListErrorsComponent } from './list-errors.component';
 import { ShowAuthedDirective } from './show-authed.directive';
+import { ShowAdminDirective } from './show-admin.directive';
+import { UserListComponent, UserPreviewComponent } from './user-helpers';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { } from '@angular/platform-browser/animations';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   imports: [
@@ -14,26 +28,55 @@ import { ShowAuthedDirective } from './show-authed.directive';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    RouterModule
+    RouterModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDialogModule,
+    MatListModule,
+    FlexLayoutModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatSlideToggleModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule
   ],
   declarations: [
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,
+    UserListComponent,
+    UserPreviewComponent,
     ListErrorsComponent,
-    ShowAuthedDirective
+    ShowAuthedDirective,
+    ShowAdminDirective
+
   ],
   exports: [
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,
+    UserListComponent,
+    UserPreviewComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
     ListErrorsComponent,
     RouterModule,
-    ShowAuthedDirective
+    ShowAuthedDirective,
+    ShowAdminDirective,
+    MatButtonModule,
+    MatCardModule,
+    MatDialogModule,
+    MatListModule,
+    FlexLayoutModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatSlideToggleModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule
   ]
 })
-export class SharedModule {}
+export class SharedModule { }

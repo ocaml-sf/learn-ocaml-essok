@@ -9,38 +9,22 @@
           <h4>{{ profile.username }}</h4>
           <p>{{ profile.description }}</p>
 
-           <a [routerLink]="['/profile-settings']"
-              [hidden]="!isUser"
-              class="btn btn-sm btn-outline-secondary action-btn">
-              <i class="ion-gear-a"></i> Edit Profile Settings
-            </a>
+          <a [routerLink]="['/profile-settings/' + profile.username]" [hidden]="!isUser && !currentUser.admin"
+            *ngIf="currentUser.active" class="btn btn-sm btn-outline-info">
+            <i class="ion-md-settings"></i> Edit Profile Settings
+          </a>
+          <a [routerLink]="['/disable-account']" [hidden]="!isUser" *ngIf="!currentUser.active"
+            class="btn btn-sm btn-outline-warning">
+            <i class="ion-md-power"></i> Active my account
+          </a>
         </div>
 
       </div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="row">
 
-      <div class="col-xs-12 col-md-10 offset-md-1">
-        <div class="servers-toggle">
-          <ul class="nav nav-pills outline-active">
-            <li class="nav-item">
-              <a class="nav-link"
-                 routerLinkActive="active"
-                 [routerLinkActiveOptions]="{ exact: true }"
-                 [routerLink]="['/profile', profile.username]">
-                 My Posts
-              </a>
-            </li>
-          </ul>
-        </div>
+  <router-outlet></router-outlet>
 
-        <router-outlet></router-outlet>
-      </div>
-
-    </div>
-  </div>
 
 </div>

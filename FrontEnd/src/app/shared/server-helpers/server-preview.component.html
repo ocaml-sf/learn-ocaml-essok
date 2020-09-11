@@ -1,9 +1,29 @@
-<div class="server-preview">
+<a [routerLink]="['/server', server.slug]">
+  <i *ngIf="!server.active">Status : Offline</i>
+  <h1>{{ server.title }}</h1>
+  <p *ngIf="server.active">{{ server.description }}</p>
+</a>
 
-  <a [routerLink]="['/server', server.slug]" class="preview-link">
-    <h1>{{ server.title }}</h1>
-    <p>{{ server.description }}</p>
-    <span>Read more...</span>
+<h3>{{ server.description }}
+  <div *ngIf="server.active">
+    <div *ngIf="server.token">
+      <i>Status : Online</i> <br /> Teacher token : {{server.token}}<br />
+    </div>
+    <div *ngIf="!server.token">
+      <i>Status : Pending</i> <br /> Teacher token : <button type="button" class="btn btn-outline-warning"
+                                                             (click)="getToken()">Click here to retrieve your teacher
+        token</button><br />
+    </div>
 
-  </a>
-</div>
+    Server URL : <a href="http://{{server.url}}" target="_blank">{{server.url}}</a>
+  </div>
+</h3>
+<app-list-errors [errors]="errors"></app-list-errors>
+<mat-radio-group [(ngModel)]="target">
+  <mat-radio-button value="all"> All </mat-radio-button>
+  <mat-radio-button value="repository"> Exercises only </mat-radio-button>
+  <mat-radio-button value="sync"> Sync only </mat-radio-button>
+</mat-radio-group>
+<button mat-flat-button color="primary" (click)="download()">Download</button>
+<mat-progress-spinner class="spinner" [color]="color" [mode]="mode" [value]="value" [diameter]=50>
+</mat-progress-spinner>

@@ -1,25 +1,51 @@
-<div class="home-page">
+<div class="container">
 
-  <div class="banner" *appShowAuthed="false">
-    <div class="container">
-      <h1 class="logo-font">Learn Ocaml Server Manager</h1>
-      <p>A place to manage your <i>Learn Ocaml</i> server.</p>
+  <div class="row justify-content-center" *appShowAuthed="false">
+    <div class="col-8 banner">
+      <h1 class="logo-font">Learn OCaml Essok</h1>
+      <p>A place to manage your <i>Learn OCaml</i> instances.</p>
     </div>
   </div>
 
-  <div class="container page" *appShowAuthed="false">
-    <div class="col-md-10 offset-md-1 col-xs-12">
-        <h1 class="text-xs-center">{{ title }}</h1>
-        <p class="text-xs-center">{{ header }}</p>
-        <p class="text-xs-center">{{ body }}</p>
+  <div class="row justify-content-center" *appShowAuthed="false">
+    <div class="col-8">
+      <!-- <h1 class="text-xs-center">{{ title }}</h1> -->
+      <h2 class="text-xs-center">{{ header }}</h2>
+      <h2> This site is currently in developpement please report
+        <a href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blanck"> here</a> any issues you encounter.
+      </h2>
+      <!-- <p class="text-xs-center">{{ body }}</p> -->
+    </div>
+  </div>
+
+  <div class="row justify-content-center" *appShowAuthed="false">
+    <a class="col-8" href="https://ocaml-sf.org">
+      <img class="img-fluid" src="assets/banner.png">
+    </a>
+  </div>
+
+  <div class="row justify-content-center" *appShowAuthed="true">
+    <div class="col-12 bg-sand" *ngIf="!currentUser.authorized && !currentUser.admin">
+      <h1 class="text-xs-center">Information</h1>
+      <hr />
+      <h1 class="text-xs-center">Your account is pending verification... </h1>
+    </div>
+
+    <div class="col-12 card bg-sand" *ngIf="currentUser.authorized || currentUser.admin">
+      <h1 class="text-xs-center">Mainboard</h1>
+      <hr />
+      <button class="btn btn-md btn-info" (click)="getActived()">
+        <i class="icon ion-md-settings"></i> Filter by Active : {{ isActive }}
+      </button>
+      <hr />
+
+      <div class="list-group">
+        <app-server-list [limit]="5" [config]="listConfig"></app-server-list>
       </div>
+    </div>
   </div>
 
   <div class="container page" *appShowAuthed="true">
-    <h1 class="text-xs-center">Mainboard</h1>
-    <hr />
-    <div class="row">
-        <app-server-list [limit]="5" [config]="listConfig"></app-server-list>
-    </div>
+
   </div>
 </div>

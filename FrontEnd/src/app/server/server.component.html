@@ -1,56 +1,35 @@
-<div class="server-page">
+<div class="container p-5">
+  <div class="row text-white bg-dark p-3 justify-content-center">
+    <h1 class="col-11">{{server.title}}</h1>
+    <app-server-meta [server]="server" class="col-11">
+      <div class="btn-group" role="group" aria-label="Server buttons" [hidden]="!canModify">
+        <button class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
+          [routerLink]="['/server-settings', server.slug]">
+          <i class="ion-md-create"></i> Manage Server
+        </button>
 
-  <div class="banner">
-    <div class="container">
-      <h1>{{ server.title }}</h1>
+        <button class="btn btn-sm btn-outline-warning" *ngIf="currentUser.active" [ngClass]="{disabled: isDisabled}"
+          (click)="toggleServerStatus()">
+          <i class="ion-md-power"></i>
+          <span *ngIf="!server.active"> Enable Server</span>
+          <span *ngIf="server.active"> Disable Server</span>
+        </button>
 
-      <app-server-meta [server]="server">
+        <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin"
+          (click)="toggleDangerous()">
+          <i class="ion-md-warning"></i>
+          <span *ngIf="!isDangerous"> Show Dangerous options</span>
+          <span *ngIf="isDangerous"> Hide Dangerous options</span>
+        </button>
 
-          <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary"
-             [routerLink]="['/editor', server.slug]">
-            <i class="ion-edit"></i> Edit Server
-          </a>
-
-          <button class="btn btn-sm btn-outline-danger"
-            [ngClass]="{disabled: isDeleting}"
-            (click)="deleteServer()">
-            <i class="ion-trash-a"></i> Delete Server
-          </button>
-        </span>
-      </app-server-meta>
-    </div>
-  </div>
-
-  <div class="container page">
-
-    <div class="row server-content">
-      <div class="col-md-12">
-
-        <div [innerHTML]="server.body | markdown"></div>
+        <button class="btn btn-sm btn-outline-danger"
+          *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
+          [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
+          <i class="ion-md-trash"></i> Delete Server
+        </button>
 
       </div>
-    </div>
-
-    <hr />
-
-    <div class="server-actions">
-      <app-server-meta [server]="server">
-
-          <span [hidden]="!canModify">
-          <a class="btn btn-sm btn-outline-secondary"
-             [routerLink]="['/editor', server.slug]">
-            <i class="ion-edit"></i> Edit Server
-          </a>
-
-          <button class="btn btn-sm btn-outline-danger"
-            [ngClass]="{disabled: isDeleting}"
-            (click)="deleteServer()">
-            <i class="ion-trash-a"></i> Delete Server
-          </button>
-        </span>
-      </app-server-meta>
-    </div>
-
+    </app-server-meta>
   </div>
+  <jw-modal id="pleaseWait2"></jw-modal>
 </div>

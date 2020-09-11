@@ -3,130 +3,366 @@ var mongoose = require('mongoose');
 var Server = mongoose.model('Server');
 var User = mongoose.model('User');
 var auth = require('../auth');
+var events = require('events');
+const server_functions = require('../../lib/server_functions');
+const log_functions = require('../../lib/log_functions');
+const errors_functions = require('../../lib/errors');
+const log_message = require('../../configs/log_message');
+const api_code = require('../../configs/api_code');
+const defaultContainerName = require('../../configs/OS').defaultContainerName;
 
 // Preload server objects on routes with ':server'
-router.param('server', function(req, res, next, slug) {
-  Server.findOne({ slug: slug})
-    .populate('author')
-    .then(function (server) {
-      if (!server) { return res.sendStatus(404); }
-
-      req.server = server;
-
-      return next();
-    }).catch(next);
-});
-router.get('/', auth.optional, function(req, res, next) {
-  var query = {};
-  var limit = 20;
-  var offset = 0;
-
-  if(typeof req.query.limit !== 'undefined'){
-    limit = req.query.limit;
-  }
-
-  if(typeof req.query.offset !== 'undefined'){
-    offset = req.query.offset;
-  }
-
-  Promise.all([
-    req.query.author ? User.findOne({username: req.query.author}) : null,
-  ]).then(function(results){
-    var author = results[0];
-
-    if(author){
-      query.author = author._id;
-    }
-
-    return Promise.all([
-      Server.find(query)
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .sort({createdAt: 'desc'})
+router.param('server', function (req, res, next, slug) {
+    Server.findOne({ slug: slug })
         .populate('author')
-        .exec(),
-      Server.count(query).exec(),
-      req.payload ? User.findById(req.payload.id) : null,
-    ]).then(function(results){
-      var servers = results[0];
-      var serversCount = results[1];
-      var user = results[2];
+        .then(function (server) {
+            if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
 
-      return res.json({
-        servers: servers.map(function(server){
-          return server.toJSONFor(user);
-        }),
-        serversCount: serversCount
-      });
-    });
-  }).catch(next);
+            req.server = server;
+
+            return next();
+        }).catch(next);
 });
 
-router.post('/', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if (!user) { return res.sendStatus(401); }
+router.get('/', auth.required, function (req, res, next) {
 
-    var server = new Server(req.body.server);
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            log_functions.create('error', 'get /server/',
+                log_message.user_account_unknown + user, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'get /server/',
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
 
-    server.author = user;
+        if ((user.username !== req.query.author) && !user.isAdmin()) {
+            log_functions.create('error', 'get /server/',
+                log_message.user_owner_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        var author = req.query.author;
+        user.findAnUser(author).then(function (results) {
 
-    return server.save().then(function(){
-      console.log(server.author);
-      return res.json({server: server.toJSONFor(user)});
-    });
-  }).catch(next);
+            author = results[0];
+            console.log(author);
+            user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
+                var servers = results[0];
+                var serversCount = results[1];
+                log_functions.create('general', 'get /server/', 'ok', user, req.server)
+                return res.json({
+                    servers: servers.map(function (server) {
+                        return server.toJSONFor(author);
+                    }),
+                    serversCount: serversCount
+                });
+            });
+        }).catch(next);
+    }).catch(next);
+
+});
+
+router.post('/', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            log_functions.create('error', 'post /server/',
+                log_message.user_account_unknown + user, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.active) {
+            log_functions.create('error', 'post /server/',
+                log_message.user_account_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'post /server/',
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        var server = new Server(req.body.server);
+        server.author = user;
+        log_functions.create('bin', 'post /server/', log_message.user_server_created, user, server);
+        return server.save().then(function () {
+            server_functions.createSwiftContainer(server.slug).then((_) => {
+                server_functions.copySwiftContainer(defaultContainerName, server.slug).then(_ => {
+                    log_functions.create('general', 'post /server/', log_message.user_swift_created, user, server);
+                    console.log('swift created');
+                    return res.json({ server: server.toJSONFor(user) });
+                });
+            }, (err) => {
+                log_functions.create('error', 'post /server/',
+                    log_message.user_swift_error, user, server);
+                return res.status(api_code.error).send({ errors: { err } });
+            });
+        });
+
+    }).catch(next);
 });
 
 // return a server
-router.get('/:server', auth.optional, function(req, res, next) {
-  Promise.all([
-    req.payload ? User.findById(req.payload.id) : null,
-    req.server.populate('author').execPopulate()
-  ]).then(function(results){
-    var user = results[0];
+router.get('/:server', auth.required, function (req, res, next) {
+    Promise.all([
+        req.payload ? User.findById(req.payload.id) : null,
+        req.server.populate('author').execPopulate(),
 
-    return res.json({server: req.server.toJSONFor(user)});
-  }).catch(next);
+    ]).then(function (results) {
+        var user = results[0];
+        var server = req.server.toJSONFor(user);
+        if (!user) {
+            log_functions.create('error', 'get /server/:' + req.server.slug,
+                log_message.user_account_unknown + user, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'get /server/:' + req.server.slug,
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+
+        if ((user.username !== server.author.username) && (!user.isAdmin())) {
+            log_functions.create('error', 'get /server/:' + req.server.slug,
+                log_message.user_account_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        log_functions.create('general', 'get /server/:' + req.server.slug, 'ok', user, req.server);
+        return res.json({ server });
+
+    }).catch(next);
 });
 
 // update server
-router.put('/:server', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if(req.server.author._id.toString() === req.payload.id.toString()){
-      if(typeof req.body.server.title !== 'undefined'){
-        req.server.title = req.body.server.title;
-      }
+router.put('/:server', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user.active) {
+            log_functions.create('error', 'put /server/:' + req.server.slug,
+                log_message.user_account_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'put /server/:' + req.server.slug,
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (user.processing) {
+            log_functions.create('error', 'put /server/:' + req.server.slug,
+                log_message.user_processing_unauthorised, user, req.server);
+            return res.sendStatus(api_code.forbidden);
+        }
+        if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
 
-      if(typeof req.body.server.description !== 'undefined'){
-        req.server.description = req.body.server.description;
-      }
+            if (typeof req.body.server.title !== 'undefined') {
+                req.server.title = req.body.server.title;
+            }
 
-      if(typeof req.body.server.body !== 'undefined'){
-        req.server.body = req.body.server.body;
-      }
+            if (typeof req.body.server.description !== 'undefined') {
+                req.server.description = req.body.server.description;
+            }
 
-      req.server.save().then(function(server){
-        return res.json({server: server.toJSONFor(user)});
-      }).catch(next);
-    } else {
-      return res.sendStatus(403);
-    }
-  });
+            if (typeof req.body.server.body !== 'undefined') {
+                req.server.body = req.body.server.body;
+            }
+
+            req.server.save().then(function (server) {
+                log_functions.create('bin', 'put /server/:' + req.server.slug, 'server information updated', user, req.server);
+                return res.json({ server: server.toJSONFor(user) });
+            }).catch(next);
+        } else {
+            log_functions.create('error', 'put /server/:' + req.server.slug,
+                log_message.user_owner_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+    });
+});
+
+//disable or enable a server
+router.post('/disable/:server', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+            if (!user.active) {
+                log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+                    log_message.user_account_error, user, req.server);
+                return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+            }
+            if (!user.isAdmin() && !user.authorized) {
+                log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+                    log_message.user_activated_error, user, req.server);
+                return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+            }
+            if (user.processing) {
+                log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+                    log_message.user_processing_unauthorised, user, req.server);
+                return res.sendStatus(api_code.forbidden);
+            }
+
+            var slug = req.server.slug;
+            var username = req.server.author.username;
+            var namespace = 'default';
+
+            if (req.server.active) {
+                console.log('shut_off');
+                var volume = req.server.volume;
+                console.log('volume : ' + volume);
+                user.startProcessing().then(() => {
+                    log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
+                    console.log('user.processing : ' + user.processing);
+                    server_functions.shut_off(slug, namespace, volume).then((response) => {
+                        user.endProcessing().then(() => {
+                            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
+                            console.log('user.processing : ' + user.processing);
+                            req.server.active = false;
+                            req.server.save().then(function () {
+                                log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_off, user, req.server);
+                                return res.sendStatus(api_code.ok);
+                            });
+                        });
+                    }, (err) => {
+                        user.endProcessing().then(() => {
+                            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_off, user);
+                            return res.status(api_code.error).send({ errors: { err } });
+                        });
+                    });
+                });
+            } else {
+                console.log('shut_on');
+                user.startProcessing().then(() => {
+                    log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
+                    console.log('user.processing : ' + user.processing);
+                    server_functions.shut_on(slug, username, namespace).then((response) => {
+                        user.endProcessing().then(() => {
+                            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
+                            console.log('user.processing : ' + user.processing);
+                            req.server.volume = response;
+                            req.server.active = true;
+                            req.server.save().then(function () {
+                                log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_on, user, req.server);
+                                return res.sendStatus(api_code.ok);
+                            });
+                        });
+                    }, (err) => {
+                        user.endProcessing().then(() => {
+                            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
+                            return res.status(api_code.error).send({ errors: { err } });
+                        });
+                    });
+                });
+            }
+        } else {
+            log_functions.create('error', 'get /server/disable/:' + req.server.slug,
+                log_message.user_owner_error, user, req.server);
+            return res.sendStatus(api_code.forbidden);
+        }
+    }).catch(next);
 });
 
 // delete server
-router.delete('/:server', auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if (!user) { return res.sendStatus(401); }
+router.delete('/:server', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            log_functions.create('error', 'delete /server/:' + req.server.slug,
+                log_message.user_account_unknown + user, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.active) {
+            log_functions.create('error', 'delete /server/:' + req.server.slug,
+                log_message.user_account_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'delete /server/:' + req.server.slug,
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (user.processing) {
+            log_functions.create('error', 'delete /server/:' + req.server.slug,
+                log_message.user_processing_unauthorised, user, req.server);
+            return res.sendStatus(api_code.forbidden);
+        }
 
-    if(req.server.author._id.toString() === req.payload.id.toString()){
-      return req.server.remove().then(function(){
-        return res.sendStatus(204);
-      });
-    } else {
-      return res.sendStatus(403);
-    }
-  }).catch(next);
+        if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+
+            var slug = req.server.slug;
+            var namespace = 'default';
+            console.log('asking for a deletion');
+            console.log('slug : ' + slug);
+            console.log('namespace : ' + namespace);
+            log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_deletion_ask, user, req.server);
+
+            user.startProcessing().then(() => {
+                log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_start, user);
+                server_functions.delete(slug, namespace, './uploads/' + user.username + '/' + slug + '/').then((response) => {
+                    user.endProcessing().then(() => {
+                        log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
+                        log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.server_deletion_ok, user, req.server).then(() => {
+                            return req.server.remove().then(function () {
+                                return res.sendStatus(api_code.ok);
+                            });
+                        })
+                    });
+                }, (err) => {
+                    user.endProcessing().then(() => {
+                        log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
+                        return res.status(api_code.error).send({ errors: { err } });
+                    });
+                });
+            });
+        } else {
+            log_functions.create('error', 'delete /server/:' + req.server.slug,
+                log_message.user_owner_error, user, req.server);
+            return res.sendStatus(api_code.forbidden);
+        }
+    }).catch(next);
+});
+
+router.post('/token/:server', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            log_functions.create('error', 'post /server/:' + req.server.slug,
+                log_message.user_account_unknown + user, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.active) {
+            log_functions.create('error', 'post /server/:' + req.server.slug,
+                log_message.user_account_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+        if (!user.isAdmin() && !user.authorized) {
+            log_functions.create('error', 'post /server/:' + req.server.slug,
+                log_message.user_activated_error, user, req.server);
+            return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
+        }
+
+        if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+
+            if (req.server.token !== undefined) {
+                console.log(req.server.token);
+                return res.status(api_code.error).send({ errors: 'teacher token already retrieve' });
+            } else {
+                var slug = req.server.slug;
+                var namespace = 'default';
+                user.startProcessing().then(() => server_functions.catchTeacherToken(slug, namespace))
+                    .then(token => {
+                        log_functions.create('bin', 'post /server/token:' + req.server.slug, log_message.user_token_ok, user, req.server);
+                        req.server.token = token;
+                        return req.server.save();
+                    })
+                    .then(() => user.endProcessing())
+                    .then(() => res.json({ server: req.server.toJSONFor(user) }))
+                    .catch(async err => {
+                        await user.endProcessing();
+                        log_functions.create('error', 'post /server/',
+                            log_message.user_token_error + req.server.slug,
+                            user, req.server);
+                        return res.status(api_code.error).send({ errors: { err } });
+                    });
+            }
+        } else {
+            log_functions.create('error', 'get /server/disable/:' + req.server.slug,
+                log_message.user_owner_error, user, req.server);
+            return res.sendStatus(api_code.forbidden);
+        }
+    }).catch(next);
 });
 
 module.exports = router;

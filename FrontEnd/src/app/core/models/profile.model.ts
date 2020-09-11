@@ -3,5 +3,7 @@ export interface Profile {
   description: string;
   place: string;
   goal: string;
+  active: boolean;
   image: string;
+  authorized: boolean;
 }

@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { User, UserService } from '../../core';
 
 @Component({
-  selector: 'app-layout-header',
-  templateUrl: './header.component.html'
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
   constructor(
     private userService: UserService
-  ) {}
+  ) { }
 
   currentUser: User;
 
@@ -19,5 +20,9 @@ export class HeaderComponent implements OnInit {
         this.currentUser = userData;
       }
     );
+  }
+
+  logout() {
+    this.userService.purgeAuth();
   }
 }

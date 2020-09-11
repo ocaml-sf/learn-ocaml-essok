@@ -10,7 +10,7 @@ export class ProfileResolver implements Resolve<Profile> {
   constructor(
     private profilesService: ProfilesService,
     private router: Router
-  ) {}
+  ) { }
 
   resolve(
     route: ActivatedRouteSnapshot,

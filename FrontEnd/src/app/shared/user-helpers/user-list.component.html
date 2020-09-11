@@ -1,0 +1,22 @@
+<div class="app-user-preview" [hidden]="!loading">
+  <h4>Loading users...</h4>
+</div>
+
+<div class="app-user-preview" [hidden]="loading || results.length != 0">
+  <h4>No users are here... yet.</h4>
+</div>
+
+<mat-list class="users-list" [hidden]="loading || results.length == 0">
+  <div mat-subheader>Users list</div>
+  <mat-list-item *ngFor="let user of results">
+    <app-user-preview [user]="user"></app-user-preview>
+    <mat-divider></mat-divider>
+  </mat-list-item>
+</mat-list>
+<mat-paginator [hidden]="loading || results.length == 0"
+               [length]="usersCount"
+               [pageSize]="pageSize"
+               [pageSizeOptions]="pageSizeOptions"
+               (page)="updatePage($event)"
+               showFirstLastButtons>
+</mat-paginator>

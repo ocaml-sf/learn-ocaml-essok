@@ -1,0 +1,23 @@
+$border-radius: 4px;
+$font-size: 1rem;
+$font-weight: 400;
+$height: 34px;
+$text-align: center;
+
+%border {
+    border: 1px solid transparent;
+    border-radius: $border-radius;
+    box-shadow: border-box;
+    font-size: $font-size;
+    font-weight: $font-weight;
+    height: $height;
+    text-align: $text-align;
+}
+
+@mixin border-color($color) {
+    @extend %border;
+
+    color: $color;
+    background-color: transparent;
+    border-color: $color;
+}

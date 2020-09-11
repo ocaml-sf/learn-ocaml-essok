@@ -2,11 +2,13 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ServerComponent } from './server.component';
 import { ServerResolver } from './server-resolver.service';
+import { AuthGuard } from '../core';
 
 const routes: Routes = [
   {
     path: ':slug',
     component: ServerComponent,
+    canActivate: [AuthGuard],
     resolve: {
       server: ServerResolver
     }
@@ -17,4 +19,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ServerRoutingModule {}
+export class ServerRoutingModule { }

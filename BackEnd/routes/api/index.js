@@ -1,8 +1,9 @@
 var router = require('express').Router();
-
 router.use('/', require('./users'));
 router.use('/profiles', require('./profiles'));
 router.use('/servers', require('./server'));
+router.use('/uploads', require('./upload'));
+
 router.use(function(err, req, res, next){
   if(err.name === 'ValidationError'){
     return res.status(422).json({

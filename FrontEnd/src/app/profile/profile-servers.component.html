@@ -1,2 +1,19 @@
-<app-server-list [limit]="10" [config]="serversConfig">
-</app-server-list>
+<div class="container page">
+    <div class="row">
+
+        <div class="col-xs-12 col-md-10 offset-md-1">
+            <div class="servers-toggle">
+                <ul class="nav nav-pills outline-active">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+                            [routerLink]="['/profile', profile.username]">
+                            Active Servers
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <app-server-list [config]="serversConfig">
+            </app-server-list>
+        </div>
+    </div>
+</div>

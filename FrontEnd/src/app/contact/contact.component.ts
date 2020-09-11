@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-contact',
   templateUrl: './contact.component.html',
-  styleUrls: ['./contact.component.css']
+  styleUrls: ['./contact.component.scss']
 
 })
 export class ContactComponent implements OnInit {
@@ -19,8 +19,8 @@ export class ContactComponent implements OnInit {
   ngOnInit() {
     this.route.url.subscribe(data => {
       this.title = 'Contact';
-      this.header = 'This is the header of the contact page';
-      this.body = 'This is the body of the contact page';
+      this.header = 'Contact page';
+      this.body = '';
     });
   }
 

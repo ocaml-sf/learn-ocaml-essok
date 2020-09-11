@@ -5,6 +5,7 @@ import { ProfileSettingsComponent } from './profile-settings.component';
 import { AuthGuard } from '../core';
 import { SharedModule } from '../shared';
 import { ProfileSettingsRoutingModule } from './profile-settings-routing.module';
+import { ProfileSettingsResolver } from './profile-settings-resolver.service';
 
 @NgModule({
   imports: [
@@ -13,6 +14,9 @@ import { ProfileSettingsRoutingModule } from './profile-settings-routing.module'
   ],
   declarations: [
     ProfileSettingsComponent
+  ],
+  providers: [
+    ProfileSettingsResolver
   ]
 })
-export class ProfileSettingsModule {}
+export class ProfileSettingsModule { }

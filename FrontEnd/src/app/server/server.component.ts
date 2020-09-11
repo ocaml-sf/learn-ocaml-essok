@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ModalService } from '../modal';
 
 import {
   Server,
@@ -19,41 +20,70 @@ export class ServerComponent implements OnInit {
   canModify: boolean;
   isSubmitting = false;
   isDeleting = false;
+  isDisabled = false;
+  isDangerous = false;
 
   constructor(
     private route: ActivatedRoute,
     private serversService: ServersService,
     private router: Router,
     private userService: UserService,
+    private modalService: ModalService
   ) { }
 
   ngOnInit() {
-    // Retreive the prefetched server
+    this.loadServer();
+    this.loadUser();
+  }
+
+  loadServer() {
     this.route.data.subscribe(
       (data: { server: Server }) => {
         this.server = data.server;
-
-      }
-    );
-
-    // Load the current user's data
-    this.userService.currentUser.subscribe(
-      (userData: User) => {
-        this.currentUser = userData;
-
-        this.canModify = (this.currentUser.username === this.server.author.username);
       }
     );
   }
+
+  loadUser() {
+    this.userService.currentUser.subscribe(
+      (userData: User) => {
+        this.currentUser = userData;
+        this.canModify = (this.currentUser.username === this.server.author.username);
+      }
+    );
+    this.userService.isAdmin.subscribe(
+      (isAdmin) => {
+        this.canModify = (this.canModify || isAdmin);
+      }
+    );
+
+  }
+
   deleteServer() {
     this.isDeleting = true;
-
+    this.modalService.open('pleaseWait2');
     this.serversService.destroy(this.server.slug)
       .subscribe(
         success => {
+          this.modalService.close('pleaseWait2');
           this.router.navigateByUrl('/');
         }
       );
+  }
+
+  toggleServerStatus() {
+    //this.modalService.open('pleaseWait2');
+    this.isDisabled = true;
+    this.serversService.disable(this.server.slug)
+      .subscribe(
+        success => {
+          //this.modalService.close('pleaseWait2');
+          this.router.navigateByUrl('/');
+        }
+      );
+  }
+  toggleDangerous() {
+    this.isDangerous = !this.isDangerous;
   }
 
 }

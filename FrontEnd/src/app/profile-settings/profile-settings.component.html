@@ -1,76 +1,46 @@
 <div class="profileSettings-page">
   <div class="container page">
     <div class="row">
-      <div class="col-md-8 offset-md-2 col-xs-12">
+      <div class="col-md-10 offset-md-1 col-xs-12">
 
-        <h1 class="text-xs-center">Your Settings</h1>
+        <h1 class="text-xs-center">Settings</h1>
 
         <app-list-errors [errors]="errors"></app-list-errors>
-
         <form [formGroup]="profileSettingsForm" (ngSubmit)="submitForm()">
           <fieldset [disabled]="isSubmitting">
 
             <fieldset class="form-group">
-              <input class="form-control"
-                type="text"
-                placeholder="URL of profile picture"
-                formControlName="image" />
+              <input class="form-control" type="text" placeholder="URL of profile picture" formControlName="image" />
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="text"
-                placeholder="Username"
+              <input class="form-control form-control-lg" type="text" placeholder="Username"
                 formControlName="username" />
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                rows="5"
-                placeholder="Short description about you"
+              <textarea class="form-control form-control-lg" rows="5" placeholder="Short description about you"
                 formControlName="description">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                formControlName="place"
-                placeholder="Where do you work ?"
+              <textarea class="form-control form-control-lg" formControlName="place" placeholder="Where do you work ?"
                 rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <textarea class="form-control form-control-lg"
-                formControlName="goal"
-                placeholder="Why would you want an account ?"
-                rows="5">
+              <textarea class="form-control form-control-lg" formControlName="goal"
+                placeholder="Why would you want an account ?" rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="email"
-                placeholder="Email"
-                formControlName="email" />
+              <input class="form-control form-control-lg" type="email" placeholder="Email" formControlName="email" />
             </fieldset>
 
-            <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="password"
-                placeholder="New Password"
-                formControlName="password" />
-            </fieldset>
-
-            <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                type="password"
-                placeholder="New Password Verification"
-                formControlName="password_verification" />
-            </fieldset>
-
-            <button class="btn btn-lg btn-primary pull-xs-right"
-              type="submit">
+            <button class="btn btn-lg btn-primary pull-xs-right" type="submit">
               Update Settings
             </button>
 
@@ -79,12 +49,55 @@
 
         <!-- Line break for logout button -->
         <hr />
-
-        <button class="btn btn-outline-danger"
-          (click)="logout()">
-          Or click here to logout.
-        </button>
-
+        <div class="col-md-12 offset-md-0 col-xs-12">
+          <div class="warning" *ngIf="!userToModify.authorized && user.admin">
+            <h2>Warning ZONE</h2>
+            <p>ACTIVATE THE ACCOUNT:</p>
+            <p>If the form satisfies you, you can activate the account then the user would create and manage its server
+            </p>
+            <p>
+              Otherwise you can delete the account in the Dangerous ZONE and ask the user to make a more accurate form.
+            </p>
+            <button class="btn btn-outline-warning" (click)="activateAccount()">
+              Click here to activate the account
+            </button>
+            <br />
+            <br />
+          </div>
+          <div class="warning" *ngIf="user.admin">
+            <h2>DEBUG ZONE (ADMIN ONLY)</h2>
+            <p>AUTHORIZE THE ACCOUNT:</p>
+            <p>
+              If they were a bug and an account has been unauthorized and is blocked you can click here to solve the
+              problem.
+            </p>
+            <button class="btn btn-outline-warning" (click)="authorizeAccount()">
+              Click here to make the account great again !
+            </button>
+            <br />
+            <br />
+          </div>
+          <hr />
+          <div class="danger" *ngIf="userToModify.authorized || user.admin">
+            <h2>Dangerous ZONE</h2>
+            <p>RESET PASSWORD :</p>
+            <button class="btn btn-outline-danger" routerLink="/reset-password" routerLinkActive="active">
+              Click here to reset your password
+            </button>
+            <br />
+            <br />
+            <p>DISABLE ACCOUNT :</p>
+            <button class="btn btn-outline-danger" routerLink="/disable-account" routerLinkActive="active">
+              Click here to disable your account
+            </button>
+            <br />
+            <br />
+            <p>DELETE ACCOUNT :</p>
+            <button class="btn btn-outline-danger" routerLink="/delete-account" routerLinkActive="active">
+              Click here to delete your account
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

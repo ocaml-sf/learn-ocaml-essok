@@ -18,4 +18,4 @@ import { AuthRoutingModule } from './auth-routing.module';
     NoAuthGuard
   ]
 })
-export class AuthModule {}
+export class AuthModule { }
