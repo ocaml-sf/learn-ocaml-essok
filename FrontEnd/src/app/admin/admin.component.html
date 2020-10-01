@@ -1,11 +1,9 @@
 <div class="banner" *appShowAdmin="false">
-  <div class="container">
-    <h1 class="logo-font">Learn OCaml Essok</h1>
-    <i>SHALL NOT PASS</i>
-  </div>
+  <h1 class="logo-font">Learn OCaml Essok</h1>
+  <i>SHALL NOT PASS</i>
 </div>
 
-<mat-card>
+<mat-card *appShowAdmin="true">
   <mat-card-title>God Board</mat-card-title>
   <mat-card-subtitle>"With great power comes a great responsibility"</mat-card-subtitle>
   <mat-card-content fxLayout="column" fxLayoutGap="1rem">
