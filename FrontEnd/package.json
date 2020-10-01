@@ -37,6 +37,7 @@
     "ionicons": "^4.6.3",
     "jquery": "^3.5.1",
     "marked": "^0.7.0",
+    "material-design-icons": "^3.0.1",
     "ng2-file-upload": "^1.4.0",
     "popper.js": "^1.15.0",
     "progress-bar": "^0.1.1",
