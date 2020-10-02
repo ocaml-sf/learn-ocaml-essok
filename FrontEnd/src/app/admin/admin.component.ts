@@ -29,6 +29,8 @@ export class AdminComponent implements OnInit {
     Object.assign(this.user, this.userService.getCurrentUser());
     this.isUser = true;
     this.isServer = false;
+    this.isActive = false;
+    this.isAuthorized = true;
     this.filterService.getActive(this.isActive);
     this.filterService.getAuthorized(this.isAuthorized);
 
@@ -44,17 +46,13 @@ export class AdminComponent implements OnInit {
     this.isUser = true;
   }
   getActived() {
-    if (this.isActive === undefined) {
-      this.isActive = true;
-    }
     this.isActive = !this.isActive;
+    this.isAuthorized = false;
     this.filterService.getActive(this.isActive);
   }
   getAuthorized() {
-    if (this.isAuthorized === undefined) {
-      this.isAuthorized = true;
-    }
     this.isAuthorized = !this.isAuthorized;
+    this.isActive = false;
     this.filterService.getAuthorized(this.isAuthorized);
   }
 }

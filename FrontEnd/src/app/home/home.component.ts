@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.authStatus();
+    this.isActive = false;
 
     if (this.isAuthenticated) {
       this.authTrue();
@@ -84,11 +85,7 @@ export class HomeComponent implements OnInit {
   }
 
   getActived() {
-    if (this.isActive === undefined) {
-      this.isActive = true;
-    }
     this.isActive = !this.isActive;
     this.filterService.getActive(this.isActive);
   }
 }
-

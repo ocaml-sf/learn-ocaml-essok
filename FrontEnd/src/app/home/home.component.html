@@ -1,51 +1,71 @@
-<div class="container">
-
-  <div class="row justify-content-center" *appShowAuthed="false">
-    <div class="col-8 banner">
-      <h1 class="logo-font">Learn OCaml Essok</h1>
-      <p>A place to manage your <i>Learn OCaml</i> instances.</p>
-    </div>
+<ng-container *appShowAuthed="false">
+  <div fxLayout="row" fxLayoutAlign="center">
+    <mat-card class="banner" fxFlex="50%">
+      <mat-card-title>
+        Learn OCaml Essok
+      </mat-card-title>
+      <mat-card-subtitle>
+        A place to manage your <i>Learn OCaml</i> instances.
+      </mat-card-subtitle>
+    </mat-card>
   </div>
 
-  <div class="row justify-content-center" *appShowAuthed="false">
-    <div class="col-8">
-      <!-- <h1 class="text-xs-center">{{ title }}</h1> -->
-      <h2 class="text-xs-center">{{ header }}</h2>
-      <h2> This site is currently in developpement please report
-        <a href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blanck"> here</a> any issues you encounter.
+  <div fxLayout="row" fxLayoutAlign="center">
+    <div fxFlex="80%">
+      <h2>{{ header }}</h2>
+      <h2>
+        This site is currently in developpement please report
+
+        <a href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blank">
+          here
+        </a>
+
+        any issues you encounter.
       </h2>
-      <!-- <p class="text-xs-center">{{ body }}</p> -->
     </div>
   </div>
 
-  <div class="row justify-content-center" *appShowAuthed="false">
-    <a class="col-8" href="https://ocaml-sf.org">
+  <div fxLayout="row" fxLayoutAlign="center">
+    <a href="https://ocaml-sf.org" fxFlex="50%">
       <img class="img-fluid" src="assets/banner.png">
     </a>
   </div>
+</ng-container>
 
-  <div class="row justify-content-center" *appShowAuthed="true">
-    <div class="col-12 bg-sand" *ngIf="!currentUser.authorized && !currentUser.admin">
-      <h1 class="text-xs-center">Information</h1>
-      <hr />
-      <h1 class="text-xs-center">Your account is pending verification... </h1>
-    </div>
+<ng-container *appShowAuthed="true">
+  <div fxLayout="row">
+    <ng-container *ngIf="!currentUser.authorized && !currentUser.admin;
+                         then pendingBlock else mainboardBlock">
+    </ng-container>
 
-    <div class="col-12 card bg-sand" *ngIf="currentUser.authorized || currentUser.admin">
-      <h1 class="text-xs-center">Mainboard</h1>
-      <hr />
-      <button class="btn btn-md btn-info" (click)="getActived()">
-        <i class="icon ion-md-settings"></i> Filter by Active : {{ isActive }}
-      </button>
-      <hr />
+    <ng-template #pendingBlock>
+      <mat-card fxFill>
+        <mat-card-header>
+          <mat-card-title>Information</mat-card-title>
+        </mat-card-header>
+        Your account is pending verification...
+      </mat-card>
+    </ng-template>
 
-      <div class="list-group">
+    <ng-template #mainboardBlock>
+      <mat-card fxFill>
+        <mat-card-header>
+          <mat-card-title>Mainboard</mat-card-title>
+        </mat-card-header>
+        <hr />
+        <mat-card-actions>
+          <mat-slide-toggle class="mat-button"
+                            color="info"
+                            [checked]="isActive"
+                            labelPosition='before' (change)="getActived()">
+            <mat-icon>settings</mat-icon>
+            Filter by Active :
+          </mat-slide-toggle>
+        </mat-card-actions>
+        <hr />
+        <hr />
         <app-server-list [limit]="5" [config]="listConfig"></app-server-list>
-      </div>
-    </div>
+      </mat-card>
+    </ng-template>
   </div>
-
-  <div class="container page" *appShowAuthed="true">
-
-  </div>
-</div>
+</ng-container>
