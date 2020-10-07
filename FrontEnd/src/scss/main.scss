@@ -18,8 +18,9 @@ $ionicons-font-path: "~ionicons/dist/fonts";
         'components/slide-toggle';
 
 @import 'pages/app',
+        'pages/contact',
         'pages/help',
-        'pages/contact';
+        'pages/server/server-meta';
 
 
 // TODO: migrate all contents of shame.scss

@@ -1,35 +1,29 @@
-<div class="container p-5">
-  <div class="row text-white bg-dark p-3 justify-content-center">
-    <h1 class="col-11">{{server.title}}</h1>
-    <app-server-meta [server]="server" class="col-11">
-      <div class="btn-group" role="group" aria-label="Server buttons" [hidden]="!canModify">
-        <button class="btn btn-sm btn-outline-secondary" *ngIf="!server.active && currentUser.active"
-          [routerLink]="['/server-settings', server.slug]">
-          <i class="ion-md-create"></i> Manage Server
-        </button>
-
-        <button class="btn btn-sm btn-outline-warning" *ngIf="currentUser.active" [ngClass]="{disabled: isDisabled}"
-          (click)="toggleServerStatus()">
-          <i class="ion-md-power"></i>
-          <span *ngIf="!server.active"> Enable Server</span>
-          <span *ngIf="server.active"> Disable Server</span>
-        </button>
-
-        <button class="btn btn-sm btn-outline-danger" *ngIf="!server.active && currentUser.active && currentUser.admin"
-          (click)="toggleDangerous()">
-          <i class="ion-md-warning"></i>
-          <span *ngIf="!isDangerous"> Show Dangerous options</span>
-          <span *ngIf="isDangerous"> Hide Dangerous options</span>
-        </button>
-
-        <button class="btn btn-sm btn-outline-danger"
-          *ngIf="!server.active && currentUser.active && currentUser.admin && isDangerous"
-          [ngClass]="{disabled: isDeleting}" (click)="deleteServer()">
-          <i class="ion-md-trash"></i> Delete Server
-        </button>
-
-      </div>
-    </app-server-meta>
-  </div>
-  <jw-modal id="pleaseWait2"></jw-modal>
+<div fxLayout="row" fxLayoutAlign="center">
+  <app-server-meta [server]="server" fxFlex="80%">
+    <mat-card-actions *ngIf="canModify && currentUser.active">
+      <button mat-stroked-button color="info"
+              [routerLink]="['/server-settings', server.slug]"
+              *ngIf="!server.active">
+        <mat-icon>create</mat-icon>
+        Manage Server
+      </button>
+      <button mat-stroked-button color="warn"
+              (click)="toggleServerStatus()">
+        <mat-icon>power_settings_new</mat-icon>
+        {{!server.active ? 'Enable Server' : 'Disable Server'}}
+      </button>
+      <button mat-stroked-button color="accent"
+              (click)="toggleDangerous()"
+              *ngIf="!server.active && currentUser.admin">
+        <mat-icon>warning</mat-icon>
+        Show Dangerous Actions
+      </button>
+      <button mat-stroked-button color="accent"
+              [disabled]="isDeleting" (click)="deleteServer()"
+              *ngIf="isDangerous">
+        <mat-icon>delete</mat-icon>
+        Delete Server
+      </button>
+    </mat-card-actions>
+  </app-server-meta>
 </div>

@@ -13,11 +13,11 @@
   <hr />
   <mat-card-actions>
     <button mat-stroked-button color="warn"
-            [ngClass]="{disabled: isUser}" (click)="getUser()">
+            [disabled]="isUser" (click)="getUser()">
       <i class="ion-person"></i> Manage by User
     </button>
     <button mat-stroked-button color="warn"
-            [ngClass]="{disabled: isServer}" (click)="getServer()">
+            [disabled]="isServer" (click)="getServer()">
       <i class="ion-settings"></i> Manage by Server
     </button>
     <mat-slide-toggle class="mat-button"

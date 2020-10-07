@@ -1,0 +1,11 @@
+.server-meta {
+    background-color: $color-grey;
+
+    > .mat-card-title-group {
+
+        .mat-card-title,
+        .mat-card-subtitle {
+            color: $color-white;
+        }
+    }
+}

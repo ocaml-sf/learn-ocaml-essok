@@ -1,16 +1,18 @@
-<div class="server-meta">
-  <a [routerLink]="['/profile', server.author.username]">
-    <img [src]="server.author.image" />
-  </a>
-
-  <div class="info">
-    <a class="author" [routerLink]="['/profile', server.author.username]">
-      {{ server.author.username }}
-    </a>
-    <span class="date">
-      {{ server.createdAt | date: 'longDate' }}
-    </span>
-  </div>
+<mat-card class="server-meta">
+  <mat-card-title-group>
+    <mat-card-title>
+      <h1>{{server.title}}</h1>
+      <a [routerLink]="['/profile', server.author.username]">
+        <img mat-card-lg-image [src]="server.author.image">
+      </a>
+    </mat-card-title>
+    <mat-card-subtitle>
+      <a [routerLink]="['/profile', server.author.username]">
+        {{server.author.username}}
+      </a>,
+      created: {{server.createdAt | date: 'longDate'}}
+    </mat-card-subtitle>
+  </mat-card-title-group>
 
   <ng-content></ng-content>
-</div>
+</mat-card>
