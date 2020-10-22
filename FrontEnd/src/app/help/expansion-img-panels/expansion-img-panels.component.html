@@ -1,0 +1,27 @@
+<!-- If only one image in list, don't need to use mat-accordion -->
+<ng-container *ngIf="imgPanels.length == 1">
+  <ng-container *ngTemplateOutlet="panelTemplate"></ng-container>
+</ng-container>
+
+<!-- If more than one image in list, use mat-accordion -->
+<mat-accordion multi *ngIf="imgPanels.length > 1">
+  <ng-container *ngTemplateOutlet="panelTemplate"></ng-container>
+</mat-accordion>
+
+<!-- Template reuse -->
+<ng-template #panelTemplate>
+  <mat-expansion-panel *ngFor="let imgPanel of imgPanels"
+                       (opened)="imgPanel.openState = true"
+                       (closed)="imgPanel.openState = false">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{imgPanel.openState ? 'Hide' : 'Show'}} image
+      </mat-panel-title>
+      <mat-panel-description>
+        {{imgPanel.description}}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <img src="{{imgPanel.src}}"
+         alt="The image did not manage to show">
+  </mat-expansion-panel>
+</ng-template>

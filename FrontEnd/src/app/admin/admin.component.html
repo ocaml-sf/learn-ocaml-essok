@@ -1,38 +1,40 @@
 <div class="banner" *appShowAdmin="false">
-  <div class="container">
-    <h1 class="logo-font">Learn OCaml Essok</h1>
-    <i>SHALL NOT PASS</i>
-  </div>
+  <h1 class="logo-font">Learn OCaml Essok</h1>
+  <i>SHALL NOT PASS</i>
 </div>
 
-<mat-card>
-  <mat-card-title>God Board</mat-card-title>
-  <mat-card-subtitle>"With great power comes a great responsibility"</mat-card-subtitle>
-  <mat-card-content fxLayout="column" fxLayoutGap="1rem">
-    <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="2rem">
-      <button fxFlex="25%" mat-stroked-button color="warn"
-              [ngClass]="{disabled: isUser}" (click)="getUser()">
-        <i class="ion-person"></i> Manage by User
-      </button>
-      <button fxFlex="25%" mat-stroked-button color="warn"
-              [ngClass]="{disabled: isServer}" (click)="getServer()">
-        <i class="ion-settings"></i> Manage by Server
-      </button>
-    </div>
-    <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="2rem">
-      <mat-slide-toggle fxFlex="25%" color="info"
-                        labelPosition='before' (change)="getActived()">
-        Filter by Active
-      </mat-slide-toggle>
-      <mat-slide-toggle fxFlex="25%" mat-stroked-button color="info"
-                        labelPosition='before' [disabled]="isServer"
-                        (change)="getAuthorized()">
-        Filter by Authorized
-      </mat-slide-toggle>
-    </div>
-    <hr fxFlexFill />
-    <hr fxFlexFill />
-    <router-outlet name="server" *ngIf="isServer"></router-outlet>
-    <router-outlet name="user" *ngIf="isUser"></router-outlet>
-  </mat-card-content>
+<mat-card *appShowAdmin="true">
+  <mat-card-header>
+    <mat-card-title>God Board</mat-card-title>
+    <mat-card-subtitle>
+      "With great power comes a great responsibility"
+    </mat-card-subtitle>
+  </mat-card-header>
+  <hr />
+  <mat-card-actions>
+    <button mat-stroked-button color="warn"
+            [disabled]="isUser" (click)="getUser()">
+      <i class="ion-person"></i> Manage by User
+    </button>
+    <button mat-stroked-button color="warn"
+            [disabled]="isServer" (click)="getServer()">
+      <i class="ion-settings"></i> Manage by Server
+    </button>
+    <mat-slide-toggle class="mat-button"
+                      color="info"
+                      [checked]="isActive"
+                      labelPosition='before' (change)="getActived()">
+      Filter by Active
+    </mat-slide-toggle>
+    <mat-slide-toggle class="mat-button"
+                      color="info"
+                      [checked]="isAuthorized" [disabled]="isServer"
+                      labelPosition='before' (change)="getAuthorized()">
+      Filter by Authorized
+    </mat-slide-toggle>
+  </mat-card-actions>
+  <hr />
+  <hr />
+  <router-outlet name="server" *ngIf="isServer"></router-outlet>
+  <router-outlet name="user" *ngIf="isUser"></router-outlet>
 </mat-card>

@@ -10,14 +10,19 @@
         @if($light-text) {
             color: $color-white;
         } @else {
-            color: $color-gray;
+            color: $color-black;
         }
         background-color: $color;
     }
+
 }
 
 @each $colorkey, $colorvalue in $palette {
     .mat-stroked-button.mat-#{$colorkey} {
         @include button-color($colorvalue...);
     }
+}
+
+.mat-button-wrapper > .mat-icon {
+    vertical-align: text-bottom;
 }
