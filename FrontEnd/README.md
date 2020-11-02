@@ -15,7 +15,7 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 - CRUD users (sign up & settings page, password change, disable & unactive mode, admin panel)
 - CRUD Servers (upload & download content, state of your server, teacher token retrieve)
 - GET and display paginated lists of servers and users
-- GDPR respectful, read it here(https://gdpr-info.eu/)
+- GDPR respectful, read it [here](https://gdpr-info.eu/)
 - Up to date - HELP & CONTACT pages
 
 `CRUD (create, read, update and delete)`
