@@ -1,10 +1,10 @@
 # ![Essok](FrontEnd/src/assets/essok-logo/logo_white.jpg)
 [![learn-ocaml-essok](https://img.shields.io/badge/docker-ocamlsf%2Flearn--ocaml-blue.svg)](https://hub.docker.com/r/ocamlsf/learnocaml-essok-dockerfile "Docker image of learn-ocaml-essok")
 
-SETUP AND DOCS
+Setup and docs
 -----
 
-* [To SETUP your server (FrontEnd & BackEnd) from scratch](SETUP.md) [**recommended**]
+* [To setup your server globally from scratch](SETUP.md) [**recommended**]
 * [FrontEnd documentation](FrontEnd/README.md)
 * [BackEnd documentation](BackEnd/README.md)
 * [LearnOCaml project](https://github.com/ocaml-sf/learn-ocaml)
@@ -26,7 +26,8 @@ code for the app, images, static files, course content and exercises
 are placed under the MIT license.
 
 The OCaml / ocaml.org / Essok logo is released under the very liberal UNLICENSE.
-See (https://github.com/ocaml/ocaml.org/blob/master/LICENSE.md).
+See it [here](https://github.com/ocaml/ocaml.org/blob/master/LICENSE.md).
+
 
 Contributions to this repository are placed under the BSD
 license. This means that we can merge them with the same license as
