@@ -4,7 +4,7 @@
 SETUP AND DOCS
 -----
 
-* [To setup your server (FrontEnd & BackEnd) from scratch](SETUP.md) [**recommended**]
+* [To SETUP your server (FrontEnd & BackEnd) from scratch](SETUP.md) [**recommended**]
 * [FrontEnd documentation](FrontEnd/README.md)
 * [BackEnd documentation](BackEnd/README.md)
 * [LearnOCaml project](https://github.com/ocaml-sf/learn-ocaml)
