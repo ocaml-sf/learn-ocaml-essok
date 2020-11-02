@@ -1,5 +1,3 @@
-# ![Essok FrontEnd](src/assets/essok-logo/logo_white.jpg)
-
 # FrontEnd
 
 # Getting started
