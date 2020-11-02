@@ -1,4 +1,7 @@
-# ![Essok](../FrontEnd/src/assets/essok-logo/logo_white.jpg)
+# ![Essok BackEnd](../FrontEnd/src/assets/essok-logo/logo_white.jpg)
+
+# BackEnd
+
 # Getting started
 
 To get the Node server running locally:
@@ -40,9 +43,8 @@ To get the Node server running locally:
 - `clients/` - This folder contains the clients for some external API such as swift.
 - `configs/` - This folder contains configuration for passport as well as a central location for configuration/environment variables.
 - `libs/` - This folder contains librairies used for our BackEnd.
-- `models/` - This folder contains our various Objets such as User or Server.
-- `routes/` - This folder contains the route definitions for our API.
 - `models/` - This folder contains the schema definitions for our Mongoose models.
+- `routes/` - This folder contains the route definitions for our API.
 
 ## Error Handling
 
