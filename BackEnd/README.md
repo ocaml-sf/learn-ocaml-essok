@@ -1,5 +1,3 @@
-# ![Essok BackEnd](../FrontEnd/src/assets/essok-logo/logo_white.jpg)
-
 # BackEnd
 
 # Getting started
