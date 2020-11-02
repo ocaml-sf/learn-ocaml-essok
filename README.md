@@ -1,5 +1,5 @@
 # ![Essok](FrontEnd/src/assets/essok-logo/logo_white.jpg)
-[![learn-ocaml-essok](https://img.shields.io/badge/docker-ocamlsf%2Flearn--ocaml-blue.svg)](https://hub.docker.com/r/ocamlsf/learnocaml-essok-dockerfile "Docker image of learn-ocaml-essok")
+[![learn-ocaml-essok](https://img.shields.io/badge/docker-ocamlsf%2Flearn--ocaml--essok-blue.svg)](https://hub.docker.com/r/ocamlsf/learnocaml-essok-dockerfile "Docker image of learn-ocaml-essok")
 
 Setup and docs
 -----
