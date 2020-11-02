@@ -15,8 +15,8 @@ Contacts
 - To contact the LearnOCaml team, it's [here](https://github.com/ocaml-sf/learn-ocaml#README)
 
 - To contact the LeanOCamlEssok team :
-  - We have an Essok dedicated public community server on Discord, you can join it by clicking [here](https://discord.gg/495GMdx3wa).
-  - You can follow the progress of Essok development, ask your questions, find your answers, chat with other members and submit your issues to the hotline, don't forget to follow the rules and to read the help guideline.
+  - [![Discord](https://img.shields.io/badge/Discord-Essok-7289da.svg)](https://discord.gg/495GMdx3wa "Click here to join Essok server on discord !")
+  - We have an Essok dedicated public community server on Discord. You can follow the progress of Essok development, ask your questions, find your answers, chat with other members and submit your issues to the hotline, don't forget to follow the rules and to read the help guideline.
 
 License and copyright
 ---------------------
