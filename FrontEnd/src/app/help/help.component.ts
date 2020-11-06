@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
 
-import { IMGPANELS } from './imgPanel';
+import { IMGPANELS } from './imgPanelHelp';
 
 @Component({
   selector: 'app-help',

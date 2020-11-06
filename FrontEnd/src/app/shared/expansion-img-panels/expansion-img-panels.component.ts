@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ImgPanel } from '../imgPanel';
+import { ImgPanel } from './imgPanel';
 
 @Component({
   selector: 'app-expansion-img-panels',

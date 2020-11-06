@@ -1,11 +1,11 @@
-mat-expansion-panel img {
+.mat-expansion-panel img {
     width: 100%;
 }
 
-#table_contents > mat-expansion-panel {
+#table_contents > .mat-expansion-panel {
     background-color: $color-sand;
 }
 
-#manage_files #subtable_contents > mat-expansion-panel {
+#manage_files #subtable_contents > .mat-expansion-panel {
         background-color: $color-desert-sand;
 }
