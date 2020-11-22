@@ -18,7 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule } from '@angular/material/stepper';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -58,8 +58,8 @@ import { ShowAdminDirective } from './show-admin.directive';
     MatRadioModule,
     MatSlideToggleModule,
     MatStepperModule,
+    MatTooltipModule,
     ReactiveFormsModule,
-    ScrollingModule,
   ],
   declarations: [
     ShowAuthedDirective,
@@ -93,10 +93,10 @@ import { ShowAdminDirective } from './show-admin.directive';
     MatProgressSpinnerModule,
     MatRadioModule,
     MatSlideToggleModule,
+    MatTooltipModule,
     ReactiveFormsModule,
     RouterModule,
     ExpansionImgPanelsComponent,
-    ScrollingModule,
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,

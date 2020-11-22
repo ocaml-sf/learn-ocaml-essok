@@ -1,25 +1,58 @@
-@mixin button-color($color, $light-text:false) {
-    @include border-color($color);
+$font-size: 1rem;
+$font-weight: 400;
+$height: 34px;
+$text-align: center;
 
+%button {
+    font-size: $font-size;
+    font-weight: $font-weight;
+    height: $height;
+    text-align: $text-align;
     transition: color 0.15s ease-in-out,
                 background-color 0.15s ease-in-out,
                 border-color 0.15s ease-in-out,
                 box-shadow 0.15s ease-in-out;
+}
 
-    &:hover {
-        @if($light-text) {
-            color: $color-white;
-        } @else {
-            color: $color-black;
-        }
+@mixin text-light-color($text-light) {
+    @if($text-light) {
+        color: $color-white;
+    } @else {
+        color: $color-black;
+    }
+}
+
+@mixin mat-stroked-button-color($color, $text-light:false) {
+    @extend %button;
+    @include border-color($color);
+
+    color: $color;
+    background-color: transparent;
+
+    &:hover:enabled {
+        @include text-light-color($text-light);
         background-color: $color;
     }
+}
 
+@mixin mat-flat-button-color($color, $text-light: false) {
+    @extend %button;
+    @include text-light-color($text-light);
+
+    background-color: $color;
+
+    &:hover:enabled {
+        background-color: $color-black;
+    }
 }
 
 @each $colorkey, $colorvalue in $palette {
     .mat-stroked-button.mat-#{$colorkey} {
-        @include button-color($colorvalue...);
+        @include mat-stroked-button-color($colorvalue...);
+    }
+
+    .mat-flat-button.mat-#{$colorkey} {
+        @include mat-flat-button-color($colorvalue...);
     }
 }
 
