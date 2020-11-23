@@ -1,17 +1,27 @@
 @import '~@angular/material/theming';
 @include mat-core();
 
+// OCaml Software Fundation colors
 $color-main-orange: #F67220; // Main Orange
 $color-oasis-blue: #3B55F2; // Oasis Blue
 $color-sand: #F6EBE3; // Sand
 $color-desert-sand: #EDC9AF; // Desert Sand
 $color-brown-sand: #C2B280; // Brown Sand
 $color-white : white;
-$color-light-green: mat-color($mat-green, 100);
-$color-light-red: mat-color($mat-red, 100);
-$color-light-grey: mat-color($mat-grey, 200);
-$color-grey: mat-color($mat-grey, 700);
+
+// Custom colors
 $color-black: mat-color($mat-grey, 900);
+$color-blue: mat-color($mat-blue, 200);
+$color-light-blue: mat-color($mat-light-blue, 200);
+$color-light-green: mat-color($mat-green, 100);
+$color-light-grey: mat-color($mat-grey, 200);
+$color-light-red: mat-color($mat-red, 100);
+$color-green: mat-color($mat-green, 300);
+$color-grey: mat-color($mat-grey, 700);
+$color-purple: mat-color($mat-deep-purple, A100);
+$color-orange: mat-color($mat-orange, 600);
+$color-discord: #7289DA;
+$color-github: #2B3137;
 
 $color-primary: mat-color($mat-blue, 500);
 $color-accent: mat-color($mat-red, 500);
