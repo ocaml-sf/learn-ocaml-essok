@@ -1,6 +1,6 @@
 {
   "name": "essok-node",
-  "version": "1.0.0",
+  "version": "1.5.3",
   "description": "essok on node",
   "main": "app.js",
   "scripts": {
@@ -17,8 +17,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@kubernetes/client-node": "^0.10.3",
-    "archiver": "^4.0.1",
+    "@kubernetes/client-node": "^0.12.2",
+    "archiver": "^4.0.2",
     "body-parser": "^1.19.0",
     "child_process": "^1.0.2",
     "cors": "2.8.5",
@@ -32,8 +32,8 @@
     "fs-extra": "^8.1.0",
     "fs-readdir-recursive": "^1.1.0",
     "gulp": "^4.0.2",
-    "gulp-cli": "^2.2.0",
-    "helmet": "^3.22.0",
+    "gulp-cli": "^2.3.0",
+    "helmet": "^3.23.3",
     "jsonwebtoken": "8.5.1",
     "method-override": "3.0.0",
     "methods": "1.1.2",
@@ -51,7 +51,7 @@
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "newman": "^4.6.1",
-    "nodemon": "^1.19.4"
+    "newman": "^5.2.0",
+    "nodemon": "^2.0.6"
   }
 }

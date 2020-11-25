@@ -3,4 +3,9 @@ router-outlet + * {
     margin-left: 5%;
     margin-right: 5%;
     margin-bottom: 2rem;
+    flex-grow: 1;
+
+    > *:not(:last-child) {
+        margin-bottom: 16px;
+    }
 }

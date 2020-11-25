@@ -199,7 +199,8 @@ function _createObjectService(slug) {
 
 function _createObjectRule(slug, username) {
     return {
-        host: username + '.' + slug + '.learnocaml.site', //.org
+        // TODO: remove hard coded URL
+        host: username + '.' + slug + '.learn-ocaml.org',
         http: {
             paths: [{
                 backend: {
@@ -429,7 +430,12 @@ var server_functions = {
     delete: _delete,
     readNamespacedPodLog: _readNamespacedPodLog,
     tryGetTeacherToken: _tryGetTeacherToken,
-    catchTeacherToken: _catchTeacherToken
+    catchTeacherToken: _catchTeacherToken,
+    /* Used to debug
+    createNamespacedIngress: _createNamespacedIngress,
+    deleteNamespacedIngress: _deleteNamespacedIngress,
+    createObjectRule: _createObjectRule,
+    */
 };
 
 module.exports = server_functions;

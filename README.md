@@ -1,144 +1,47 @@
-### Getting started
+# ![Essok](FrontEnd/src/assets/essok-logo/logo_white.jpg)
+[![learn-ocaml-essok](https://img.shields.io/badge/docker-ocamlsf%2Flearn--ocaml--essok-blue.svg)](https://hub.docker.com/r/ocamlsf/learnocaml-essok-dockerfile "Docker image of learn-ocaml-essok")
 
-## Installation from scratch
+Setup and docs
+-----
 
-## Install nodejs
+* [To setup your server globally from scratch](SETUP.md) [**recommended**]
+* [FrontEnd documentation](FrontEnd/README.md)
+* [BackEnd documentation](BackEnd/README.md)
+* [LearnOCaml project](https://github.com/ocaml-sf/learn-ocaml)
+ 
+Contacts
+--------
 
-Make sure you have [nodejs](https://nodejs.org/en/)
-You can download it from the offical website or with aptitude :
+- To contact the LearnOCaml team, it's [here](https://github.com/ocaml-sf/learn-ocaml#README)
 
-`sudo apt install nodejs`
+- To contact the LeanOCamlEssok team :
+  - [![Discord](https://img.shields.io/badge/Discord-Essok-7289da.svg)](https://discord.gg/495GMdx3wa "Click here to join Essok server on discord !")
+  - We have an Essok dedicated public community server on Discord. You can follow the progress of Essok development, ask your questions, find your answers, chat with other members and submit your issues to the hotline, don't forget to follow the rules and to read the help guideline.
 
-## Install npm
+License and copyright
+---------------------
 
-npm is distributed with Node.js- which means that when you download Node.js, you automatically get npm installed on your computer.
-Make sure you have [nodejs](https://nodejs.org/en/)
-You can download it from the offical website or with aptitude : 
+Unless explicitly written below or in the files themselves, the source
+code for the app, images, static files, course content and exercises
+are placed under the MIT license.
 
-`sudo apt install npm`
+The OCaml / ocaml.org / Essok logo is released under the very liberal UNLICENSE.
+See it [here](https://github.com/ocaml/ocaml.org/blob/master/LICENSE.md).
 
-## Install angular/cli
 
-upgrade to the latest version of npm :  
+Contributions to this repository are placed under the BSD
+license. This means that we can merge them with the same license as
+the rest of the codebase, while you keep all the rights on your code.
+And we will not have to bother you with any future license update.
+See (https://opensource.org/licenses/BSD-3-Clause).
 
-`sudo npm i npm@latest -g` /make sure you have the permission/
+Authors and Acknowledgements
+----------------------------
 
-then install angular/cli : 
+Learn-OCaml-Essok is a free software by the [OCaml Software Foundation](http://ocaml-sf.org).
 
-`sudo npm i @angular/cli -g`
-
-Make sure you have the [Angular CLI](https://github.com/angular/angular-cli#installation) installed globally.
-
-## Install mongodb
-
-Make sure you have [mongodb](https://www.mongodb.com/download-center/community)
-You can download it from the offical website or with aptitude : 
-
-`sudo apt install mongodb`
-
-Don't forget to start the service : 
-
-`sudo service mongodb start`
-
-## Install yarn
-
-We use [Yarn](https://yarnpkg.com) to manage the dependencies, so we strongly recommend you to use it. you can install it from [Here](https://yarnpkg.com/en/docs/install) or from here :
-
-`sudo apt install yarn`
-
-Then run 
-
-`yarn install` 
-
-to resolve all dependencies (might take a minute).
-
-## Install Kubectl 
-
-Kubectl is the (Linux ?) Kubernetes command line client ! So go [there](https://kubernetes.io/docs/tasks/tools/install-kubectl) and may the force be with you !
-After installing Kubectl we need to setup our config, so make this 
-
-`mkdir ~/.kube`
-
-Then put your kubernetes config file in this reposotory.
-Hopefully you can retrieve your config file from OVH go to your `project pannel` then search for your config setup in `Containers & Orchestration` section then `Managed Kubernetes Service` then click on your project name, then scroll down and click on `kubeconfig`. Wait the file creation and download the config file, rename it as "config" (no extension, just config) then past it inside the .kube repository in your HOME. Well done !
-
-Tips : your OVH project administrator and/or your Kubernetes expert will help you a lot if this step is too harsh for you !
-
-## Install ng
-
-make sure you have the lastest version of npm,
-then install ng : 
-
-`sudo npm i ng -g`
-
-## Install your dependencies
-
-Run 
-
-`npm install` 
-
-In your FrontEnd and in your BackEnd.
-
-Or
-
-Run 
-
-`yarn install`
-
-In your FrontEnd and in your BackEnd.
-
-## Update your file BackEnd/Client/os.js
-
-Rename it OS.js and fill the blank with your OVH config
-
-## Update your file BackEnd/app.js
-
-Verify the binding of all the settings with your env settings.
-
-For example : port of your mongodb docker/server.
-
-## Prepare your BackEnd
-
-Create two repositories at the root of your BackEnd : uploads and downloads
-
-`mkdir uploads && mkdir downloads`
-
-## Run FrontEnd
-
-Run 
-
-`ng serve`
-
-For a dev server.
-
-Run 
-
-`ng build --prod`
-
-For a prod server. The production files will be generated in dist/ folder.
-
-Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Run Backend
-
-Run
-
-`npm run dev`
-
-For a dev server.
-
-Run 
-
-`sudo npm install pm2 -g && npm run start`
-
-For a prod server
-
-## Optionnal steps : 
-
-## Install OpenStack Swift Client
-
-Install OpenStack Swift Client locally to manage your disk with the command line client.
-
-`sudo apt install swift` 
-
-Then follow the instructions and this helpful [guide](https://www.systutorials.com/docs/linux/man/1-swift/#lbAG)
+ * The main authors are Sébastien Lecleire and Astyax Nourel.
+ * It builds on the mother app by [RealWorld](https://github.com/gothinkster/realworld).
+ * Special thanks to Yann Régis Gianas for its irreplaceable support.
+ * Special thanks to Lina Mouméni for the beautiful Essok Logo.
+ 

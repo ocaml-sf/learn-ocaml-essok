@@ -1,21 +1,63 @@
-<mat-card>
-  <h1 class="text-xs-center">{{ title }}</h1>
-  <hr />
-  <!-- <p class="text-xs-center">{{ header }}</p> -->
-  <!-- <hr /> -->
-  <p class="text-xs-center">{{ body }}</p>
-  <h2 id="contacts">
-    If you need any help please contact :
+<div fxLayout="row">
+  <mat-card id="contacts" fxFill>
+    <mat-card-title>
+      <mat-icon>contacts</mat-icon>
+      {{ title }}
+    </mat-card-title>
+    <!-- <p class="text-xs-center">{{ header }}</p> -->
+    <!-- <hr /> -->
+    <p>
+      If you need any help, you can contact us by email, from Discord, or
+      from Github.
+    </p>
+    <p>
+      We will help you as soon as possible.
+    </p>
+  </mat-card>
+</div>
+<div fxLayout="row">
+  <mat-card id="contacts_mail" fxFill>
+    <mat-card-title>
+      <a href="mailto: support@essok.learn-ocaml.org">
+        <mat-icon>mail</mat-icon>
+      </a>
+      Email
+    </mat-card-title>
+    You can contact us at
+    <a href="mailto: support@essok.learn-ocaml.org">
+      support@essok.learn-ocaml.org
+    </a>
+  </mat-card>
+</div>
 
-    <br />
-    <i> sebastien.lecleire@etu.univ-paris-diderot.fr</i>
-    <br />
-    <i>astyax.nourel@etu.univ-paris-diderot.fr</i>
-    <br />
-    <i>yrg@irif.fr</i>
-    <br />
+<div fxLayout="row">
+  <mat-card id="contacts_discord" fxFill>
+    <mat-card-title>
+      <a href="https://discord.gg/495GMdx3wa" target="_blank">
+        <img src="assets/social/discord_logo.svg" width="100px">
+      </a>
+    </mat-card-title>
+    We have a Discord community, you can join us at
+    https://discord.gg/495GMdx3wa
+    <a id="discord_link" href="https://discord.gg/495GMdx3wa" target="_blank">
+      <mat-icon>link</mat-icon>
+    </a>
+  </mat-card>
+</div>
 
-    We will help you as soon as possible.
-  </h2>
-  <hr />
-</mat-card>
+<div fxLayout="row">
+  <mat-card id="contacts_github" fxFill>
+    <mat-card-title>
+      <a href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blank">
+        <img src="assets/social/github_mark.png" width="30px">
+        <img src="assets/social/github_logo.png" width="70px">
+      </a>
+    </mat-card-title>
+    Our github repository is accessible at
+    https://github.com/ocaml-sf/learn-ocaml-essok
+    <a id="github_link"
+       href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blank">
+      <mat-icon>link</mat-icon>
+    </a>
+  </mat-card>
+</div>

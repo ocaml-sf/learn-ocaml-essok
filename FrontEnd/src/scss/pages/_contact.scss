@@ -1,3 +1,38 @@
-#contacts > i {
-    color: $color-oasis-blue;
+#contacts {
+
+}
+
+#contacts_mail {
+    background-color: $color-light-blue;
+
+    > .mat-card-title > a {
+        color: inherit;
+        > .mat-icon {
+            vertical-align: middle;
+        }
+    }
+}
+
+#contacts_discord {
+    background-color: $color-discord;
+    color: $color-white;
+
+    > #discord_link {
+        vertical-align: top;
+        > .mat-icon {
+            color: $color-white;
+        }
+    }
+}
+
+#contacts_github {
+    background-color: $color-github;
+    color: $color-white;
+
+    > #github_link {
+        vertical-align: top;
+        > .mat-icon {
+            color: $color-white;
+        }
+    }
 }

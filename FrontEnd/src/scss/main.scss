@@ -2,7 +2,7 @@ $ionicons-font-path: "~ionicons/dist/fonts";
 
 /* You can add global styles to this file, and also import other style files */
 @import '~@angular/material/prebuilt-themes/indigo-pink';
-@import '~material-design-icons/iconfont/material-icons';
+@import '~material-design-icons/iconfont/material-icons.css';
 @import '~bootstrap/scss/bootstrap';
 @import 'fonts/fonts';
 @import '~ionicons/dist/scss/ionicons';
@@ -18,9 +18,11 @@ $ionicons-font-path: "~ionicons/dist/fonts";
         'components/slide-toggle';
 
 @import 'pages/app',
+        'pages/home',
         'pages/contact',
         'pages/help',
-        'pages/server/server-meta';
+        'pages/server-meta',
+        'pages/server-settings';
 
 
 // TODO: migrate all contents of shame.scss

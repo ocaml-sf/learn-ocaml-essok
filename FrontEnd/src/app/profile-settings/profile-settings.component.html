@@ -10,34 +10,41 @@
           <fieldset [disabled]="isSubmitting">
 
             <fieldset class="form-group">
+              Profil Picture URL
               <input class="form-control" type="text" placeholder="URL of profile picture" formControlName="image" />
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg" type="text" placeholder="Username"
+              Username
+              <input class="form-control form-control-lg" type="text" placeholder="Type Your username"
                 formControlName="username" />
             </fieldset>
 
             <fieldset class="form-group">
+              Description
               <textarea class="form-control form-control-lg" rows="5" placeholder="Short description about you"
                 formControlName="description">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
+              Workplace
               <textarea class="form-control form-control-lg" formControlName="place" placeholder="Where do you work ?"
                 rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
+              Goal
               <textarea class="form-control form-control-lg" formControlName="goal"
-                placeholder="Why would you want an account ?" rows="5">
+                        placeholder="Why would you want an account ?" rows="5">
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <input class="form-control form-control-lg" type="email" placeholder="Email" formControlName="email" />
+              Email
+              <input class="form-control form-control-lg" type="email" formControlName="email"
+                     placeholder="Type your email" />
             </fieldset>
 
             <button class="btn btn-lg btn-primary pull-xs-right" type="submit">

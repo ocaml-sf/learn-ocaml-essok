@@ -1,34 +1,49 @@
 <ng-container *appShowAuthed="false">
   <div fxLayout="row" fxLayoutAlign="center">
-    <mat-card class="banner" fxFlex="50%">
+    <mat-card id="welcome_title" fxFlex="60%">
       <mat-card-title>
         Learn OCaml Essok
       </mat-card-title>
       <mat-card-subtitle>
-        A place to manage your <i>Learn OCaml</i> instances.
+        Welcome to a place where you can create and manage your
+        Learn-OCaml instances.
       </mat-card-subtitle>
     </mat-card>
   </div>
 
   <div fxLayout="row" fxLayoutAlign="center">
-    <div fxFlex="80%">
-      <h2>{{ header }}</h2>
-      <h2>
-        This site is currently in developpement please report
-
-        <a href="https://github.com/ocaml-sf/learn-ocaml-essok" target="_blank">
+    <mat-card id="welcome_description" fxFlex="80%">
+      <mat-card-title>
+        What is a Learn-OCaml instance ?
+      </mat-card-title>
+      <p>
+        Learn-OCaml is a platform for learning the OCaml language,
+        featuring a Web toplevel, an exercise environment, and a
+        directory of lessons and tutorials. You can check more details
+        <a href="http://ocaml-sf.org/learn-ocaml">
           here
         </a>
-
-        any issues you encounter.
-      </h2>
-    </div>
+      </p>
+    </mat-card>
   </div>
 
   <div fxLayout="row" fxLayoutAlign="center">
-    <a href="https://ocaml-sf.org" fxFlex="50%">
-      <img class="img-fluid" src="assets/banner.png">
-    </a>
+    <mat-card id="welcome_contact" fxFlex="60%">
+      <mat-card-title>
+        Contact us
+      </mat-card-title>
+      <p>
+        If you are interested and want to contact us, you can find
+        more informations
+        <a routerLink="/contact">
+          here
+        </a>
+      </p>
+    </mat-card>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="center">
+    <img fxFlex="50%" src="assets/essok-logo/logo_1024.jpg">
   </div>
 </ng-container>
 

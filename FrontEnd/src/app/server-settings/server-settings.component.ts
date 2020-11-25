@@ -9,13 +9,20 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 import { ModalService } from '../modal';
 import { environment } from '../../environments/environment';
 import { ConfirmDialogService } from '../confirm';
+import { IMGPANELS } from './imgPanelServerSettings';
+
 const URL = environment.api_url + '/uploads/check';
 const URL_full = environment.api_url + '/uploads/full';
+
+interface Group {
+  id : string;
+  title: string;
+  exercises: string[];
+}
 
 @Component({
   selector: 'app-server-settings-page',
   templateUrl: './server-settings.component.html',
-  styleUrls: ['./server-settings.component.scss']
 })
 export class ServerSettingsComponent implements OnInit {
   server: Server = {} as Server;
@@ -28,19 +35,23 @@ export class ServerSettingsComponent implements OnInit {
   uploader_full: FileUploader;
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
-  isDeleting = false;
-  isDisabled = true;
-  isChecked = false;
-  isAssuming = false;
-  isSending = false;
-  exercises: any[];
-  idIndex = 1;
-  exercisesList = [];
-  trashesList = [];
-  exercisesDroplist = [];
-  trashesDroplist = [];
-  groupsList = [];
+  isDeleting : boolean = false;
+  isDisabled : boolean = true;
+  isConfirmingDelete : boolean = false;
+  isAssumingDelete : boolean = false;
+  isSending : boolean = false;
+  exercises : any[];
+  idIndex : number = 1;
+  exercisesList : string[] = [];
+  trashList : string[] = [];
+  exercisesDropList : string[] = [];
+  trashDropList : string[] = [];
+  groupsList : Group[] = [];
   useless: ExercisesList = {} as ExercisesList;
+  IMGPANELS = IMGPANELS;
+  uploadHeaders : string[] = ['name', 'size', 'status'];
+  dangerousZonePanelState : boolean = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -77,15 +88,9 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   updateExercisesDropList() {
-    this.exercisesDroplist = ['exercises-list', 'create-group',
-      ...this.groupsList.map(group => group.id)];
-    console.log(this.exercisesDroplist);
-  }
-
-  updateTrashesDropList() {
-    this.trashesDroplist = ['trashes-list', 'create-group',
-      ...this.groupsList.map(group => group.id)];
-    console.log(this.trashesDroplist);
+    this.exercisesDropList = ['trash-list', 'exercises-list', 'create-group-list',
+                              ...this.groupsList.map(group => group.id)];
+    console.log(this.exercisesDropList);
   }
 
   generateGroupID() {
@@ -120,9 +125,8 @@ export class ServerSettingsComponent implements OnInit {
           this.groupsList = this.useless.group.map(
             group => { return { ...group, id: this.generateGroupID() }; });
           this.updateExercisesDropList()
-          this.updateTrashesDropList()
           this.exercisesList = this.useless.name;
-          this.trashesList = [];
+          this.trashList = [];
           this.errors = {};
         },
         err => {
@@ -137,7 +141,7 @@ export class ServerSettingsComponent implements OnInit {
       console.log('FileUpload:uploaded:', item, status, response);
       this.useless = JSON.parse(response);
       this.exercisesList = this.useless.name;
-      this.trashesList = [];
+      this.trashList = [];
       this.loadGroups();
       // move to the next slide
     };
@@ -185,7 +189,7 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   deleteServer() {
-    if (this.isChecked && this.isAssuming) {
+    if (this.isConfirmingDelete && this.isAssumingDelete) {
       this.isDeleting = true;
       this.modalService.open('pleaseWait2');
       this.serversService.destroy(this.server.slug)
@@ -209,14 +213,6 @@ export class ServerSettingsComponent implements OnInit {
           this.router.navigateByUrl('/');
         }
       );
-  }
-
-  assumeDelete() {
-    this.isAssuming = !this.isAssuming;
-  }
-
-  understandDelete() {
-    this.isChecked = !this.isChecked;
   }
 
   send() {
@@ -273,22 +269,20 @@ export class ServerSettingsComponent implements OnInit {
 
     this.groupsList.push(newGroup);
     this.updateExercisesDropList();
-    this.updateTrashesDropList();
     transferArrayItem(event.previousContainer.data,
       newGroup.exercises,
       event.previousIndex,
       0);
+    this.groupsList = [...this.groupsList];
     this.deleteGroupCheck(previousContainer.id, previousContainer.data);
   }
 
-  deleteGroupCheck(id, data) {
-    if ((id !== 'exercises-list') && (id !== 'trashes-list') && (data.length === 0)) {
+  deleteGroupCheck(id : string, data) {
+    if ((id !== 'exercises-list') && (id !== 'trash-list') && (data.length === 0)) {
       this.groupsList = this.groupsList.filter(group => group.id !== id);
-      this.updateTrashesDropList();
       this.updateExercisesDropList();
       console.log(this.groupsList);
-      console.log(this.exercisesDroplist);
-      console.log(this.trashesDroplist);
+      console.log(this.exercisesDropList);
     }
   }
   // how it works
@@ -302,8 +296,8 @@ export class ServerSettingsComponent implements OnInit {
 
   clean() {
     let that = this;
-    this.confirmDialogService.confirmThis("Are you sure you want to delete all the Exercises in the Trashes list ?", function () {
-      that.serversService.deleteExercises(that.server.slug, that.trashesList).subscribe(
+    this.confirmDialogService.confirmThis("Are you sure you want to delete all the Exercises in the Trash list ?", function () {
+      that.serversService.deleteExercises(that.server.slug, that.trashList).subscribe(
         data => {
           that.loadGroups();
         },

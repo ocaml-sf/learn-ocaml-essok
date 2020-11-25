@@ -16,7 +16,7 @@ export class ContactComponent implements OnInit {
 
   ngOnInit() {
     this.route.url.subscribe(data => {
-      this.title = 'Contact';
+      this.title = 'Contacts';
       this.header = 'Contact page';
       this.body = '';
     });

@@ -1,88 +1,109 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
 
-import { ServerListComponent, ServerMetaComponent, ServerPreviewComponent } from './server-helpers';
-import { ListErrorsComponent } from './list-errors.component';
-import { ShowAuthedDirective } from './show-authed.directive';
-import { ShowAdminDirective } from './show-admin.directive';
-import { UserListComponent, UserPreviewComponent } from './user-helpers';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { } from '@angular/platform-browser/animations';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
+
+import { ExpansionImgPanelsComponent }
+from './expansion-img-panels/expansion-img-panels.component';
+import { ListErrorsComponent } from './list-errors.component';
+import {
+  ServerListComponent,
+  ServerMetaComponent,
+  ServerPreviewComponent
+} from './server-helpers';
+import { UserListComponent, UserPreviewComponent } from './user-helpers';
+import { ShowAuthedDirective } from './show-authed.directive';
+import { ShowAdminDirective } from './show-admin.directive';
 
 @NgModule({
   imports: [
     CommonModule,
+    FlexLayoutModule,
     FormsModule,
-    ReactiveFormsModule,
     HttpClientModule,
     RouterModule,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
+    MatChipsModule,
     MatDialogModule,
     MatExpansionModule,
     MatIconModule,
+    MatInputModule,
     MatListModule,
-    FlexLayoutModule,
     MatPaginatorModule,
     MatProgressBarModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
+    MatProgressSpinnerModule,
     MatRadioModule,
-    MatProgressSpinnerModule
+    MatSlideToggleModule,
+    MatStepperModule,
+    MatTooltipModule,
+    ReactiveFormsModule,
   ],
   declarations: [
+    ShowAuthedDirective,
+    ExpansionImgPanelsComponent,
+    ListErrorsComponent,
     ServerListComponent,
     ServerMetaComponent,
     ServerPreviewComponent,
     UserListComponent,
     UserPreviewComponent,
-    ListErrorsComponent,
-    ShowAuthedDirective,
-    ShowAdminDirective
-
+    ShowAdminDirective,
   ],
   exports: [
-    ServerListComponent,
-    ServerMetaComponent,
-    ServerPreviewComponent,
-    UserListComponent,
-    UserPreviewComponent,
     CommonModule,
+    FlexLayoutModule,
     FormsModule,
-    ReactiveFormsModule,
     HttpClientModule,
     ListErrorsComponent,
-    RouterModule,
-    ShowAuthedDirective,
-    ShowAdminDirective,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
+    MatChipsModule,
     MatDialogModule,
     MatExpansionModule,
     MatIconModule,
+    MatInputModule,
     MatListModule,
-    FlexLayoutModule,
+    MatStepperModule,
     MatPaginatorModule,
     MatProgressBarModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
+    MatProgressSpinnerModule,
     MatRadioModule,
-    MatProgressSpinnerModule
+    MatSlideToggleModule,
+    MatTooltipModule,
+    ReactiveFormsModule,
+    RouterModule,
+    ExpansionImgPanelsComponent,
+    ServerListComponent,
+    ServerMetaComponent,
+    ServerPreviewComponent,
+    UserListComponent,
+    UserPreviewComponent,
+    ShowAuthedDirective,
+    ShowAdminDirective,
   ]
 })
 export class SharedModule { }

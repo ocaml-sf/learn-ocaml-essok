@@ -1,30 +1,21 @@
-export interface ImgPanel {
-    description? : string;
-    src : string;
-    openStage? : boolean;
-}
-
-const IMGSDIRPATH : string = '../../assets/images/';
-
-function addImgDirPath(imgPanel : ImgPanel) {
-  return {...imgPanel, src: IMGSDIRPATH + imgPanel.src};
-}
+import { ImgPanel } from '../shared/expansion-img-panels/imgPanel';
+import { addImgsDirPath } from '../shared/expansion-img-panels/imgPanelAssets';
 
 const CREATESERVER : ImgPanel[] =
-    [
-      {
-        description: 'Example of server creation',
-        src : 'create_server.png',
-      },
-      {
-        description: 'Example of server creation error',
-        src: 'create_server_bug.png',
-      },
-      {
-        description: 'Example of correct server creation',
-        src: 'create_server_correct.png'
-      },
-    ];
+  [
+    {
+      description: 'Example of server creation',
+      src : 'create_server.png',
+    },
+    {
+      description: 'Example of server creation error',
+      src: 'create_server_bug.png',
+    },
+    {
+      description: 'Example of correct server creation',
+      src: 'create_server_correct.png'
+    },
+  ];
 
 const MANAGESERVER : ImgPanel[] =
   [
@@ -45,7 +36,7 @@ const UPLOADFILES : ImgPanel[] =
     { src: 'upload_file_local.png' },
     { src: 'exercises_yes.png' },
     { src: 'exercises_no.png' },
-    { src: 'upload_files_local_example.png' },
+    { src: 'upload_file_local_example.png' },
     { src: 'upload_file_local_example_done.png' },
   ];
 
@@ -105,7 +96,7 @@ const GROUPLIST : ImgPanel[] =
     },
     {
       description: 'Example of group rename',
-      src: 'send_fie_group_rename_select.png',
+      src: 'send_file_group_rename_select.png',
     },
     {
       description: 'Example of group renamed',
@@ -173,7 +164,7 @@ const ACCESSSERVER : ImgPanel[] =
     },
     {
       description: 'Example of access server paste',
-      src: 'access_server_paster.png',
+      src: 'access_server_paste.png',
     },
     {
       description: 'Example of access server done',
@@ -233,21 +224,27 @@ const DELETEACCOUNT : ImgPanel[] =
     },
   ];
 
-export const IMGPANELS =
-  {
-    CREATESERVER: CREATESERVER.map(addImgDirPath),
-    MANAGESERVER: MANAGESERVER.map(addImgDirPath),
-    UPLOADFILES: UPLOADFILES.map(addImgDirPath),
-    MANAGEFILES: MANAGEFILES.map(addImgDirPath),
-    EXERCISESLIST: EXERCISESLIST.map(addImgDirPath),
-    TRASH: TRASH.map(addImgDirPath),
-    GROUPLIST: GROUPLIST.map(addImgDirPath),
-    TEACHERTOKEN: TEACHERTOKEN.map(addImgDirPath),
-    ACCESSSERVER: ACCESSSERVER.map(addImgDirPath),
-    SHUTOFF: SHUTOFF.map(addImgDirPath),
-    DANGEROUS: DANGEROUS.map(addImgDirPath),
-    PASSWORD: PASSWORD.map(addImgDirPath),
-    DELETESERVER: DELETESERVER.map(addImgDirPath),
-    DISABLEACCOUNT: DISABLEACCOUNT.map(addImgDirPath),
-    DELETEACCOUNT: DELETEACCOUNT.map(addImgDirPath),
-  };
+let _IMGPANELS = {
+    CREATESERVER,
+    MANAGESERVER,
+    UPLOADFILES,
+    MANAGEFILES,
+    EXERCISESLIST,
+    TRASH,
+    GROUPLIST,
+    TEACHERTOKEN,
+    ACCESSSERVER,
+    SHUTOFF,
+    DANGEROUS,
+    PASSWORD,
+    DELETESERVER,
+    DISABLEACCOUNT,
+    DELETEACCOUNT,
+};
+
+Object.keys(_IMGPANELS)
+  .map((key: string) => {
+    _IMGPANELS[key] = addImgsDirPath(_IMGPANELS[key]);
+  });
+
+export const IMGPANELS = _IMGPANELS;

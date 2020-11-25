@@ -1,5 +1,20 @@
+$font-size: 1rem;
+$font-weight: 400;
+$height: 34px;
+$text-align: center;
+
+%slide-toggle {
+    font-size: $font-size;
+    font-weight: $font-weight;
+    height: $height;
+    text-align: $text-align;
+}
+
 @mixin slide-toggle-color($color) {
+    @extend %slide-toggle;
     @include border-color($color);
+
+    color: $color;
 }
 
 @each $color-key, $color-value in $palette {
