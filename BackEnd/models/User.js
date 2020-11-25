@@ -166,7 +166,7 @@ UserSchema.methods.toProfileJSONFor = function() {
         active: this.active,
         authorized: this.authorized,
         processing: this.processing,
-        image: this.image || 'https://essok.learnocaml.site/assets/images/default_avatar.jpg',
+        image: this.image || 'https://essok.learn-ocaml.org/assets/images/default_avatar.jpg',
     };
 };
 
