@@ -336,7 +336,7 @@
     <mat-step label="Launch your instance">
       <p>
         {{
-        isDisabled ? 'Congratulation, the upload has been a success !' + ' ' +
+        !isDisabled ? 'Congratulation, the upload has been a success !' + ' ' +
         'Now you can launch your Learn-OCaml instance !'
         : isSending ? 'Your files are processing !'
         : 'Try to send some files first !'
