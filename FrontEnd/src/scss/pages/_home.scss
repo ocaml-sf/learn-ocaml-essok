@@ -1,11 +1,23 @@
-#welcome_title {
-    background-color: $color-blue;
-}
+#home_container {
+    min-height: calc(100vh - 200px); // 200px = header + footer
 
-#welcome_description {
-    background-color: $color-green;
-}
+    > div {
+        > #welcome_title {
+            background-color: $color-blue;
+        }
 
-#welcome_contact {
-    background-color: $color-orange;
+        > #welcome_description {
+            background-color: $color-green;
+        }
+
+        > #welcome_contact {
+            background-color: $color-orange;
+        }
+
+        > #essok_logo {
+            width: 100%;
+            display: block;
+            margin-bottom: auto;
+        }
+    }
 }
