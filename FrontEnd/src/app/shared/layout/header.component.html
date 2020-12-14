@@ -1,109 +1,103 @@
-<header class="mb-6">
-  <nav class="navbar navbar-expand-lg fixed-top">
-    <a class="navbar-brand" routerLink="/">
+<header>
+  <div fxLayout="row" fxLayoutGap="16px">
+    <a routerLink="/">
       <img src="assets/small_logo.svg">
     </a>
-
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-      aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-      <i class="ion-md-menu border rounded py-2 px-4"></i>
-    </button>
-
-    <!-- Show this for logged out users -->
-    <div id="navbarCollapse" class="collapse navbar-collapse">
-      <ul *appShowAuthed="false" class="navbar-nav">
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-primary" routerLink="/">
-            Home
+    <nav fxFlex="100" fxLayout="row" fxLayoutGap="16px"
+         fxLayoutAlign.lt-md="end">
+      <ng-template #buttonsList let-buttons="buttons">
+        <!-- Buttons List template for mobile -->
+        <button fxHide fxShow.lt-md
+                mat-button [matMenuTriggerFor]="routerMenu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu fxHide fxShow.lt-md
+                  #routerMenu="matMenu">
+          <button mat-menu-item
+                  *ngFor="let button of buttons"
+                  routerLink="{{button.routerLink}}"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact : button.options.exact }">
+            {{button.body}}
           </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-secondary" routerLink="/login" routerLinkActive="active">
-            Sign in
-          </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-secondary" routerLink="/register" routerLinkActive="active">
-            Sign up
-          </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-info" routerLink="/contact" routerLinkActive="active">
-            Contacts
-          </button>
-        </li>
-
-      </ul>
-
-      <!-- Show this for logged in users -->
-      <ul *appShowAuthed="true" class="nav navbar-nav pull-xs-right">
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-primary" routerLink="/" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }">
-            Home
-          </button>
-        </li>
-
-        <li class="nav-item" *ngIf="currentUser.active && currentUser.authorized || currentUser.admin">
-          <button type="button" class="btn btn-outline-secondary" routerLink="/editor" routerLinkActive="active">
-            <i class="ion-compose"></i>&nbsp;New Server
-          </button>
-        </li>
-
-        <li class="nav-item" *ngIf="currentUser.active && currentUser.authorized  || currentUser.admin">
-          <button type="button" class="btn btn-outline-secondary"
-            [routerLink]="['/profile-settings', currentUser.username]" routerLinkActive="active">
-            <i class="ion-gear-a"></i>&nbsp;Profile Settings
-          </button>
-        </li>
-
-        <li class="nav-item" *ngIf="!currentUser.active">
-          <button type="button" class="btn btn-outline-warning" routerLink="/disable-account" routerLinkActive="active">
-            <i class="ion-gear-a"></i>&nbsp;Activate your Account
-          </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-info" [routerLink]="['/profile', currentUser.username]"
-            routerLinkActive="active">
-            <!-- <img [src]="currentUser.image" *ngIf="currentUser.image" class="user-pic" /> -->
-            {{ currentUser.username }}
-          </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-info" routerLink="/contact" routerLinkActive="active">
-            Contacts
-          </button>
-        </li>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-info" routerLink="/help" routerLinkActive="active">
-            Help
-          </button>
-        </li>
-        <li class="nav-item" *appShowAdmin="true">
-          <button type="button" class="btn btn-outline-warning" routerLink="/admin" routerLinkActive="active">
-            Admin Panel
-          </button>
-
-        <li class="nav-item">
-          <button type="button" class="btn btn-outline-danger" (click)="logout()" routerLink="/"
-            routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <button *appShowAuthed="true"
+                  mat-menu-item
+                  routerLink="/"
+                  (click)="logout()">
             Logout
           </button>
-        </li>
+        </mat-menu>
 
-      </ul>
-    </div>
+        <!-- Buttons List template for desktop -->
+        <button fxShow fxHide.lt-md
+                mat-stroked-button
+                *ngFor="let button of buttons"
+                color="{{button.color}}"
+                routerLink="{{button.routerLink}}"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact : button.options.exact }">
+          {{button.body}}
+        </button>
+        <!-- TODO: find a way to put it as a routerButton -->
+        <button *appShowAuthed="true"
+                fxShow fxHide.lt-md
+                mat-stroked-button
+                color="accent"
+                routerLink="/"
+                (click)="logout()">
+          Logout
+        </button>
+      </ng-template>
 
+      <!-- Show this for logged out users -->
+      <ng-container *appShowAuthed="false">
+        <ng-container
+          *ngTemplateOutlet="buttonsList;
+                             context : { buttons : BUTTONS.ANONYMOUSUSERS }">
+        </ng-container>
+      </ng-container>
+
+      <!-- Show this for logged in users -->
+      <ng-container *appShowAuthed="true">
+        <!-- Show this for users that have disabled their account -->
+        <ng-container *ngIf="!currentUser.active">
+          <ng-container
+            *ngTemplateOutlet="buttonsList;
+                               context : { buttons : BUTTONS.DISABLEDUSERS }">
+          </ng-container>
+        </ng-container>
+
+        <!-- Show this for users where their account is pending verification -->
+        <ng-container *ngIf="currentUser.active &&
+                             !currentUser.authorized &&
+                             !currentUser.admin">
+          <ng-container
+            *ngTemplateOutlet="buttonsList;
+                               context : { buttons : BUTTONS.PENDINGUSERS }">
+          </ng-container>
+        </ng-container>
+
+        <!-- Show this for regular logged users -->
+        <ng-container *ngIf="currentUser.active &&
+                             currentUser.authorized &&
+                             !currentUser.admin">
+          <ng-container
+            *ngTemplateOutlet="buttonsList;
+                               context : { buttons : BUTTONS.REGULARUSERS }">
+          </ng-container>
+        </ng-container>
+
+        <!-- Show this for logged admins users -->
+        <ng-container *ngIf="currentUser.admin">
+          <ng-container
+            *ngTemplateOutlet="buttonsList;
+                               context : { buttons : BUTTONS.ADMINUSERS }">
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </nav>
     <a class="navbar-brand d-none d-lg-block" href="https://ocaml-sf.org">
       <img src="assets/small_logo.svg">
     </a>
-  </nav>
+  </div>
 </header>
