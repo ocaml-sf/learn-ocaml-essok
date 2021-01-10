@@ -31,6 +31,8 @@ Make sure you have the [Angular CLI](https://github.com/angular/angular-cli#inst
 
 ### Install mongodb
 
+**Be careful because the installation depends a lot on the OS you are on. Check [this page](https://docs.mongodb.com/manual/administration/install-community/) if the below content doesn't work and follow the instructions.**
+
 Make sure you have [mongodb](https://www.mongodb.com/download-center/community)
 You can download it from the offical website or with aptitude : 
 
@@ -42,7 +44,7 @@ Don't forget to start the service :
 
 ### Install yarn
 
-We use [Yarn](https://yarnpkg.com) to manage the dependencies, so we strongly recommend you to use it. you can install it from [Here](https://yarnpkg.com/en/docs/install) or from here :
+You can use [Yarn](https://yarnpkg.com) to manage your dependencies. You can install it from [Here](https://yarnpkg.com/en/docs/install) or from here :
 
 `sudo apt install yarn`
 
@@ -51,6 +53,8 @@ Then run
 `yarn install` 
 
 to resolve all dependencies (might take a minute).
+
+**Note that using Yarn may supplement that of npm in some cases.**
 
 ### Install Kubectl 
 
@@ -143,6 +147,8 @@ For a prod server
 
 Install OpenStack Swift Client locally to manage your disk with the command line client.
 
-`sudo apt install swift` 
+Be sure to have pip (from Python3) installed on your system, then :
+
+`pip install --user python-swiftclient python-keystoneclient`
 
 Then follow the instructions and this helpful [guide](https://www.systutorials.com/docs/linux/man/1-swift/#lbAG)
