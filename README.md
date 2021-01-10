@@ -8,6 +8,7 @@ Setup and docs
 * [FrontEnd documentation](FrontEnd/README.md)
 * [BackEnd documentation](BackEnd/README.md)
 * [LearnOCaml project](https://github.com/ocaml-sf/learn-ocaml)
+* [The live website](https://essok.learn-ocaml.org)
  
 Contacts
 --------
