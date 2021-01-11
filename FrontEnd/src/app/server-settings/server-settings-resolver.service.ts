@@ -22,7 +22,7 @@ export class ServerSettingsResolver implements Resolve<Server> {
       .pipe(
         map(
           server => {
-            if (this.userService.getCurrentUser().username === server.author.username || this.userService.getCurrentUser().admin) {
+            if (this.userService.getCurrentUser().username === server.author.username) {
               return server;
             } else {
               this.router.navigateByUrl('/');
