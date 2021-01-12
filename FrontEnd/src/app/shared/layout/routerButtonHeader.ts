@@ -47,7 +47,7 @@ const PROFILE = function (username : string) : RouterButton {
     return new RouterButtonImpl({
         body: username,
         color: "secondary",
-        routerLink: `/${username}`,
+        routerLink: `/profile/${username}`,
     });
 }
 
