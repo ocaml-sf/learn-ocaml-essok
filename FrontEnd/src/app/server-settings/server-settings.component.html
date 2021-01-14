@@ -17,19 +17,20 @@
               <mat-label>URL of server repository</mat-label>
               <input matInput type="url" formControlName="url">
             </mat-form-field>
-            <mat-checkbox name="gitJSON" [(ngModel)]="githubJSONUsed">
-              Check if you want to override the current index.json by the github index.json, if present.
-              <b>Recommended for newly created servers.</b>
-            </mat-checkbox>
-            <mat-checkbox name="gitLoading" [(ngModel)]="githubAutoLoading">
-              Check if you want to launch directly your server after the upload. <b>Recommended if you checked the above
-                box.</b>
-            </mat-checkbox>
-            <br />
             <button mat-flat-button color="success" type="submit" [disabled]="isSubmitting">
               Charge URL's exercises
             </button>
           </form>
+          <br />
+          <mat-checkbox name="gitJSON" [(ngModel)]="githubJSONUsed">
+            Check if you want to override the current index.json by the github index.json, if present.
+            <b>Recommended for newly created servers.</b>
+          </mat-checkbox>
+          <mat-checkbox name="gitLoading" [(ngModel)]="githubAutoLoading">
+            Check if you want to launch directly your server after the upload. <b>Recommended if you checked the above
+              box.</b>
+          </mat-checkbox>
+          <br />
         </mat-expansion-panel>
         <mat-expansion-panel id="upload_exercises">
           <mat-expansion-panel-header>
