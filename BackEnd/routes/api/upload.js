@@ -6,12 +6,12 @@ const auth = require('../auth');
 const path = require('path');
 const api_code = require('../../configs/api_code');
 
-var dirPath = './uploads/';
+const dirPath = './uploads/';
 var destPath = '';
 
-var save_folder = 'save/';
-var archive_folder = 'archive/';
-var download_folder = 'download/';
+const save_folder = 'save/';
+const archive_folder = 'archive/';
+const download_folder = 'download/';
 const safe_folder = 'exercises/';
 const dirt_folder = 'sandbox/';
 
@@ -232,21 +232,30 @@ router.post('/full', auth.required, upload.single('file'), function (req, res, n
                             .catch(err => upload_errors.wrap_error('copyDir', api_code.error, err))
 
                             .then(() => upload_functions.createArchiveFromDirectory(repositoryDirPath, repositoryDir,
-                                archive_extension, repositoryNamePath))
-                            .then(() => upload_functions.fileExists(syncDirPath))
-                            .then(syncExists => (syncExists) ?
-                                upload_functions.createArchiveFromDirectory(syncDirPath, syncDir, archive_extension,
-                                    syncNamePath) : undefined)
+                                                                                    archive_extension, repositoryNamePath))
                             .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync', api_code.error, err))
-
-                            .then(() => upload_functions.sendToSwift(swiftDirPath, server.slug))
+                            .then(() => upload_functions.sendToSwift(path.resolve(swiftDirPath + repositoryArchive),
+                                                                     server.slug, repositoryArchive))
                             .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err))
-
+                            .then(() => upload_functions.fileExists(syncDirPath))
+                            .then(async syncExists => {
+                                console.log("syncExists");
+                                console.log(syncExists);
+                                if(syncExists) {
+                                    await upload_functions.createArchiveFromDirectory(syncDirPath, syncDir,
+                                                                                      archive_extension, syncNamePath)
+                                        .catch(err => upload_errors.wrap_error('createArchiveFromDirectory sync',
+                                                                               api_code.error, err))
+                                        .then(() => upload_functions.sendToSwift(path.resolve(swiftDirPath + syncArchive),
+                                                                                 server.slug, syncArchive))
+                                        .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err));
+                                }})
                             .then(() => res.sendStatus(api_code.ok))
                             .catch(err => upload_errors.unwrap_error(res, err));
                     } else {
                         console.error('Bad file Format : ' + req.file.mimetype + '\nExpected .zip');
-                        return res.status(api_code.error).json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
+                        return res.status(api_code.error)
+                            .json({ errors: { file: 'must be exercises.zip found ' + req.file.mimetype } });
                     }
                 }
             }).catch(next);
@@ -319,83 +328,54 @@ router.post('/send', auth.required, function (req, res, next) {
                 if (upload_errors.group_duplicate(tabOfName)) {
                     return res.status(api_code.error).send({ errors: { file: ": Error in groups names, duplicate name" } });
                 }
-                var test = false;
-                user.startProcessing().then(async () => {
-                    console.log('user.processing : ' + user.processing);
-                    upload_functions.checkFiles(dir + safe_folder).then((files) => {
-                        upload_functions.copyDir(dir + safe_folder, dir + dirt_folder).then((ok) => {
-                            upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder, tabOfName, files).then(async (tabOfName_bis) => {
-                                upload_functions.create_new_tabOfName(dir + save_folder, dir + dirt_folder, tabOfName_bis).then((new_tabOfName) => {
-                                    if (test) {
+                user.startProcessing()
+                    .then(() => console.log('user.processing : ' + user.processing))
+                    .then(() => upload_functions.checkFiles(dir + safe_folder))
+                    .catch(err => upload_errors.wrap_error('checkFiles', api_code.error, err))
+                    .then((files) =>
+                        upload_functions.copyDir(dir + safe_folder, dir + dirt_folder)
+                            .catch(err => upload_errors.wrap_error('copyDir', api_code.error, err))
+                            .then(() => upload_functions.delete_useless_files(req.body.useless, dir + dirt_folder,
+                                                                              tabOfName, files))
+                            .catch(err => upload_errors.wrap_error('delete_useless_files', api_code.error, err)))
+                    .then((tabOfName_bis) => upload_functions.create_new_tabOfName(dir + save_folder,
+                                                                                   dir + dirt_folder,
+                                                                                   tabOfName_bis))
+                    .catch(err => upload_errors.wrap_error('create_new_tabOfName', api_code.error, err))
+                    .then((new_tabOfName) => {
+                        let sourcePath = dir + dirt_folder;
+                        let destPath = repositoryDir + exercisesDir;
+                        let archivePath = sourcePath + archive_folder;
+                        let repositoryPath = archivePath + repositoryName;
+                        upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
+                            .catch(err => upload_errors.wrap_error('create_indexJSON', api_code.error, err))
 
-                                        user.endProcessing().then(() => {
-                                            console.log('user.processing : ' + user.processing);
-                                            return res.send({
-                                                success: true,
-                                                message: 'ok'
-                                            });
-                                        });
+                            .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
+                            .catch(err => upload_errors.wrap_error('createDir', api_code.error, err))
 
-                                    } else {
-                                        let sourcePath = dir + dirt_folder;
-                                        let destPath = repositoryDir + exercisesDir;
-                                        let archivePath = sourcePath + archive_folder;
-                                        let repositoryPath = archivePath + repositoryName;
-                                        upload_functions.create_indexJSON(dir + dirt_folder + 'index.json', new_tabOfName)
-                                            .catch(err => upload_errors.wrap_error('create_indexJSON', api_code.error, err))
+                            .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
+                                                                  sourcePath + indexJSON))
+                            .catch(err => upload_errors.wrap_error('copyFile index.json', api_code.error, err))
 
-                                            .then(() => upload_functions.createDir(dir + dirt_folder + archive_folder))
-                                            .catch(err => upload_errors.wrap_error('createDir', api_code.error, err))
+                            .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
+                                                                                    archive_extension,
+                                                                                    repositoryPath))
+                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', api_code.error, err))
 
-                                            .then(() => upload_functions.copyFile(dir + save_folder + indexJSON,
-                                                sourcePath + indexJSON))
-                                            .catch(err => upload_errors.wrap_error('copyFile index.json', api_code.error, err))
+                            .then(() => upload_functions.sendToSwift(path.resolve(archivePath + repositoryArchive),
+                                                                     server.slug, repositoryArchive))
+                            .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err))
 
-                                            .then(() => upload_functions.createArchiveFromDirectory(sourcePath, destPath,
-                                                archive_extension,
-                                                repositoryPath))
-                                            .catch(err => upload_errors.wrap_error('createArchiveFromDirectory', api_code.error, err))
+                            .then(() => upload_functions.removeDir(archivePath))
+                            .catch(err => upload_errors.wrap_error('archivePath', api_code.error, err))
 
-                                            .then(() => upload_functions.sendToSwift(archivePath, server.slug))
-                                            .catch(err => upload_errors.wrap_error('sendToSwift', api_code.error, err))
-
-                                            .then(() => upload_functions.removeDir(archivePath))
-                                            .catch(err => upload_errors.wrap_error('archivePath', api_code.error, err))
-
-                                            .then(() => user.endProcessing())
-                                            .then(() => console.log('user.processing : ' + user.processing))
-                                            .then(() => res.send({ success: true, message: 'ok' }))
-                                            .catch(err => upload_errors.unwrap_error(res, err));
-
-                                    }
-
-                                }, (err) => {
-                                    console.log('Error create newTabOfName !: ' + err);
-                                    user.endProcessing().then(() => {
-                                        return res.status(api_code.error).json({ errors: { errors: err.message } });
-                                    });
-                                });
-                            }, (err) => {
-                                console.log('Error delete useless file !: ' + err);
-                                user.endProcessing().then(() => {
-                                    return res.status(api_code.error).json({ errors: { errors: err.message } });
-                                });
-                            });
-                        }, (err) => {
-                            console.log('Error copy directory !: ' + err);
-                            user.endProcessing().then(() => {
-                                return res.status(api_code.error).json({ errors: { errors: err.message } });
-                            });
-                        });
-                    }, (err) => {
-                        console.log('Error checkfiles !: ' + err);
-                        user.endProcessing().then(() => {
-                            return res.status(api_code.error).json({ errors: { errors: err.message } });
-                        });
-                    });
-                });
+                            .finally(() => user.endProcessing())
+                            .finally(() => console.log('user.processing : ' + user.processing))
+                            .then(() => res.send({ success: true, message: 'ok' }))
+                            .catch(err => upload_errors.unwrap_error(res, err)); 
+                    }).catch(next);
             }).catch(next);
-    }).catch(next);
+    });
 });
 
 router.post('/delete', auth.required, function (req, res, next) {
@@ -470,11 +450,12 @@ router.post('/download/:server', auth.required, function (req, res, next) {
             var dest_path = dirPath + server.author.username + '/' + server.slug + '/';
             // console.log(req);
             var target = req.body.target;
+            console.log("target to download");
             console.log(target);
             if (!(target === 'all' || target === 'sync' || target === 'repository')) {
                 target = 'all';
             }
-            upload_functions.createArbo(dirPath + server.author.username + '/', server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
+            upload_functions.createArbo(dirPath + server.author.username + '/', server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then(() => {
                 upload_functions.getFromSwift(path.resolve(dest_path + download_folder), server.slug, target).then(() => {
                     var folderName = target;
                     if (folderName === 'all') {
