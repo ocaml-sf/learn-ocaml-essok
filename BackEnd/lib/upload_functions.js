@@ -202,11 +202,11 @@ function deleteDir(tab_of_dir) {
     });
 }
 /**
- * 
- * @param {*} source 
- * @param {*} dest 
- * @param {*} format 
- * @param {*} archive_name 
+ *
+ * @param {*} source
+ * @param {*} dest
+ * @param {*} format
+ * @param {*} archive_name
  */
 async function createArchiveFromDirectory(source, dest, format, archive_name) {
     var files = read(source).map(file => [path.join(source, file), path.join(dest, file)]);
@@ -468,55 +468,44 @@ function _create_indexJSON(path, tabOfName) {
     });
 }
 
-function _getFromSwift(path, slug, target) {
-    return new Promise(function (resolve, reject) {
+async function _getFromSwift(path, slug, target) {
+    let openrc = 'cd ~ && source openrc.sh';
+    let swift = 'swift download ' + slug
+        + ' -D ' + path
+        + ' --skip-identical > /dev/null';
 
-        var options = ' --object-threads 15 --container-threads 10 --skip-identical > /dev/null';
-        if (target !== 'all') {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + ' -p ' + target + options;
-        } else {
-            var cmd = 'cd ~ && source openrc.sh && swift download ' + slug + ' -D ' + path + options;
-        }
-        console.log('downloading...');
+    if (target !== 'all') {
+        swift += ' -p ' + target;
+    }
+    let cmd = openrc + ' && ' + swift;
+    console.log('downloading...');
+    console.log(cmd);
 
-        exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 }).then(() => {
-
-            return resolve('done');
-        }, (err) => {
+    return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
+        .then(() => 'done')
+        .catch((err) => {
             console.log('Error exec !: ' + err);
-            return reject(err);
+            throw err;
         });
-    })
 }
 
-function _sendToSwift(path, slug, remote = '') {
-    return new Promise(function (resolve, reject) {
-        var nameProcessed = 0;
-        console.log(read(path));
-        console.log('server name:' + slug);
-        read(path).forEach((element, index, array) => {
-            global_functions.asyncFunction(element, () => {
-                var readStream = fs.createReadStream(path + element);
-                var writeStream = swiftClient.upload({
-                    container: slug,
-                    remote: remote + element,
-                });
-                writeStream.on('error', function (err) {
-                    console.log('error in upload : ' + err);
-                    return reject(err);
-                });
-                writeStream.on('success', function (file) {
-                    console.log('fileUploaded successful : ' + file.name);
-                    nameProcessed++;
-                    if (nameProcessed === array.length) {
-                        console.log('All file have been uploaded successfully, you can launch your server now !');
-                        return resolve('fileUploaded successful : ' + array);
-                    }
-                });
-                readStream.pipe(writeStream);
-            });
+async function _sendToSwift(path, slug, remote) {
+    let openrc = 'cd ~ && source openrc.sh';
+    let swift = 'swift upload ' + slug
+        + ' ' + path
+        + ' --skip-identical > /dev/null';
+
+    if(remote !== undefined) {
+        swift += ' --object-name ' + remote;
+    }
+
+    let cmd = openrc + ' && ' + swift;
+    return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
+        .then(() => 'done')
+        .catch((err) => {
+            console.log('Error exec !: ' + err);
+            throw err;
         });
-    });
 }
 
 function _removeDir(path) {
@@ -574,7 +563,7 @@ function _createDir(path) {
         fs.mkdir(path, function (err) {
             if (err) {
                 if (err.code === 'EEXIST') {
-                    console.error('my repository already exists');
+                    console.error('my repository already exists at ' + path);
                 } else {
                     return reject(err);
                 }
