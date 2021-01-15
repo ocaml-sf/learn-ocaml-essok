@@ -637,13 +637,13 @@ function _moveDir(source, destination) {
 
 }
 
-function _archive_traitement(dest_path, source_path, archive_folder, safe_folder) {
+function _archive_traitement(dest_path, source_path, archive_folder, safe_folder, link_github = '') {
     return new Promise(function (resolve, reject) {
         _desarchived(dest_path + archive_folder, source_path).then((response) => {
             console.log('desachived done');
             _checkFiles(dest_path + archive_folder).then((archive_name) => {
                 console.log('check done');
-                _copyDir(dest_path + archive_folder + archive_name[0], dest_path + safe_folder).then((response) => {
+                _copyDir(dest_path + archive_folder + archive_name[0] + link_github, dest_path + safe_folder).then((response) => {
                     console.log('copyDir done');
                     _removeDir(dest_path + archive_folder).then(() => {
                         console.log('removeDir done');

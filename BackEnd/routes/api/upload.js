@@ -283,7 +283,7 @@ router.post('/url', auth.required, function (req, res, next) {
                 upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
                     upload_functions.createDir(dest_path + server.slug + '/' + DOWNLOAD_DIR).then(() => {
                         upload_functions.download_from_url(file_url, dest_path + server.slug + '/' + DOWNLOAD_DIR).then((source_path) => {
-                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder).then((files) => {
+                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, '/exercises').then((files) => {
                                 console.log(files);
                                 return res.json({
                                     name: files,

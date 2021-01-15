@@ -1,8 +1,6 @@
 // Next sibling
 router-outlet + * {
-    margin-left: 5%;
-    margin-right: 5%;
-    margin-bottom: 2rem;
+    margin: 0 10%;
     flex-grow: 1;
 
     > *:not(:last-child) {

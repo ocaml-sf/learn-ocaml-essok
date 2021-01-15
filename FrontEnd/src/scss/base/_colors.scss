@@ -28,6 +28,7 @@ $color-accent: mat-color($mat-red, 500);
 $color-warn: mat-color($mat-amber, 500);
 $color-success: mat-color($mat-green, 500);
 $color-info: mat-color($mat-cyan, 500);
+$color-secondary: mat-color($mat-grey, 700);
 
 /**
  * Palette used for every material component
@@ -40,7 +41,8 @@ $palette: ("primary": ($color-primary, true),
            "accent" : ($color-accent, true),
            "warn": ($color-warn, false),
            "success": ($color-success, true),
-           "info": ($color-info, true));
+           "info": ($color-info, true),
+           "secondary": ($color-secondary, true));
 
 
 // TODO: check if changing angular palette is usefull

@@ -15,7 +15,7 @@ const URL = environment.api_url + '/uploads/check';
 const URL_full = environment.api_url + '/uploads/full';
 
 interface Group {
-  id : string;
+  id: string;
   title: string;
   exercises: string[];
 }
@@ -35,22 +35,22 @@ export class ServerSettingsComponent implements OnInit {
   uploader_full: FileUploader;
   hasBaseDropZoneOver: boolean;
   hasAnotherDropZoneOver: boolean;
-  isDeleting : boolean = false;
-  isDisabled : boolean = true;
-  isConfirmingDelete : boolean = false;
-  isAssumingDelete : boolean = false;
-  isSending : boolean = false;
-  exercises : any[];
-  idIndex : number = 1;
-  exercisesList : string[] = [];
-  trashList : string[] = [];
-  exercisesDropList : string[] = [];
-  trashDropList : string[] = [];
-  groupsList : Group[] = [];
+  isDeleting: boolean = false;
+  isDisabled: boolean = true;
+  isConfirmingDelete: boolean = false;
+  isAssumingDelete: boolean = false;
+  isSending: boolean = false;
+  exercises: any[];
+  idIndex: number = 1;
+  exercisesList: string[] = [];
+  trashList: string[] = [];
+  exercisesDropList: string[] = [];
+  trashDropList: string[] = [];
+  groupsList: Group[] = [];
   useless: ExercisesList = {} as ExercisesList;
   IMGPANELS = IMGPANELS;
-  uploadHeaders : string[] = ['name', 'size', 'status'];
-  dangerousZonePanelState : boolean = false;
+  uploadHeaders: string[] = ['name', 'size', 'status'];
+  dangerousZonePanelState: boolean = false;
 
   constructor(
     private router: Router,
@@ -89,7 +89,7 @@ export class ServerSettingsComponent implements OnInit {
 
   updateExercisesDropList() {
     this.exercisesDropList = ['trash-list', 'exercises-list', 'create-group-list',
-                              ...this.groupsList.map(group => group.id)];
+      ...this.groupsList.map(group => group.id)];
     console.log(this.exercisesDropList);
   }
 
@@ -168,7 +168,23 @@ export class ServerSettingsComponent implements OnInit {
     this.hasAnotherDropZoneOver = e;
   }
 
-  submitForm() {
+  uploadURL() {
+    this.isSubmitting = true;
+    this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
+
+      data => {
+        this.useless = JSON.parse(JSON.stringify(data));
+        this.exercisesList = this.useless.name;
+        this.loadGroups();
+      },
+      err => {
+        this.errors = err;
+        this.isSubmitting = false;
+      }
+    );
+  }
+
+  uploadFullURL() {
     this.isSubmitting = true;
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
@@ -279,7 +295,7 @@ export class ServerSettingsComponent implements OnInit {
     this.deleteGroupCheck(previousContainer.id, previousContainer.data);
   }
 
-  deleteGroupCheck(id : string, data) {
+  deleteGroupCheck(id: string, data) {
     if ((id !== 'exercises-list') && (id !== 'trash-list') && (data.length === 0)) {
       this.groupsList = this.groupsList.filter(group => group.id !== id);
       this.updateExercisesDropList();

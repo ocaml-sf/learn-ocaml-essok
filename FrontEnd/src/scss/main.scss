@@ -5,7 +5,7 @@ $ionicons-font-path: "~ionicons/dist/fonts";
 @import '~material-design-icons/iconfont/material-icons.css';
 @import '~bootstrap/scss/bootstrap';
 @import 'fonts/fonts';
-@import '~ionicons/dist/scss/ionicons';
+/*@import '~ionicons/dist/scss/ionicons';*/
 /*@import url('//demo.productionready.io/main.css');*/
 
 @import 'base/colors';
@@ -15,6 +15,7 @@ $ionicons-font-path: "~ionicons/dist/fonts";
         'layout/header';
 
 @import 'components/buttons',
+        'components/menu',
         'components/slide-toggle';
 
 @import 'pages/app',

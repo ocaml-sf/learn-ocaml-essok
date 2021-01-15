@@ -1,11 +1,10 @@
-.mat-expansion-panel img {
-    width: 100%;
-}
-
 #table_contents > .mat-expansion-panel {
     background-color: $color-sand;
 }
 
-#manage_files #subtable_contents > .mat-expansion-panel {
+#manage_files #subtable_contents {
+    > #exercises_part, > #trash_part, > #groups_part {
+        width: 100%;
         background-color: $color-desert-sand;
+    }
 }
