@@ -234,14 +234,16 @@ export class ServerSettingsComponent implements OnInit {
   send() {
     var groups = [[]];
     this.modalService.open('pleaseWait2');
+    // TODO: remove the horrible matrix structure
     this.groupsList.forEach(element => {
       groups.push([element.title].concat(element.exercises));
     });
-    this.serversService.send(this.server.slug, this.exercisesList, groups).subscribe(
-      data => {
+    this.serversService.send(this.server.slug, this.exercisesList, groups,
+                             this.trashList)
+      .subscribe(_res => {
         this.modalService.close('pleaseWait2');
-
         this.isDisabled = false;
+        this.loadGroups();
         let that = this;
         this.confirmDialogService.confirmThis("Launch your learnOCaml server now?", function () {
           that.disableServer();
@@ -307,22 +309,6 @@ export class ServerSettingsComponent implements OnInit {
       alert("Yes clicked");
     }, function () {
       alert("No clicked");
-    })
-  }
-
-  clean() {
-    let that = this;
-    this.confirmDialogService.confirmThis("Are you sure you want to delete all the Exercises in the Trash list ?", function () {
-      that.serversService.deleteExercises(that.server.slug, that.trashList).subscribe(
-        data => {
-          that.loadGroups();
-        },
-        err => {
-          that.errors = err;
-        }
-      );
-    }, function () {
-      alert("The operation has been aborted");
     })
   }
 }
