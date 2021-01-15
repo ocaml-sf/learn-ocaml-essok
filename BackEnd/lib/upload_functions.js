@@ -116,12 +116,12 @@ function addFileInTabOfName(element, tmp) {
             }
             else {
                 if (tmp.includes(element[i])) {
-                    console.log(tmp + ' contains : ' + element[i] + ' so it will be push in ' + new_group);
+                    //console.log(tmp + ' contains : ' + element[i] + ' so it will be push in ' + new_group);
                     new_group.push(element[i].replace(separator, new_separator));
-                    console.log('new_group : ' + new_group);
+                    //console.log('new_group : ' + new_group);
                 }
                 if (i == element.length - 1) {
-                    console.log('finally new_group : ' + new_group);
+                    //console.log('finally new_group : ' + new_group);
                     return resolve(new_group);
                 }
             }
@@ -322,9 +322,9 @@ function _delete_useless_files(useless, path, tabOfName, files) {
         if (useless === [] || useless === undefined || useless === null) {
             return resolve('nothing to delete');
         }
-        console.log('tabOfName before filter : ' + tabOfName);
+        //console.log('tabOfName before filter : ' + tabOfName);
         tabOfName = tabOfName.filter(group => group.length >= 2);
-        console.log('tabOfName after filter : ' + tabOfName);
+        //console.log('tabOfName after filter : ' + tabOfName);
 
         var tmp = [];
         var itemsProcessed = 0;
@@ -367,15 +367,15 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
             global_functions.asyncFunction(element, () => {
                 addFileInTabOfName(element, tmp).then(async (response) => {
                     if (response) {
-                        console.log('new group in new_tab_of_name : ' + response);
+                        //console.log('new group in new_tab_of_name : ' + response);
                         new_tabOfName.push(response);
-                        console.log('new_tab_of_name : ' + new_tabOfName);
+                        //console.log('new_tab_of_name : ' + new_tabOfName);
                     }
                     nameProcessed++;
                     if (nameProcessed === array.length) {
-                        console.log('new_tabOfName before filter : ' + new_tabOfName);
+                        //console.log('new_tabOfName before filter : ' + new_tabOfName);
                         new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
-                        console.log('new_tabOfName after filter : ' + new_tabOfName);
+                        //console.log('new_tabOfName after filter : ' + new_tabOfName);
                         if (!new_tabOfName.length) {
                             return reject(': No correct files found for index.json');
                         }
@@ -452,11 +452,11 @@ function _load_tabOfName(save_path) {
 function _create_indexJSON(path, tabOfName) {
     return new Promise(function (resolve, reject) {
         create_IndexJSON_header().then((header) => {
-            console.log('header created : \n' + header);
+            //console.log('header created : \n' + header);
             create_IndexJSON_body(tabOfName).then((body) => {
-                console.log('body created : \n' + body);
+                //console.log('body created : \n' + body);
                 create_IndexJSON_footer().then((footer) => {
-                    console.log('footer created : \n' + footer);
+                    //console.log('footer created : \n' + footer);
                     fs.writeFile(path, header + body + footer, function (err) {
                         if (err) return reject(err);
                         console.log('index.json : ' + header + body + footer);
