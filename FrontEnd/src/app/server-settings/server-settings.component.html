@@ -26,7 +26,8 @@
             Check if you want to override the current index.json by the github index.json, if present.
             <b>Recommended for newly created servers.</b>
           </mat-checkbox>
-          <mat-checkbox name="gitLoading" [(ngModel)]="githubAutoLoading">
+          <mat-checkbox name="gitLoading" [disabled]="!githubJSONUsed" [checked]="githubJSONUsed && githubAutoLoading"
+            [(ngModel)]="githubAutoLoading">
             Check if you want to launch directly your server after the upload. <b>Recommended if you checked the above
               box.</b>
           </mat-checkbox>
