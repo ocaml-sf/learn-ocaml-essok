@@ -330,6 +330,28 @@ router.post('/send', auth.required, function (req, res, next) {
                 }
                 user.startProcessing()
                     .then(() => console.log('user.processing : ' + user.processing))
+                    .then(async () => {
+                        let trash = req.body.trash;
+                        console.log("trash");
+                        console.log(trash);
+                        if(Array.isArray(trash)) {
+                            await Promise.all(trash.map(exercise => {
+                                let safeExercisePath =
+                                    path.resolve(dir, safe_folder, exercise),
+                                    dirtExercisePath =
+                                    path.resolve(dir, dirt_folder, exercise);
+                                return upload_functions.removeDir(safeExercisePath)
+                                    .catch(err => upload_errors.wrap_error('removeDir',api_code.error, err))
+                                    .then(() => console.log(safeExercisePath +
+                                                            ' removed'))
+                                    .then(() => upload_functions.removeDir(dirtExercisePath))
+                                    .catch(err => upload_errors.wrap_error('removeDir',api_code.error, err))
+                                    .then(() => console.log(dirtExercisePath +
+                                                            ' removed'));
+                            }));
+
+                        }
+                    })
                     .then(() => upload_functions.checkFiles(dir + safe_folder))
                     .catch(err => upload_errors.wrap_error('checkFiles', api_code.error, err))
                     .then((files) =>
@@ -376,62 +398,6 @@ router.post('/send', auth.required, function (req, res, next) {
                     }).catch(next);
             }).catch(next);
     });
-});
-
-router.post('/delete', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
-        if (!user) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
-        if (!user.isAdmin() && !user.authorized) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
-        if (user.processing) { return res.sendStatus(api_code.forbidden); }
-        Server.findOne({ slug: req.body.server })
-            .populate('author')
-            .then(function (server) {
-                if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Not found' } }); }
-                if ((server.author.username !== user.username) && (!user.isAdmin())) { return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } }); }
-                var dir = './uploads/' + server.author.username + '/' + server.slug + '/';
-                var tabOfName = req.body.trash;
-                if (!tabOfName || tabOfName === undefined || !tabOfName.length || tabOfName.length == 0) {
-                    return res.status(api_code.error).send({ errors: { file: ": No groups received" } });
-                }
-                user.startProcessing().then(() => {
-                    console.log('user.processing : ' + user.processing);
-                    tabOfName.forEach(element => {
-
-                        upload_functions.removeDir(dir + safe_folder + element).then(() => {
-                            console.log(dir + safe_folder + element + ' removed');
-                            upload_functions.removeDir(dir + dirt_folder + element).then(() => {
-                                console.log(dir + dirt_folder + element + ' removed');
-
-
-                            }, (err) => {
-                                console.log('Error removeDir !: ' + err);
-                                user.endProcessing().then(() => {
-                                    return res.status(api_code.error).json({ errors: { errors: err.message } });
-                                });
-                            });
-
-                        }, (err) => {
-                            console.log('Error removeDir !: ' + err);
-                            user.endProcessing().then(() => {
-                                return res.status(api_code.error).json({ errors: { errors: err.message } });
-                            });
-                        });
-
-                    });
-                    user.endProcessing().then(() => {
-                        console.log('user.processing : ' + user.processing);
-
-                        return res.sendStatus(api_code.ok);
-                    });
-                }, (err) => {
-                    console.log('Error unlinkSync !: ' + err);
-                    user.endProcessing().then(() => {
-                        return res.status(api_code.error).json({ errors: { errors: err.message } });
-                    });
-                });
-
-            }).catch(next);
-    }).catch(next);
 });
 
 router.post('/download/:server', auth.required, function (req, res, next) {
