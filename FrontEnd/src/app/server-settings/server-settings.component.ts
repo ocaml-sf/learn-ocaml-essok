@@ -51,8 +51,6 @@ export class ServerSettingsComponent implements OnInit {
   IMGPANELS = IMGPANELS;
   uploadHeaders: string[] = ['name', 'size', 'status'];
   dangerousZonePanelState: boolean = false;
-  githubAutoLoading: boolean = false;
-  githubJSONUsed: boolean = false;
 
   constructor(
     private router: Router,
@@ -70,7 +68,6 @@ export class ServerSettingsComponent implements OnInit {
       // description: '',
       url: '',
       // file: '',
-      jsonOverride: this.githubJSONUsed,
     });
 
     const token = this.jwtService.getToken();
@@ -171,7 +168,7 @@ export class ServerSettingsComponent implements OnInit {
     this.hasAnotherDropZoneOver = e;
   }
 
-  submitForm() {
+  uploadURL() {
     this.isSubmitting = true;
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
@@ -179,9 +176,22 @@ export class ServerSettingsComponent implements OnInit {
         this.useless = JSON.parse(JSON.stringify(data));
         this.exercisesList = this.useless.name;
         this.loadGroups();
-        if (this.githubAutoLoading) {
-          this.disableServer();
-        }
+      },
+      err => {
+        this.errors = err;
+        this.isSubmitting = false;
+      }
+    );
+  }
+
+  uploadFullURL() {
+    this.isSubmitting = true;
+    this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
+
+      data => {
+        this.useless = JSON.parse(JSON.stringify(data));
+        this.exercisesList = this.useless.name;
+        this.loadGroups();
       },
       err => {
         this.errors = err;

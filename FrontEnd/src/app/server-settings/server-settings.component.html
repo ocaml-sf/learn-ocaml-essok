@@ -9,10 +9,10 @@
         <mat-expansion-panel id="upload_url">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <b>Basic online functionality</b> : Upload a repository from Github
+              Upload a repository from Github
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <form [formGroup]="serverSettingsForm" (ngSubmit)="submitForm()">
+          <form [formGroup]="serverSettingsForm" (ngSubmit)="uploadURL()">
             <mat-form-field appearance="fill">
               <mat-label>URL of server repository</mat-label>
               <input matInput type="url" formControlName="url">
@@ -21,22 +21,30 @@
               Charge URL's exercises
             </button>
           </form>
-          <br />
-          <mat-checkbox name="gitJSON" [(ngModel)]="githubJSONUsed">
-            Check if you want to override the current index.json by the github index.json, if present.
-            <b>Recommended for newly created servers.</b>
-          </mat-checkbox>
-          <mat-checkbox name="gitLoading" [disabled]="!githubJSONUsed" [checked]="githubJSONUsed && githubAutoLoading"
-            [(ngModel)]="githubAutoLoading">
-            Check if you want to launch directly your server after the upload. <b>Recommended if you checked the above
-              box.</b>
-          </mat-checkbox>
-          <br />
         </mat-expansion-panel>
+
+        <!-- <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <b>Online functionality (automatic management)</b> : Upload and launch a repository from Github (must be
+              fonctionnal and have a valid index.json)
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <form [formGroup]="serverSettingsForm" (ngSubmit)="uploadFullURL()">
+            <mat-form-field appearance="fill">
+              <mat-label>URL of server repository</mat-label>
+              <input matInput type="url" formControlName="url">
+            </mat-form-field>
+            <button mat-flat-button color="success" type="submit" [disabled]="isSubmitting">
+              Charge URL's exercises
+            </button>
+          </form>
+        </mat-expansion-panel> -->
+
         <mat-expansion-panel id="upload_exercises">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <b>Basic local functionality</b> : Upload with an archive of exercises from your computer
+              Upload with an archive of exercises from your computer
               (must be named "exercises.zip")
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -155,10 +163,12 @@
             </button>
           </div>
         </mat-expansion-panel>
+
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <b>Advanced local functionality</b> : Upload a complete server from your computer [repository + sync]
+              Upload a complete server from your computer
+              [repository + sync]
             </mat-panel-title>
           </mat-expansion-panel-header>
           <h3>Select files</h3>
@@ -342,6 +352,7 @@
       <mat-checkbox name="confirm" [(ngModel)]="isConfirmingDelete" color="accent">
         I confirm I understand I will lose <b>all</b> my server's data and there is <b>no way</b> to have it back !
       </mat-checkbox>
+      <br />
       <mat-checkbox name="assume" [(ngModel)]="isAssumingDelete" color="accent">
         I assume I know what I am doing and to disable my server is <b>not</b> what I want !
       </mat-checkbox>
