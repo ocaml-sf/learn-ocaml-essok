@@ -62,9 +62,13 @@ export class ServersService {
       .pipe(map(data => data));
   }
 
-  send(slug, useless, list) {
-    return this.apiService.post('/uploads/send', { server: slug, useless, list })
-      .pipe(map(data => data));
+  send(slug : string, useless: string[], list : string[][], trash : string[]) {
+    return this.apiService.post('/uploads/send', {
+      server: slug,
+      useless,
+      list,
+      trash,
+    });
   }
 
   getGroups(slug) {
