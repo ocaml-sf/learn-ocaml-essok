@@ -142,7 +142,7 @@ router.post('/check', auth.required, upload.single('file'), function (req, res, 
                         mimetype === 'application/x-zip-compressed') {
                         console.log('file received');
                         upload_functions.createArbo(dest_path, server.slug + '/', safe_folder, dirt_folder, save_folder, download_folder).then((response) => {
-                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, true, '').then((files) => {
+                            upload_functions.archive_traitement(dest_path + server.slug + '/', source_path, archive_folder, safe_folder, '').then((files) => {
                                 console.log(files);
                                 return res.json({
                                     name: files,
