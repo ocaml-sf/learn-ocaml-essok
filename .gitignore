@@ -87,3 +87,8 @@
 /BackEnd/.idea
 /BackEnd/configs/OS.js
 /BackEnd/dist
+
+# Typescript BackEnd
+/BackEndTS/.env*
+/BackEndTS/dist
+/BackEndTS/node_modules

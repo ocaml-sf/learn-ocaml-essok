@@ -1,0 +1,56 @@
+{
+  "name": "essok-backend",
+  "version": "1.0.0",
+  "description": "Learn-OCaml-Essok BackEnd on Node",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "NODE_ENV=development npm run nodemon dotenv_config_path=.env-dev",
+    "nodemon": "nodemon src/index.ts --ignore uploads",
+    "lint": "eslint ./src/index.ts --ext .js,.jsx,.ts,.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocaml-sf/learn-ocaml-essok.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ocaml-sf/learn-ocaml-essok/issues"
+  },
+  "homepage": "https://github.com/ocaml-sf/learn-ocaml-essok#readme",
+  "dependencies": {
+    "@typegoose/typegoose": "^7.4.8",
+    "bcrypt": "^5.0.0",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.12.2",
+    "connect-mongo": "^3.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "envalid": "^7.0.0",
+    "eslint": "^7.18.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "helmet": "^4.4.1",
+    "jest": "^26.6.3",
+    "mongoose": "^5.10.18",
+    "morgan": "^1.10.0",
+    "reflect-metadata": "^0.1.13",
+    "routing-controllers": "^0.9.0-alpha.6",
+    "typescript": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/cors": "^2.8.9",
+    "@types/express": "^4.17.11",
+    "@types/express-session": "^1.17.3",
+    "@types/jest": "^26.0.20",
+    "@types/mongoose": "^5.10.3",
+    "@types/morgan": "^1.9.2",
+    "@types/node": "^14.14.22",
+    "@typescript-eslint/eslint-plugin": "^4.14.0",
+    "@typescript-eslint/parser": "^4.14.0",
+    "nodemon": "^2.0.7",
+    "ts-node": "^9.1.1"
+  }
+}
