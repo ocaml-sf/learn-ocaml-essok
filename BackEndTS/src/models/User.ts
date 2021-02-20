@@ -39,7 +39,7 @@ const regExpEmail : RegExp =
     });
 })
 
-class User {
+export class User {
   @prop({
     lowercase : true,
     match : /[a-z A-Z 0-9]+/,
@@ -92,8 +92,8 @@ class User {
   })
   role!: string;
 
-  public comparePassword(this: DocumentType<User>, password: string) {
-    return bcrypt.compare(password, this.password)
+  public async comparePassword(this: DocumentType<User>, password: string) {
+    return await bcrypt.compare(password, this.password)
   }
 
   public static async make(this : ReturnModelType<typeof User>,
@@ -103,6 +103,6 @@ class User {
   }
 }
 
-const UserModel = getModelForClass(User);
+export const UserModel = getModelForClass(User);
 
 export default UserModel;

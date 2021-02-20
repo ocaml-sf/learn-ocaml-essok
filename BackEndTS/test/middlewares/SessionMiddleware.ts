@@ -1,25 +1,22 @@
 import session from "express-session";
-import MongoStore from "connect-mongo";
+import sessionFileStore from "session-file-store";
 
 import { Middleware, ExpressMiddlewareInterface } from "routing-controllers";
 import { Request, Response, NextFunction } from "express";
 import { Service } from "typedi";
 
-import db from "../DB";
-import env from "../configEnv";
+const FileStore = sessionFileStore(session);
 
 @Middleware({ type : "before" })
 @Service()
 export class SessionMiddleware implements ExpressMiddlewareInterface {
   use(req: Request, res: Response, next: NextFunction) {
     session({
-      name : env.SERVER_SESSION_NAME,
-      secret: env.SERVER_SESSION_SECRET,
+      name : "session",
+      secret: "dst",
       resave: false,
       saveUninitialized: false,
-      store: new MongoStore({
-        mongoUrl: db.uri,
-      })
+      store: new FileStore(),
     })(req, res, next);
   }
 }

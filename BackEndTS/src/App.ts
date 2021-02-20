@@ -1,9 +1,9 @@
-import express from "express";
-import helmet from "helmet";
-
 import "reflect-metadata";
+import express from "express";
+import { Container } from "typedi";
 import {
-  useExpressServer,
+  createExpressServer,
+  useContainer,
   RoutingControllersOptions,
 } from "routing-controllers";
 
@@ -13,8 +13,6 @@ class App {
   public app : express.Application;
 
   constructor() {
-    this.app = express();
-
     let cors : RoutingControllersOptions["cors"] = false;
     if (env.isProd) {
       cors = {
@@ -22,7 +20,9 @@ class App {
       }
     }
 
-    useExpressServer(this.app, {
+    useContainer(Container);
+
+    this.app = createExpressServer({
       cors,
       routePrefix: "/api",
       defaultErrorHandler: false,

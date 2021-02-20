@@ -1,43 +1,48 @@
 import { promisify } from "util";
 import {
-  Body,
-  InternalServerError,
+  Body, Session,
   JsonController,
-  OnUndefined,
-  Post,
-  Session,
-  BadRequestError,
+  Post, OnUndefined,
+  BadRequestError, InternalServerError,
 } from "routing-controllers";
+import { Inject, Service } from "typedi";
 
+import UserInterface from "../user/UserInterface";
 import UserDTO from "../../dto/UserDTO";
 
-import UserModel from "../../models/User";
-
 @JsonController()
+@Service()
 export class AuthController {
+  constructor(@Inject("user") private userService : UserInterface) {}
+
   @Post("/login")
   @OnUndefined(204)
   async login(@Body({ validate : { groups: ["login"] } }) dto : UserDTO,
               @Session() session: any) : Promise<void> {
-    const user = await UserModel.findOne({ email: dto.email });
-    if(user === null || !user.comparePassword(dto.password)) {
+    if(session !== undefined && session.username !== undefined) {
+      throw new BadRequestError("Already logged");
+    }
+
+    const user = await this.userService.fromDTO(dto);
+    if(user === null) {
       throw new BadRequestError("Incorrect email or password");
     }
     session.username = user.username;
-    console.log(`Hello ${session.username}`);
   }
 
-  // Question: is it usefull to check if cookies are correctly setup ?
   // Promisifying session.destroy based on
   // https://github.com/expressjs/session/pull/737
   @Post("/logout")
   @OnUndefined(204)
   async logout(@Session() session: any) : Promise<void> {
-    console.log(`Goodbye ${session.username}`);
-    await promisify(session.destroy.bind(session))()
-      .catch((err : Error) => {
-        console.error(`logout: ${err}`);
-        throw new InternalServerError("Logout");
-      });
+    if(session.username === undefined) {
+      throw new BadRequestError("User is not logged");
+    } else {
+      await promisify(session.destroy.bind(session))()
+        .catch((err : Error) => {
+          console.error(`logout: ${err}`);
+          throw new InternalServerError("Logout");
+        });
+    }
   }
 }

@@ -16,6 +16,7 @@ class DB {
       useUnifiedTopology : true,
     });
 
+    console.log("Connecting to Database...");
     this.mongoose.then(mongoose => {
       console.log("DB is ready");
       return mongoose;

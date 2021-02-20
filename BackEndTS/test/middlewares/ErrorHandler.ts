@@ -14,15 +14,18 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
   // it will not be sent as property to the client
   error(error: HttpError & { errors?: ValidationError[] },
         _request: Request, response: Response, next: NextFunction) {
+    // Used to debug tests only
+    /*
     if(error.errors) {
       console.error("errors:");
       console.error(error.errors);
     }
-    console.error("Error:", {
+    console.error({
       name : error.name,
       message : error.message,
       httpCode: error.httpCode,
     });
+    */
 
     response.status(error.httpCode).json({
       name: error.name,
