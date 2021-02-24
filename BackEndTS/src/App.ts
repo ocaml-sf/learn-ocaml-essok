@@ -29,12 +29,12 @@ class App {
       controllers: [__dirname + "/controllers/**/*.{j,t}s"],
       middlewares: [__dirname + "/middlewares/**/*.{j,t}s"],
       validation: {
-        validationError: { target : false },
         skipMissingProperties: true,
         whitelist: true,
         forbidNonWhitelisted: true,
+        validationError: { target : false, value: false },
       },
-    });
+    }) as express.Application;
   }
 
   public listen() {

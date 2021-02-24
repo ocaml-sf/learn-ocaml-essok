@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { Application } from "express";
 import { Container } from "typedi";
 import { Server as HttpServer } from "http";
 import { createExpressServer, useContainer } from "routing-controllers";
@@ -7,12 +8,13 @@ import request from "supertest";
 import { AuthController } from "../../../src/controllers/auth/AuthController";
 import { UserServiceMock } from "../user/UserServiceMock";
 
-describe("Authentication Controller", () => {
-  let app : HttpServer;
+describe("AuthController", function() {
+  let app : Application;
+  let server : HttpServer;
   let cookie : string;
   const user = {
-    email: "wilson@beard.com",
-    password: "beard",
+    email : "wilson@beard.com",
+    password : "beard",
   };
 
 
@@ -21,20 +23,29 @@ describe("Authentication Controller", () => {
 
     useContainer(Container);
     app = createExpressServer({
-      defaultErrorHandler: false,
-      controllers: [UserServiceMock, AuthController],
-      middlewares: [__dirname + "/../../middlewares/**/*.{j,t}s"],
-    }).listen("3001");
+      defaultErrorHandler : false,
+      controllers : [UserServiceMock, AuthController],
+      middlewares : [__dirname + "/../../middlewares/**/*.{j,t}s"],
+    }) as Application;
+    server = app.listen("3001");
   })
 
-  describe("POST /login", () => {
+  describe("POST /login", function() {
+    interface ResponseHeaders {
+      "content-type": string;
+      [key : string] : string;
+    }
+
     it("should log with correct email and password", function(done) {
 
       request(app)
         .post("/login").send(user)
         .expect("set-cookie", /session/)
         .expect(204)
-        .then(res => { cookie = res.headers["set-cookie"]; return; })
+        .then(res => {
+          const headers = res.headers as ResponseHeaders;
+          cookie = headers["set-cookie"];
+        })
         .then(done)
         .catch(done);
     });
@@ -60,7 +71,7 @@ describe("Authentication Controller", () => {
 
     it("should fail when only email is provided", function(done) {
       request(app)
-        .post("/login").send({ email: user.email })
+        .post("/login").send({ email : user.email })
         .expect(400)
         .then(_res => done())
         .catch(done);
@@ -78,7 +89,7 @@ describe("Authentication Controller", () => {
       request(app)
         .post("/login").send({
           email : "willow@lighter.com",
-          password: "lighter",
+          password : "lighter",
         })
         .expect(400)
         .then(_res => done())
@@ -89,7 +100,7 @@ describe("Authentication Controller", () => {
       request(app)
         .post("/login").send({
           email : "wilson@beard.com",
-          password: "lighter",
+          password : "lighter",
         })
         .expect(400)
         .then(_res => done())
@@ -97,7 +108,7 @@ describe("Authentication Controller", () => {
     });
   });
 
-  describe("POST /logout", function () {
+  describe("POST /logout", function() {
     it("should log out connected user", function(done) {
       request(app)
         .post("/logout").set("Cookie", cookie)
@@ -116,6 +127,6 @@ describe("Authentication Controller", () => {
   });
 
   after(function() {
-    app.close();
+    server.close();
   });
 });

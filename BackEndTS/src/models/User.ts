@@ -14,9 +14,10 @@ const saltRounds = 10;
 
 /**
  * General Email RegExp conform to RFC 5322 standart
+ * https://emailregex.com/
  */
-const regExpEmail : RegExp =
-  /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
+const regExpEmail =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 /**
  * User model
@@ -28,12 +29,12 @@ const regExpEmail : RegExp =
 // Password Hashing based on MongoDB's post
 // https://www.mongodb.com/blog/post/
 // password-authentication-with-mongoose-part-1
-@pre<User>("save", function() {
+@pre<User>("save", async function() {
   // only hash the password if it has been modified (or is new)
   if(!this.isModified("password")) return;
 
   // auto-generate a salt and hash the password
-  bcrypt.hash(this.password, saltRounds)
+  await bcrypt.hash(this.password, saltRounds)
     .then(hash => {
       this.password = hash;
     });
@@ -92,14 +93,16 @@ export class User {
   })
   role!: string;
 
-  public async comparePassword(this: DocumentType<User>, password: string) {
+  public async comparePassword(this: DocumentType<User>, password: string)
+  : Promise<boolean> {
     return await bcrypt.compare(password, this.password)
   }
 
   public static async make(this : ReturnModelType<typeof User>,
-                           doc: UserDTO) {
+                           doc: UserDTO)
+  : Promise<void> {
     const user = new this(doc);
-    user.save();
+    await user.save();
   }
 }
 

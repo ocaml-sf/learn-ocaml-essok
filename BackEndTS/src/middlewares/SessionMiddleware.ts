@@ -11,7 +11,7 @@ import env from "../configEnv";
 @Middleware({ type : "before" })
 @Service()
 export class SessionMiddleware implements ExpressMiddlewareInterface {
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, res: Response, next: NextFunction) : void {
     session({
       name : env.SERVER_SESSION_NAME,
       secret: env.SERVER_SESSION_SECRET,

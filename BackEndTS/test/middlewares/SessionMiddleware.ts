@@ -10,7 +10,7 @@ const FileStore = sessionFileStore(session);
 @Middleware({ type : "before" })
 @Service()
 export class SessionMiddleware implements ExpressMiddlewareInterface {
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, res: Response, next: NextFunction) : void {
     session({
       name : "session",
       secret: "dst",

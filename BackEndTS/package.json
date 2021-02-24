@@ -4,10 +4,10 @@
   "description": "Learn-OCaml-Essok BackEnd on Node",
   "main": "app.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig-build.json",
     "dev": "NODE_ENV=development npm run nodemon dotenv_config_path=.env-dev",
     "nodemon": "nodemon src/index.ts --ignore uploads",
-    "lint": "eslint ./src/index.ts --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint ./{src,test}/**/*.ts --ext .js,.jsx,.ts,.tsx",
     "test": "mocha ./test/**/*.spec.ts"
   },
   "repository": {
@@ -23,7 +23,7 @@
   "dependencies": {
     "@typegoose/typegoose": "^7.4.8",
     "bcrypt": "^5.0.0",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "connect-mongo": "^4.1.0",
     "cors": "^2.8.5",
@@ -36,7 +36,7 @@
     "mongoose": "^5.10.18",
     "morgan": "^1.10.0",
     "reflect-metadata": "^0.1.13",
-    "routing-controllers": "^0.9.0-alpha.6",
+    "routing-controllers": "^0.9.0",
     "typedi": "^0.10.0",
     "typescript": "^4.1.3"
   },

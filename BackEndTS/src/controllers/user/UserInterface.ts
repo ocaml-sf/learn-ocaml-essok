@@ -7,4 +7,10 @@ export default interface UserInterface {
    * Otherwise return null
    */
   fromDTO(dto : UserDTO) : Promise<UserDTO | null>;
+
+  /**
+   * Create a new user
+   * throws an error if user already exist
+   */
+  makeFromDTO(dto: UserDTO) : Promise<void>;
 }
