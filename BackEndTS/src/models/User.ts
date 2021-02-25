@@ -33,6 +33,8 @@ const regExpEmail =
   // only hash the password if it has been modified (or is new)
   if(!this.isModified("password")) return;
 
+  console.log("hashed");
+
   // auto-generate a salt and hash the password
   await bcrypt.hash(this.password, saltRounds)
     .then(hash => {
@@ -46,16 +48,16 @@ export class User {
     match : /[a-z A-Z 0-9]+/,
     required : true,
     index : true,
-    unique: true,
+    unique : true,
   })
   username! : string;
 
   @prop({
-    lowercase: true,
-    match: regExpEmail,
+    lowercase : true,
+    match : regExpEmail,
     required : true,
     unique : true,
-    index: true,
+    index : true,
   })
   email! : string;
 
@@ -69,17 +71,17 @@ export class User {
   description? : string;
 
   @prop()
-  place?: string;
+  place? : string;
 
   @prop()
-  goal?: string;
+  goal? : string;
 
   // An account can be disabled by the user
   // A disabled account can not create or launch servers until actived back
   @prop({
-    default: false,
+    default : false,
   })
-  isActivated!: boolean;
+  isActivated! : boolean;
 
   /**
    * Account Status, there is actually 3 roles possible:
@@ -88,18 +90,18 @@ export class User {
    * - admin
    */
   @prop({
-    enum: ["User", "Teacher", "Admin"],
-    default: "User",
+    enum : ["User", "Teacher", "Admin"],
+    default : "User",
   })
-  role!: string;
+  role! : string;
 
-  public async comparePassword(this: DocumentType<User>, password: string)
+  public async comparePassword(this : DocumentType<User>, password : string)
   : Promise<boolean> {
     return await bcrypt.compare(password, this.password)
   }
 
   public static async make(this : ReturnModelType<typeof User>,
-                           doc: UserDTO)
+                           doc : UserDTO)
   : Promise<void> {
     const user = new this(doc);
     await user.save();

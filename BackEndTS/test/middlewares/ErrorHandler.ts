@@ -4,6 +4,7 @@ import {
   Middleware,
   ExpressErrorMiddlewareInterface,
   InternalServerError,
+  UnauthorizedError,
 } from "routing-controllers";
 import { ValidationError } from "class-validator";
 import { Service } from "typedi";
@@ -14,7 +15,7 @@ type BadRequestValidationError =
 
 // Error handlers are managed by order of implementation
 
-// TODO : change to ServiceError ?
+// TODO : rename to ServiceError ?
 @Middleware({ type : "after" })
 @Service()
 export class AlreadyExistErrorHandler
@@ -22,7 +23,21 @@ implements ExpressErrorMiddlewareInterface {
   error(error : AlreadyExistError, _request : Request,
         _response : Response, next : NextFunction) : void {
     if(error instanceof AlreadyExistError) {
-      next(new BadRequestError((error as Error).message));
+      next(new BadRequestError(error.message));
+    } else {
+      next(error);
+    }
+  }
+}
+
+@Middleware({ type : "after" })
+@Service()
+export class ParamRequiredErrorHandler
+implements ExpressErrorMiddlewareInterface {
+  error(error : Error, _request : Request,
+        _response : Response, next : NextFunction) : void {
+    if(error.name === "ParamRequiredError") {
+      next(new UnauthorizedError("Authentication required"));
     } else {
       next(error);
     }

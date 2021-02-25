@@ -1,8 +1,9 @@
 import {
-  Body,
   JsonController,
+  Get, Post,
   OnUndefined,
-  Post,
+  Body, SessionParam,
+  BadRequestError,
 } from "routing-controllers";
 import { Inject, Service } from "typedi";
 
@@ -16,10 +17,19 @@ export class UserController {
 
   @Post("/register")
   @OnUndefined(204)
-  async register(@Body({ validate : { groups : ["registration"] } })
-                 user : UserDTO) : Promise<void> {
-    console.log("User:");
-    console.log(user);
+  async register(
+    @Body({ validate : { groups : ["registration"] } }) user : UserDTO
+  ) : Promise<void> {
     await this.userService.makeFromDTO(user);
+  }
+
+  @Get("/profile")
+  async get(@SessionParam("username", { required : true }) username : string)  {
+    const user = await this.userService.fromUsername(username);
+    if(user === null) {
+      throw new BadRequestError("Invalid User");
+    } else {
+      return user;
+    }
   }
 }

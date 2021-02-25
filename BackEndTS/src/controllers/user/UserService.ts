@@ -8,18 +8,39 @@ import UserDTO from "../../dto/UserDTO";
 
 @Service("user")
 export class UserService implements UserInterface {
-  async fromDTO(dto : UserDTO) : Promise<UserDTO | null> {
-    const user = await UserModel.findOne({ email: dto.email });
-    if(user !== null && await user.comparePassword(dto.password)) {
-      return user;
+  readonly defaultProjection = {
+    _id : 0,
+  }
+
+  async fromLogin(email : string, password : string) : Promise<UserDTO | null> {
+    const user = await UserModel.findOne({ email }, {
+      ...this.defaultProjection,
+      username : 1,
+      password : 1
+    });
+    if(user !== null && await user.comparePassword(password)) {
+      return user.toObject();
     } else {
       return null;
     }
   }
 
-  async makeFromDTO(dto: UserDTO) : Promise<void> {
+  async fromUsername(username : string) : Promise<UserDTO | null> {
+    const user = await UserModel.findOne({ username }, {
+      ...this.defaultProjection,
+      password : 0,
+      __v : 0,
+    });
+    if(user === null) {
+      return null;
+    } else {
+      return user.toObject();
+    }
+  }
+
+  async makeFromDTO(dto : UserDTO) : Promise<void> {
     const user = await UserModel.findOne({
-      $or: [{ email: dto.email }, { username: dto.username }],
+      $or : [{ email : dto.email }, { username : dto.username }],
     });
 
     if(user !== null) {

@@ -7,22 +7,25 @@ import {
 
 class UserDTO {
   @IsDefined({
-    groups: ["registration", "login"],
+    groups : ["registration", "login"],
   })
   @IsEmail()
-  email!: string;
+  email! : string;
 
   @IsDefined({
-    groups: ["registration", "login"],
+    groups : ["registration", "login"],
   })
   @IsString()
-  password!: string;
+  password! : string;
 
   @IsDefined({
-    groups: ["registration"],
+    groups : ["registration", "update"],
   })
   @IsAlphanumeric()
-  username!: string;
+  username! : string;
+
+  @IsString()
+  description? : string;
 }
 
 export default UserDTO;

@@ -11,8 +11,8 @@ class DB {
   constructor() {
     this.uri = `mongodb://${env.DB_HOSTNAME}:${env.DB_PORT}/${env.DB_NAME}`;
     this.mongoose = mongoose.connect(this.uri, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
+      useCreateIndex : true,
+      useNewUrlParser : true,
       useUnifiedTopology : true,
     });
 

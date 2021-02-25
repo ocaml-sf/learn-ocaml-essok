@@ -20,13 +20,12 @@ export class AuthController {
 
   @Post("/login")
   @OnUndefined(204)
-  async login(@Body({ validate : { groups: ["login"] } }) dto : UserDTO,
+  async login(@Body({ validate : { groups : ["login"] } }) dto : UserDTO,
               @Session() session : SessionUserData) : Promise<void> {
     if(session !== undefined && session.username !== undefined) {
       throw new BadRequestError("Already logged.");
     } else {
-
-      const user = await this.userService.fromDTO(dto);
+      const user = await this.userService.fromLogin(dto.email, dto.password);
       if(user === null) {
         throw new BadRequestError("Incorrect email or password.");
       }
@@ -38,7 +37,7 @@ export class AuthController {
   // https://github.com/expressjs/session/pull/737
   @Post("/logout")
   @OnUndefined(204)
-  async logout(@Session() session: SessionUserData) : Promise<void> {
+  async logout(@Session() session : SessionUserData) : Promise<void> {
     if(session.username === undefined) {
       throw new BadRequestError("No user logged.");
     } else {

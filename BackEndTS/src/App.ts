@@ -16,7 +16,7 @@ class App {
     let cors : RoutingControllersOptions["cors"] = false;
     if (env.isProd) {
       cors = {
-        origin: env.SERVER_HOSTNAME,
+        origin : env.SERVER_HOSTNAME,
       }
     }
 
@@ -24,15 +24,15 @@ class App {
 
     this.app = createExpressServer({
       cors,
-      routePrefix: "/api",
-      defaultErrorHandler: false,
-      controllers: [__dirname + "/controllers/**/*.{j,t}s"],
-      middlewares: [__dirname + "/middlewares/**/*.{j,t}s"],
-      validation: {
-        skipMissingProperties: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        validationError: { target : false, value: false },
+      routePrefix : "/api",
+      defaultErrorHandler : false,
+      controllers : [__dirname + "/controllers/**/*.{j,t}s"],
+      middlewares : [__dirname + "/middlewares/**/*.{j,t}s"],
+      validation : {
+        skipMissingProperties : true,
+        whitelist : true,
+        forbidNonWhitelisted : true,
+        validationError : { target : false, value : false },
       },
     }) as express.Application;
   }

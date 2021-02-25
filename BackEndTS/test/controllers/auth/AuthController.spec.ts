@@ -7,16 +7,12 @@ import request from "supertest";
 
 import { AuthController } from "../../../src/controllers/auth/AuthController";
 import { UserServiceMock } from "../user/UserServiceMock";
+import { WILSON } from "../user/USERS";
 
 describe("AuthController", function() {
   let app : Application;
   let server : HttpServer;
   let cookie : string;
-  const user = {
-    email : "wilson@beard.com",
-    password : "beard",
-  };
-
 
   before(function() {
     Container.set("user", new UserServiceMock());
@@ -24,22 +20,31 @@ describe("AuthController", function() {
     useContainer(Container);
     app = createExpressServer({
       defaultErrorHandler : false,
-      controllers : [UserServiceMock, AuthController],
+      controllers : [AuthController],
       middlewares : [__dirname + "/../../middlewares/**/*.{j,t}s"],
+      validation : {
+        skipMissingProperties : true,
+        whitelist : true,
+        forbidNonWhitelisted : true,
+        validationError : { target : false, value : false },
+      },
     }) as Application;
     server = app.listen("3001");
   })
 
   describe("POST /login", function() {
     interface ResponseHeaders {
-      "content-type": string;
+      "content-type" : string;
       [key : string] : string;
     }
 
     it("should log with correct email and password", function(done) {
 
       request(app)
-        .post("/login").send(user)
+        .post("/login").send({
+          email : WILSON.email,
+          password : WILSON.password,
+        })
         .expect("set-cookie", /session/)
         .expect(204)
         .then(res => {
@@ -52,7 +57,10 @@ describe("AuthController", function() {
 
     it("should fail when a session already exist", function(done) {
       request(app)
-        .post("/login").send(user)
+        .post("/login").send({
+          email : WILSON.email,
+          password : WILSON.password,
+        })
         .set("Cookie", cookie)
         .expect(400)
         .then(_res => done())
@@ -69,22 +77,33 @@ describe("AuthController", function() {
         .catch(done);
     });
 
-    it("should fail when only email is provided", function(done) {
+    it("should fail when email is not provided...", function(done) {
       request(app)
-        .post("/login").send({ email : user.email })
+        .post("/login").send({ password : WILSON.password })
         .expect(400)
         .then(_res => done())
         .catch(done);
     });
 
-    it("should fail when only password is provided...", function(done) {
+    it("should fail when password is not provided", function(done) {
       request(app)
-        .post("/login").send({ password : user.password })
+        .post("/login").send({ email : WILSON.email })
         .expect(400)
         .then(_res => done())
         .catch(done);
     });
 
+    it("should fail when unexpected data is provided", function(done) {
+      // Let's send username for example
+      request(app)
+        .post("/login").send(WILSON)
+        .expect(400)
+        .then(_res => done())
+        .catch(done);
+    });
+
+    // Question: should we migrate theses tests as integration tests?
+    //           or database unit tests ?
     it("should fail when email is incorrect", function(done) {
       request(app)
         .post("/login").send({

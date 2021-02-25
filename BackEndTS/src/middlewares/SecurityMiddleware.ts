@@ -9,7 +9,7 @@ import env from "../configEnv";
 @Middleware({ type : "before" })
 @Service()
 export class SecurityMiddleware implements ExpressMiddlewareInterface {
-  use(req: Request, res: Response, next: NextFunction) : void {
+  use(req : Request, res : Response, next : NextFunction) : void {
     if(env.isProd) {
       helmet()(req, res, next);
     } else {

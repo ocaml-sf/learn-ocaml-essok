@@ -9,7 +9,7 @@ import env from "../configEnv";
 @Middleware({ type : "before" })
 @Service()
 export class LoggingMiddleware implements ExpressMiddlewareInterface {
-  use(req: Request, res: Response, next: NextFunction) : void {
+  use(req : Request, res : Response, next : NextFunction) : void {
     morgan(env.SERVER_MORGAN_FORMAT)(req, res, next);
   }
 }

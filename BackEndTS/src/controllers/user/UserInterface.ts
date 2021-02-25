@@ -6,11 +6,16 @@ export default interface UserInterface {
    * Return the user if it exists and password check is validated
    * Otherwise return null
    */
-  fromDTO(dto : UserDTO) : Promise<UserDTO | null>;
+  fromLogin(email : string, password : string) : Promise<UserDTO | null>;
+
+  /**
+   * Get user from username
+   */
+  fromUsername(username : string) : Promise<UserDTO | null>;
 
   /**
    * Create a new user
    * throws an error if user already exist
    */
-  makeFromDTO(dto: UserDTO) : Promise<void>;
+  makeFromDTO(dto : UserDTO) : Promise<void>;
 }

@@ -92,3 +92,5 @@
 /BackEndTS/.env*
 /BackEndTS/dist
 /BackEndTS/node_modules
+/BackEndTS/sessions
+/BackEndTS/uploads
