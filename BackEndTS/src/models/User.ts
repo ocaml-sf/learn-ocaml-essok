@@ -7,7 +7,7 @@ import {
 } from "@typegoose/typegoose";
 import bcrypt from "bcrypt";
 
-import UserDTO from "../dto/UserDTO";
+import { UserDTO } from "../dto/UserDTO";
 
 // TODO: check if we should put this constant as env variable
 const saltRounds = 10;
@@ -32,8 +32,6 @@ const regExpEmail =
 @pre<User>("save", async function() {
   // only hash the password if it has been modified (or is new)
   if(!this.isModified("password")) return;
-
-  console.log("hashed");
 
   // auto-generate a salt and hash the password
   await bcrypt.hash(this.password, saltRounds)
@@ -81,7 +79,7 @@ export class User {
   @prop({
     default : false,
   })
-  isActivated! : boolean;
+  isDisabled! : boolean;
 
   /**
    * Account Status, there is actually 3 roles possible:
@@ -109,5 +107,3 @@ export class User {
 }
 
 export const UserModel = getModelForClass(User);
-
-export default UserModel;

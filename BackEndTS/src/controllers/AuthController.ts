@@ -8,8 +8,8 @@ import {
 } from "routing-controllers";
 import { Inject, Service } from "typedi";
 
-import UserInterface from "../user/UserInterface";
-import UserDTO from "../../dto/UserDTO";
+import { UserDTO } from "../dto/UserDTO";
+import { UserInterface } from "../services";
 
 type SessionUserData = SessionCookie & { username : string };
 

@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-import { MongoError } from "mongodb";
-
 import env from "./configEnv";
 
 class DB {
@@ -10,22 +8,20 @@ class DB {
 
   constructor() {
     this.uri = `mongodb://${env.DB_HOSTNAME}:${env.DB_PORT}/${env.DB_NAME}`;
+    mongoose.set("debug", env.DB_DEBUG);
+    console.log("Connecting to Database...");
     this.mongoose = mongoose.connect(this.uri, {
       useCreateIndex : true,
       useNewUrlParser : true,
       useUnifiedTopology : true,
-    });
-
-    console.log("Connecting to Database...");
-    this.mongoose.then(mongoose => {
+      serverSelectionTimeoutMS: 1000,
+    }).then(mongoose => {
       console.log("DB is ready");
       return mongoose;
-    }).catch((err : MongoError) => {
-      console.error("Can not connect to MongoDB");
-      console.error(err.name, ':', err.message);
+    }).catch((err : Error) => {
+      console.error(`Can not connect to ${env.DB_HOSTNAME}:${env.DB_PORT}`);
+      throw err;
     });
-
-    mongoose.set("debug", env.DB_DEBUG);
   }
 }
 

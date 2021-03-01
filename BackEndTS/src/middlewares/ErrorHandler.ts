@@ -8,21 +8,23 @@ import {
 } from "routing-controllers";
 import { ValidationError } from "class-validator";
 import { Service } from "typedi";
-import AlreadyExistError from "../errors/AlreadyExistError";
+
+import { ServiceError } from "../errors";
+
+import env from "../configEnv";
 
 type BadRequestValidationError =
   BadRequestError & { errors : ValidationError[] };
 
 // Error handlers are managed by order of implementation
 
-// TODO : rename to ServiceError ?
 @Middleware({ type : "after" })
 @Service()
-export class AlreadyExistErrorHandler
+export class ServiceErrorHandler
 implements ExpressErrorMiddlewareInterface {
-  error(error : AlreadyExistError, _request : Request,
+  error(error : ServiceError, _request : Request,
         _response : Response, next : NextFunction) : void {
-    if(error instanceof AlreadyExistError) {
+    if(error instanceof ServiceError) {
       next(new BadRequestError(error.message));
     } else {
       next(error);
@@ -48,18 +50,20 @@ implements ExpressErrorMiddlewareInterface {
 @Service()
 export class ValidationErrorsHandler
 implements ExpressErrorMiddlewareInterface {
-  error(error : BadRequestValidationError ,_request : Request,
+  error(error : BadRequestValidationError, _request : Request,
         response : Response, next : NextFunction) : void {
     if(error instanceof BadRequestError &&
       Array.isArray(error.errors) &&
       error.errors.every(err => err instanceof ValidationError)) {
 
-      console.error("ValidationErrorsHandler :", {
-        name : error.name,
-        message : error.message,
-        httpCode : error.httpCode,
-      });
-      console.error("errors :", error.errors);
+      if(env.SERVER_DEBUG) {
+        console.error("ValidationErrorsHandler :", {
+          name : error.name,
+          message : error.message,
+          httpCode : error.httpCode,
+        });
+        console.error("errors :", error.errors);
+      }
 
       response.status(400).json({
         name : error.name,
@@ -79,11 +83,13 @@ export class HttpErrorHandler implements ExpressErrorMiddlewareInterface {
   error(error : HttpError, _request : Request,
         response : Response, next : NextFunction) : void {
     if(error instanceof HttpError) {
-      console.error("HttpErrorHandler :", {
-        name : error.name,
-        message : error.message,
-        httpCode : error.httpCode,
-      });
+      if(env.SERVER_DEBUG) {
+        console.error("HttpErrorHandler :", {
+          name : error.name,
+          message : error.message,
+          httpCode : error.httpCode,
+        });
+      }
 
       response.status(error.httpCode).json({
         name : error.name,
@@ -102,10 +108,15 @@ export class UnexpectedErrorsHandler
 implements ExpressErrorMiddlewareInterface {
   error(error : Error, _request : Request,
         response : Response, next : NextFunction) : void {
-    console.error("Unexpected Error happens :", {
-      name : error.name,
-      message : error.message,
-    });
+    console.error("Unexpected Error happens :");
+    if(Array.isArray(error)) {
+      console.error(error);
+    } else {
+      console.error({
+        name : error.name,
+        message : error.message,
+      });
+    }
 
     const internalError = new InternalServerError(
       "Unexpected error, please contact support to investigate.");

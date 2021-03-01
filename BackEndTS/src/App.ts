@@ -26,7 +26,7 @@ class App {
       cors,
       routePrefix : "/api",
       defaultErrorHandler : false,
-      controllers : [__dirname + "/controllers/**/*.{j,t}s"],
+      controllers : [__dirname + "/{controllers,services}/**/*.{j,t}s"],
       middlewares : [__dirname + "/middlewares/**/*.{j,t}s"],
       validation : {
         skipMissingProperties : true,

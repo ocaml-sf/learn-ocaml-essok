@@ -5,10 +5,13 @@
   "main": "app.js",
   "scripts": {
     "build": "tsc -p tsconfig-build.json",
-    "dev": "NODE_ENV=development npm run nodemon dotenv_config_path=.env-dev",
+    "dev": "NODE_ENV=development DOTENV_CONFIG_PATH=.env-dev npm run nodemon",
     "nodemon": "nodemon src/index.ts --ignore uploads",
     "lint": "eslint ./{src,test}/**/*.ts --ext .js,.jsx,.ts,.tsx",
-    "test": "mocha ./test/**/*.spec.ts"
+    "mocha": "NODE_ENV=test DOTENV_CONFIG_PATH=.env-test mocha",
+    "test": "npm run mocha ./test/",
+    "testControllers": "npm run mocha ./test/**/*Controller*.spec.ts",
+    "testServices": "npm run mocha ./test/**/*Service*.spec.ts"
   },
   "repository": {
     "type": "git",

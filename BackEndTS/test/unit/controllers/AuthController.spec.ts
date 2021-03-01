@@ -5,9 +5,11 @@ import { Server as HttpServer } from "http";
 import { createExpressServer, useContainer } from "routing-controllers";
 import request from "supertest";
 
-import { AuthController } from "../../../src/controllers/auth/AuthController";
-import { UserServiceMock } from "../user/UserServiceMock";
-import { WILSON } from "../user/USERS";
+import { UserServiceMock } from "./UserServiceMock";
+import { WILSON } from "../USERS";
+import { SessionMiddleware } from "../SessionMiddleware";
+import { AuthController } from "../../../src/controllers";
+import * as errorHandlers from "../../../src/middlewares/ErrorHandler";
 
 describe("AuthController", function() {
   let app : Application;
@@ -21,7 +23,7 @@ describe("AuthController", function() {
     app = createExpressServer({
       defaultErrorHandler : false,
       controllers : [AuthController],
-      middlewares : [__dirname + "/../../middlewares/**/*.{j,t}s"],
+      middlewares : [...Object.values(errorHandlers), SessionMiddleware],
       validation : {
         skipMissingProperties : true,
         whitelist : true,
@@ -94,32 +96,10 @@ describe("AuthController", function() {
     });
 
     it("should fail when unexpected data is provided", function(done) {
-      // Let's send username for example
-      request(app)
-        .post("/login").send(WILSON)
-        .expect(400)
-        .then(_res => done())
-        .catch(done);
-    });
-
-    // Question: should we migrate theses tests as integration tests?
-    //           or database unit tests ?
-    it("should fail when email is incorrect", function(done) {
       request(app)
         .post("/login").send({
-          email : "willow@lighter.com",
-          password : "lighter",
-        })
-        .expect(400)
-        .then(_res => done())
-        .catch(done);
-    });
-
-    it("should fail when password is incorrect", function(done) {
-      request(app)
-        .post("/login").send({
-          email : "wilson@beard.com",
-          password : "lighter",
+          ...WILSON,
+          unexpected : "data",
         })
         .expect(400)
         .then(_res => done())

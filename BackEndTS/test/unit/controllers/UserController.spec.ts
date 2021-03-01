@@ -5,10 +5,11 @@ import { Server as HttpServer } from "http";
 import { createExpressServer, useContainer } from "routing-controllers";
 import request from "supertest";
 
-import { AuthController } from "../../../src/controllers/auth/AuthController";
-import { UserController } from "../../../src/controllers/user/UserController";
 import { UserServiceMock } from "./UserServiceMock";
-import { WILSON, WILLOW } from "./USERS";
+import { WILSON, WILLOW } from "../USERS";
+import { SessionMiddleware } from "../SessionMiddleware";
+import { AuthController, UserController } from "../../../src/controllers";
+import * as errorHandlers from "../../../src/middlewares/ErrorHandler";
 
 describe("UserController /user", function() {
   let app : Application;
@@ -22,7 +23,13 @@ describe("UserController /user", function() {
     app = createExpressServer({
       defaultErrorHandler : false,
       controllers : [AuthController, UserController],
-      middlewares : [__dirname + "/../../middlewares/**/*.{j,t}s"],
+      middlewares : [...Object.values(errorHandlers), SessionMiddleware],
+      validation : {
+        skipMissingProperties : true,
+        whitelist : true,
+        forbidNonWhitelisted : true,
+        validationError : { value : false },
+      },
     }) as Application;
     server = app.listen("3001");
   });
@@ -63,30 +70,6 @@ describe("UserController /user", function() {
         .post("/user/register").send({
           ...WILLOW,
           username : undefined,
-        })
-        .expect(400)
-        .then(_res => done())
-        .catch(done);
-    });
-
-    // Question: should we migrate theses tests as integration tests?
-    //           or database unit tests ?
-    it("should fail when email is already taken", function(done) {
-      request(app)
-        .post("/user/register").send({
-          ...WILLOW,
-          email : WILSON.email,
-        })
-        .expect(400)
-        .then(_res => done())
-        .catch(done);
-    });
-
-    it("should fail when username is already taken", function(done) {
-      request(app)
-        .post("/user/register").send({
-          ...WILLOW,
-          username : WILSON.username,
         })
         .expect(400)
         .then(_res => done())
