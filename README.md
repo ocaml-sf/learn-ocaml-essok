@@ -8,16 +8,14 @@ Setup and docs
 * [FrontEnd documentation](FrontEnd/README.md)
 * [BackEnd documentation](BackEnd/README.md)
 * [LearnOCaml project](https://github.com/ocaml-sf/learn-ocaml)
-* [The live website](https://essok.learn-ocaml.org)
- 
-Contacts
---------
 
-- To contact the LearnOCaml team, it's [here](https://github.com/ocaml-sf/learn-ocaml#README)
+Hosted instance
+-----
 
-- To contact the LeanOCamlEssok team :
-  - [![Discord](https://img.shields.io/badge/Discord-Essok-7289da.svg)](https://discord.gg/495GMdx3wa "Click here to join Essok server on discord !")
-  - We have an Essok dedicated public community server on Discord. You can follow the progress of Essok development, ask your questions, find your answers, chat with other members and submit your issues to the hotline, don't forget to follow the rules and to read the help guideline.
+The main authors of Essok host and maintain an instance:
+  <https://essok.learn-ocaml.org>
+If you would benefit from this service, please get in touch:
+  <https://essok.learn-ocaml.org/contact>
 
 License and copyright
 ---------------------
