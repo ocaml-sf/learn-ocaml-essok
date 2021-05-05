@@ -72,12 +72,12 @@ export class ServerComponent implements OnInit {
   }
 
   toggleServerStatus() {
-    //this.modalService.open('pleaseWait2');
+    this.modalService.open('pleaseWait2');
     this.isDisabled = true;
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
-          //this.modalService.close('pleaseWait2');
+          this.modalService.close('pleaseWait2');
           this.router.navigateByUrl('/');
         }
       );
