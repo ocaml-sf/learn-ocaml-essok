@@ -56,11 +56,11 @@ async function loadIndexJson(dirPath) {
  * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
 async function saveIndexJson(dirPath, groups) {
-    const indexObject = Object.assign({}, defaultIndexObj);
+    const indexObject = JSON.parse(JSON.stringify(defaultIndexObj));
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
     for (let i = 0; i < groups.length; i++) {
-        indexObject.groups[groupPrefix + i] = groups[i];
+        indexObject.groups[`${groupPrefix}${i}`] = groups[i];
     }
     return Promise.resolve(JSON.stringify(indexObject, null, 2))
         .then(buffer => fsPromises.writeFile(filePath, buffer));
