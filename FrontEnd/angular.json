@@ -19,13 +19,14 @@
             "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
+              "src/robots.txt",
               "src/favicon.ico"
             ],
             "styles": [
               "src/scss/main.scss",
             ],
             "scripts": [
-	      "node_modules/jquery/dist/jquery.js",
+	            "node_modules/jquery/dist/jquery.js",
               "node_modules/bootstrap/dist/js/bootstrap.js"
             ]
           },
