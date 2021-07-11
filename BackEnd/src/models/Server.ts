@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 var uniqueValidator = require('mongoose-unique-validator');
 var slug = require('slug');
 const domain = 'learn-ocaml.org';
@@ -19,31 +19,31 @@ var ServerSchema = new mongoose.Schema({
 ServerSchema.plugin(uniqueValidator, { message: 'is already taken' });
 
 ServerSchema.pre('validate', function (next) {
-  if (!this.slug) {
-    this.slugify();
+  if (!(this as any).slug) {
+    (this as any).slugify();
   }
-  this.url = this.author.username + '.' + this.slug + '.' + domain;
+  (this as any).url = (this as any).author.username + '.' + (this as any).slug + '.' + domain;
   next();
 });
 
 ServerSchema.methods.slugify = function () {
   // this.slug = slug(this.title) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36);
-  this.slug = slug(this.title);
+  (this as any).slug = slug((this as any).title);
 };
 
 ServerSchema.methods.toJSONFor = function (user) {
   return {
-    slug: this.slug,
-    title: this.title,
-    description: this.description,
-    body: this.body,
-    createdAt: this.createdAt,
-    updatedAt: this.updatedAt,
-    author: this.author.toProfileJSONFor(user),
-    active: this.active,
-    volume: this.volume,
-    token: this.token,
-    url: this.url
+    slug: (this as any).slug,
+    title: (this as any).title,
+    description: (this as any).description,
+    body: (this as any).body,
+    createdAt: (this as any).createdAt,
+    updatedAt: (this as any).updatedAt,
+    author: (this as any).author.toProfileJSONFor(user),
+    active: (this as any).active,
+    volume: (this as any).volume,
+    token: (this as any).token,
+    url: (this as any).url
   };
 };
 

@@ -86,4 +86,6 @@
 
 /BackEnd/.idea
 /BackEnd/configs/OS.js
+/BackEnd/src/configs/OS.ts
 /BackEnd/dist
+

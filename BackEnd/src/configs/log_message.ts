@@ -1,4 +1,4 @@
-var log_message = {
+const log_message = {
 
     server_access_forbidden: 'user unauthorized to access the server, his is trying to access a not owned server',
     server_update_ok: 'server information updated',
@@ -22,4 +22,4 @@ var log_message = {
 
 };
 
-module.exports = log_message;
+export default log_message;

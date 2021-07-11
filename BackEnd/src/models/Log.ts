@@ -9,7 +9,7 @@ var LogSchema = new mongoose.Schema({
     server: { type: mongoose.Schema.Types.ObjectId, ref: 'Server' }
 }, { timestamps: true });
 
-LogSchema.methods.toJSONFor = function (user) {
+LogSchema.methods.toJSONFor = function (user : any) {
     return {
         type: this.type,
         action: this.action,

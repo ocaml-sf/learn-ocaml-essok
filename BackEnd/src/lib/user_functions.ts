@@ -1,20 +1,20 @@
-const k8s = require('@kubernetes/client-node');
+import * as k8s from '@kubernetes/client-node';
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
-function _createNamespace(namespace) {
-    return k8sApi.createNamespace(namespace);
+function _createNamespace(namespace : k8s.V1Namespace) {
+  return k8sApi.createNamespace(namespace);
 };
 
-function _readNamespace(namespace) {
-    return k8sApi.readNamespace(namespace);
+function _readNamespace(namespace : string) {
+  return k8sApi.readNamespace(namespace);
 };
 
-function _createObjectNamespace(_name) {
-    return namespace = {
+function _createObjectNamespace(name : any) {
+    return {
         metadata: {
-            name: _name,
+            name,
         },
     };
 }

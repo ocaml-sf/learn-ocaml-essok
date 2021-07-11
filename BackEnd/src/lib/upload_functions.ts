@@ -5,7 +5,6 @@ const url = require('url');
 const child_process = require('child_process');
 const rimraf = require("rimraf");
 const swiftClient = require('../clients/swiftClient');
-const read = require('fs-readdir-recursive');
 const global_functions = require('./global_functions');
 const saveFile = 'index_saved.txt'
 const separator = '®';
@@ -26,13 +25,15 @@ const groupPrefix = 'group-';
 
 const defaultIndexObj = require(defaultIndexJsonPath);
 
+export const read = require('fs-readdir-recursive');
+
 /**
  * Workaround to convert a tabOfName (a dumb structure of matrix)
  * the dumb structure is like [ [ "g1", "ex1", "ex2", ...], [ "g2", "ex3", ... ] ]
  * to a standart list of groups
  * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
-function tabOfNameToGroups(tabOfName) {
+export function tabOfNameToGroups(tabOfName : string[][]) {
     return tabOfName.map(group => {
         return { title: group[0], exercises: group.slice(1) };
     });
@@ -43,26 +44,26 @@ function tabOfNameToGroups(tabOfName) {
  * return a promise with the list of groups
  * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
-async function loadIndexJson(dirPath) {
+export async function loadIndexJson(dirPath : string) {
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
     return fsPromises.readFile(filePath)
-        .then(buffer => JSON.parse(buffer))
-        .then(indexObject => Object.values(indexObject.groups));
+        .then((buffer : string) => JSON.parse(buffer))
+        .then((indexObject : any) => Object.values(indexObject.groups));
 }
 
 /**
  * Save the index.json from a list of groups object
  * a group has a structure like { title: "g1", exercises: ["ex1", "ex2", ...] }
  */
-async function saveIndexJson(dirPath, groups) {
+export async function saveIndexJson(dirPath : any, groups : any) {
     const indexObject = JSON.parse(JSON.stringify(defaultIndexObj));
     const filePath = path.join(dirPath, defaultIndexJsonFilename);
 
     for (let i = 0; i < groups.length; i++) {
         indexObject.groups[`${groupPrefix}${i}`] = groups[i];
     }
-    return Promise.resolve(JSON.stringify(indexObject, null, 2))
+    return Promise.resolve(JSON.stringify(indexObject, null, 4))
         .then(buffer => fsPromises.writeFile(filePath, buffer));
 }
 
@@ -72,8 +73,8 @@ function create_IndexJSON_header() {
     });
 }
 
-function create_IndexJSON_body(tabOfName) {
-    return new Promise(function (resolve, reject) {
+function create_IndexJSON_body(tabOfName : any) {
+    return new Promise(resolve => {
         var body = "";
         for (let i = 0; i < tabOfName.length; i++) {
             var group = tabOfName[i];
@@ -102,13 +103,13 @@ function create_IndexJSON_body(tabOfName) {
 }
 
 function create_IndexJSON_footer() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(resolve => {
         return resolve('} }');
     });
 }
 
-function addFileInTabOfName(element, tmp) {
-    return new Promise(function (resolve, reject) {
+function addFileInTabOfName(element : any, tmp : any) {
+    return new Promise(resolve => {
         var new_group = [];
         for (let i = 0; i < element.length; i++) {
             if (i === 0) {
@@ -129,15 +130,16 @@ function addFileInTabOfName(element, tmp) {
     });
 }
 
-function file_to_delete(path, element, useless, tabOfName) {
+function file_to_delete(path : string, element : any,
+                        useless : any, tabOfName : any) {
     return new Promise(function (resolve, reject) {
-        fs.stat(path + element, function (err, stat) {
+        fs.stat(path + element, function (err : any, stat : any) {
             if (err) return reject(err);
             if (stat.isFile()) {
                 console.log(path + element + ' is a file, so it will be deleted');
-                fs.unlink(path + element, function (err) {
+                fs.unlink(path + element, function (err : any) {
                     if (err) return reject(err);
-                    return resolve();
+                    return resolve(undefined);
                 });
             }
             else if (stat.isDirectory()) {
@@ -157,7 +159,7 @@ function file_to_delete(path, element, useless, tabOfName) {
                         const group = tabOfName[i];
                         if (group.includes(element)) {
                             console.log(path + element + ' is included in tabOfName file, possess an meta.json file and is not included in useless file, so it will be kept');
-                            return resolve();
+                            return resolve(undefined);
                         }
                         else {
                             if (i === tabOfName.length - 1) {
@@ -179,23 +181,23 @@ function file_to_delete(path, element, useless, tabOfName) {
     });
 }
 
-function deleteDir(tab_of_dir) {
+function deleteDir(tab_of_dir : any) {
     return new Promise(function (resolve, reject) {
         var tmp = tab_of_dir.length;
         console.log('tmp.length : ' + tmp);
         if (tmp === 0) {
             console.log('no more file to delete');
-            return resolve();
+            return resolve(undefined);
         }
         for (let i = 0; i < tab_of_dir.length; i++) {
-            rimraf(tab_of_dir[i], function (err) {
+            rimraf(tab_of_dir[i], function (err : any) {
                 if (err) return reject(err);
                 console.log('file deleted in tmp');
                 tmp--;
                 console.log('tmp.length : ' + tmp);
                 if (tmp === 0) {
                     console.log('no more file to delete');
-                    return resolve();
+                    return resolve(undefined);
                 }
             })
         }
@@ -208,8 +210,11 @@ function deleteDir(tab_of_dir) {
  * @param {*} format
  * @param {*} archive_name
  */
-async function createArchiveFromDirectory(source, dest, format, archive_name) {
-    var files = read(source).map(file => [path.join(source, file), path.join(dest, file)]);
+export async function createArchiveFromDirectory(source : string, dest : string,
+                                          format : any, archive_name : any) {
+    var files = read(source)
+        .map((file : string) =>
+            [path.join(source, file), path.join(dest, file)]);
     if (files === []) {
         throw 'empty files list';
     }
@@ -223,42 +228,43 @@ async function createArchiveFromDirectory(source, dest, format, archive_name) {
  * format : format of compression (ex: 'zip')
  * archive_name : the name of the archive
  */
-async function createArchive(files, format, archive_name = 'archive') {
+export async function createArchive(files : any, format : any,
+                             archive_name = 'archive') {
     const stream = fs.createWriteStream(archive_name + '.' + format);
     const archive = archiver(format, {});
 
     await new Promise(resolve => {
         stream.on('close', function () {
             console.log('archive ' + archive + ' created');
-            resolve();
+            resolve(undefined);
         });
 
         archive.pipe(stream);
-        files.forEach(file => {
+        files.forEach((file : any) => {
             archive.file(file[0], { name: file[1] });
         });
         archive.finalize();
     });
 }
 
-function _desarchived(dest_path, source_path) {
+export function desarchived(dest_path : any, source_path : any) {
     return new Promise(function (resolve, reject) {
 
         fs.createReadStream(source_path).pipe(unzipper.Extract({ path: dest_path }))
-            .on('close', function (err) {
+            .on('close', function (err : any) {
                 if (err) return reject(err);
                 return resolve(dest_path);
             })
-            .on('error', function (err) {
+            .on('error', function (err : any) {
                 return reject(err);
             });
     });
 }
 
-function _checkFiles(path) {
+export function checkFiles(path : string) {
     return new Promise(function (resolve, reject) {
         if (fs.existsSync(path)) {
-            fs.readdir(path, function (err, files) {
+            fs.readdir(path, function (err : any, files : any) {
                 if (err) return reject(err);
                 else if (!files.length) {
                     return resolve([]);
@@ -271,16 +277,14 @@ function _checkFiles(path) {
     });
 }
 
-function _fileExists(path) {
-    return new Promise(function (resolve, reject) {
-        return resolve(fs.existsSync(path));
-    })
+export function fileExists(path : string) {
+    return Promise.resolve(fs.existsSync(path));
 }
 
-function _unlinkSync(path) {
+export function unlinkSync(path : string) {
     return new Promise(function (resolve, reject) {
         if (fs.existsSync(path)) {
-            fs.unlink(path, function (err) {
+            fs.unlink(path, function (err : any) {
                 if (err) return reject(err);
                 return resolve('deleted');
             })
@@ -290,13 +294,13 @@ function _unlinkSync(path) {
     });
 }
 
-function _copyFile(source, dest) {
+export function copyFile(source : any, dest : any) {
     return new Promise(function (resolve, reject) {
         if (fs.existsSync(source)) {
-            fs.copyFile(source, dest, (err) => {
+            fs.copyFile(source, dest, (err : any) => {
                 if (err) return reject(err);
                 console.log(source + 'was copied to ' + dest);
-                return resolve();
+                return resolve(undefined);
             });
         } else {
             return reject('Source file doesnt exist');
@@ -304,33 +308,35 @@ function _copyFile(source, dest) {
     })
 }
 
-function _download_from_url(file_url, dest_path) {
+export function download_from_url(file_url : any, dest_path : any) {
     return new Promise(function (resolve, reject) {
 
         var file_name = url.parse(file_url).pathname.split('/').pop();
         var wget = 'wget -P ' + dest_path + ' ' + file_url;
 
-        child_process.exec(wget, function (err, stdout, stderr) {
+        child_process.exec(wget, (err : any) => {
             if (err) return reject(err);
             return resolve(dest_path + file_name);
         });
     });
 }
 
-function _delete_useless_files(useless, path, tabOfName, files) {
+export function delete_useless_files(useless : any, path : any,
+                               tabOfName : any, files : any) {
     return new Promise(function (resolve, reject) {
         if (useless === [] || useless === undefined || useless === null) {
             return resolve('nothing to delete');
         }
         //console.log('tabOfName before filter : ' + tabOfName);
-        tabOfName = tabOfName.filter(group => group.length >= 2);
+        tabOfName = tabOfName.filter((group : any) => group.length >= 2);
         //console.log('tabOfName after filter : ' + tabOfName);
 
-        var tmp = [];
+        var tmp : any = [];
         var itemsProcessed = 0;
-        files.forEach((element, index, array) => {
+        files.forEach((element : any, index : any, array : any) => {
             global_functions.asyncFunction(element, () => {
-                file_to_delete(path, element, useless, tabOfName).then((response) => {
+                file_to_delete(path, element, useless, tabOfName)
+                    .then((response) => {
                     if (response) {
                         console.log(response + ' added in tmp');
                         tmp.push(response);
@@ -356,14 +362,14 @@ function _delete_useless_files(useless, path, tabOfName, files) {
     });
 }
 
-function _create_new_tabOfName(save_path, path, tabOfName) {
+export function create_new_tabOfName(save_path : any, path : any, tabOfName : any) {
     return new Promise(function (resolve, reject) {
 
         var nameProcessed = 0;
         var tmp = fs.readdirSync(path);
-        var new_tabOfName = [[]];
+        var new_tabOfName : any = [[]];
 
-        tabOfName.forEach((element, index, array) => {
+        tabOfName.forEach((element : any, index : any, array : any) => {
             global_functions.asyncFunction(element, () => {
                 addFileInTabOfName(element, tmp).then(async (response) => {
                     if (response) {
@@ -374,7 +380,7 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
                     nameProcessed++;
                     if (nameProcessed === array.length) {
                         //console.log('new_tabOfName before filter : ' + new_tabOfName);
-                        new_tabOfName = new_tabOfName.filter(group => group.length >= 2);
+                        new_tabOfName = new_tabOfName.filter((group : any) => group.length >= 2);
                         //console.log('new_tabOfName after filter : ' + new_tabOfName);
                         if (!new_tabOfName.length) {
                             return reject(': No correct files found for index.json');
@@ -395,16 +401,16 @@ function _create_new_tabOfName(save_path, path, tabOfName) {
     });
 }
 
-function _save_tabOfName(save_path, tabOfName) {
+function _save_tabOfName(save_path : any, tabOfName : any) {
     return new Promise(function (resolve, reject) {
         var line = '';
-        tabOfName.forEach(tab => {
-            tab.forEach(element => {
+        tabOfName.forEach((tab : any) => {
+            tab.forEach((element : any) => {
                 line += element + separator;
             });
             line += '\n';
         });
-        fs.writeFile(save_path + saveFile, line, function (err) {
+        fs.writeFile(save_path + saveFile, line, function (err : any) {
             if (err) {
                 console.log('error in saving tabofname');
                 return reject(err);
@@ -415,9 +421,9 @@ function _save_tabOfName(save_path, tabOfName) {
     })
 }
 
-function _load_tabOfName(save_path) {
+export function load_tabOfName(save_path : any) {
     return new Promise(function (resolve, reject) {
-        fs.readFile(save_path + saveFile, 'utf8', function (err, data) {
+        fs.readFile(save_path + saveFile, 'utf8', (err : any, data : any) => {
             if (err) {
                 if (err.code === 'ENOENT') {
                     console.error('The save file doesnt exist now, it is the first time the repository is created');
@@ -449,15 +455,15 @@ function _load_tabOfName(save_path) {
     })
 }
 
-function _create_indexJSON(path, tabOfName) {
+export function create_indexJSON(path : any, tabOfName : any) {
     return new Promise(function (resolve, reject) {
-        create_IndexJSON_header().then((header) => {
+        create_IndexJSON_header().then((header : any) => {
             //console.log('header created : \n' + header);
-            create_IndexJSON_body(tabOfName).then((body) => {
+            create_IndexJSON_body(tabOfName).then((body : any) => {
                 //console.log('body created : \n' + body);
-                create_IndexJSON_footer().then((footer) => {
+                create_IndexJSON_footer().then((footer : any) => {
                     //console.log('footer created : \n' + footer);
-                    fs.writeFile(path, header + body + footer, function (err) {
+                    fs.writeFile(path, header + body + footer, (err : any) => {
                         if (err) return reject(err);
                         console.log('index.json : ' + header + body + footer);
                         return resolve(path + 'exercises/index.json');
@@ -468,7 +474,7 @@ function _create_indexJSON(path, tabOfName) {
     });
 }
 
-async function _getFromSwift(path, slug, target) {
+export async function getFromSwift(path : any, slug : any, target : any) {
     let openrc = 'cd ~ && source openrc.sh';
     let swift = 'swift download ' + slug
         + ' -D ' + path
@@ -483,13 +489,13 @@ async function _getFromSwift(path, slug, target) {
 
     return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
         .then(() => 'done')
-        .catch((err) => {
+        .catch((err : any) => {
             console.log('Error exec !: ' + err);
             throw err;
         });
 }
 
-async function _sendToSwift(path, slug, remote) {
+export async function sendToSwift(path : any, slug : any, remote : any) {
     let openrc = 'cd ~ && source openrc.sh';
     let swift = 'swift upload ' + slug
         + ' ' + path
@@ -502,16 +508,16 @@ async function _sendToSwift(path, slug, remote) {
     let cmd = openrc + ' && ' + swift;
     return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
         .then(() => 'done')
-        .catch((err) => {
+        .catch((err : any) => {
             console.log('Error exec !: ' + err);
             throw err;
         });
 }
 
-function _removeDir(path) {
+export function removeDir(path : any) {
     return new Promise(function (resolve, reject) {
         if (fs.existsSync(path)) {
-            rimraf(path, function (err) {
+            rimraf(path, function (err : any) {
                 if (err) return reject(err);
                 return resolve('removed');
             });
@@ -520,20 +526,21 @@ function _removeDir(path) {
     });
 }
 
-function _renameDir(oldPath, newPath, unknown, remove_if_not_empty) {
+export function renameDir(oldPath : any, newPath : any,
+                    unknown : any, remove_if_not_empty : any) {
     return new Promise(function (resolve, reject) {
         if (unknown) {
-            fs.readdir(oldPath, function (err, files) {
+            fs.readdir(oldPath, function (err : any, files : any) {
                 if (err) return reject(err);
                 else {
-                    fs.rename(oldPath + files[0], newPath, function (err) {
+                    fs.rename(oldPath + files[0], newPath, (err : any) => {
                         if (err) return reject(err);
                         return resolve('renamed');
                     })
                 }
             })
         } else {
-            fs.rename(oldPath, newPath, function (err) {
+            fs.rename(oldPath, newPath, function (err : any) {
                 if (err) {
                     return reject(err);
                 }
@@ -544,23 +551,9 @@ function _renameDir(oldPath, newPath, unknown, remove_if_not_empty) {
     })
 }
 
-function _moveDir(oldPath, newPath) {
+export function createDir(path : any) {
     return new Promise(function (resolve, reject) {
-        fsDir.move(oldPath, newPath, function (err) {
-            if (err) {
-                return reject(err);
-            }
-            else {
-                return resolve('ok');
-            }
-        })
-
-    })
-}
-
-function _createDir(path) {
-    return new Promise(function (resolve, reject) {
-        fs.mkdir(path, function (err) {
+        fs.mkdir(path, function (err : any) {
             if (err) {
                 if (err.code === 'EEXIST') {
                     console.error('my repository already exists at ' + path);
@@ -573,14 +566,16 @@ function _createDir(path) {
     });
 }
 
-function _createArbo(path, server_name, safe_folder, dirt_folder, save_folder, download_folder) {
+export function createArbo(path : any, server_name : any,
+                     safe_folder : any, dirt_folder : any, save_folder : any,
+                     download_folder : any) {
     return new Promise(function (resolve, reject) {
-        _createDir(path).then(() => {
-            _createDir(path + server_name).then(() => {
-                _createDir(path + server_name + safe_folder).then(() => {
-                    _createDir(path + server_name + dirt_folder).then(() => {
-                        _createDir(path + server_name + save_folder).then(() => {
-                            _createDir(path + server_name + download_folder).then(() => {
+        createDir(path).then(() => {
+            createDir(path + server_name).then(() => {
+                createDir(path + server_name + safe_folder).then(() => {
+                    createDir(path + server_name + dirt_folder).then(() => {
+                        createDir(path + server_name + save_folder).then(() => {
+                            createDir(path + server_name + download_folder).then(() => {
                                 return resolve('done');
                             }, (err) => {
                                 console.log('Error creating download_folder !: ' + err);
@@ -610,9 +605,9 @@ function _createArbo(path, server_name, safe_folder, dirt_folder, save_folder, d
     });
 }
 
-function _copyDir(source, destination) {
+export function copyDir(source : any, destination : any) {
     return new Promise(function (resolve, reject) {
-        fsDir.copy(source, destination, function (err) {
+        fsDir.copy(source, destination, (err : any) => {
             if (err) {
                 console.log('An error occured while copying the folder.')
                 return reject(err);
@@ -623,9 +618,9 @@ function _copyDir(source, destination) {
     })
 }
 
-function _moveDir(source, destination) {
+export function moveDir(source : any, destination : any) {
     return new Promise(function (resolve, reject) {
-        fsDir.move(source, destination, function (err) {
+        fsDir.move(source, destination, function (err : any) {
             if (err) {
                 console.log('An error occured while moving the folder.')
                 return reject(err);
@@ -637,19 +632,22 @@ function _moveDir(source, destination) {
 
 }
 
-function _archive_traitement(dest_path, source_path, archive_folder, safe_folder, link_github = '') {
+export function archive_traitement(dest_path : any, source_path : any,
+                             archive_folder : any, safe_folder : any,
+                             link_github = '') {
     return new Promise(function (resolve, reject) {
-        _desarchived(dest_path + archive_folder, source_path).then((response) => {
+        desarchived(dest_path + archive_folder, source_path).then((response) => {
             console.log('desachived done');
-            _checkFiles(dest_path + archive_folder).then((archive_name) => {
+            checkFiles(dest_path + archive_folder).then((archive_name : any) => {
                 console.log('check done');
-                _copyDir(dest_path + archive_folder + archive_name[0] + link_github, dest_path + safe_folder).then((response) => {
+                copyDir(dest_path + archive_folder + archive_name[0] + link_github, dest_path + safe_folder)
+                    .then((response : any) => {
                     console.log('copyDir done');
-                    _removeDir(dest_path + archive_folder).then(() => {
+                    removeDir(dest_path + archive_folder).then(() => {
                         console.log('removeDir done');
-                        _unlinkSync(source_path).then((response) => {
+                        unlinkSync(source_path).then((response) => {
                             console.log('unlink done');
-                            _checkFiles(dest_path + safe_folder).then((files) => {
+                            checkFiles(dest_path + safe_folder).then((files) => {
                                 console.log('checkFiles done');
                                 console.log('archive traitement done');
                                 return resolve(files);
@@ -679,28 +677,31 @@ function _archive_traitement(dest_path, source_path, archive_folder, safe_folder
         });
     });
 }
-function _archive_complete_traitement(dest_path, safe_folder, slug) {
+
+export function archive_complete_traitement(dest_path : any, safe_folder : any,
+                                      slug : any) {
     return new Promise(function (resolve, reject) {
         var fileProcessed = 0;
-        _checkFiles(dest_path + safe_folder + repository).then((files) => {
+        checkFiles(dest_path + safe_folder + repository)
+            .then((files : any) => {
             console.log('checkFiles done');
             if (files === undefined || files === [] || files.length === 0) {
                 return reject('no correct repository found, please update an archive with the correct format : repository + sync');
             } else {
-                files.forEach((element, index, array) => {
+                files.forEach((element : any, index : any, array : any) => {
                     global_functions.asyncFunction(element, () => {
-                        _copyDir(dest_path + safe_folder + repository + '/' + element, dest_path + safe_folder + element).then((response) => {
+                        copyDir(dest_path + safe_folder + repository + '/' + element, dest_path + safe_folder + element).then((response : any) => {
                             console.log('copyDir ' + fileProcessed + ' done');
                             fileProcessed++;
                             if (fileProcessed === array.length) {
                                 console.log('checkFiles done');
                                 // return resolve('ok');
-                                _sendToSwift(dest_path + safe_folder + repository, slug, repository).then(() => {
+                                sendToSwift(dest_path + safe_folder + repository, slug, repository).then(() => {
                                     console.log('repository send');
-                                    _sendToSwift(dest_path + safe_folder + sync, slug, sync).then(() => {
+                                    sendToSwift(dest_path + safe_folder + sync, slug, sync).then(() => {
                                         console.log('sync send');
-                                        _removeDir(dest_path + safe_folder + repository).then(() => {
-                                            _removeDir(dest_path + safe_folder + sync).then(() => {
+                                        removeDir(dest_path + safe_folder + repository).then(() => {
+                                            removeDir(dest_path + safe_folder + sync).then(() => {
                                                 return resolve('ok');
                                             }, (err) => {
                                                 console.log('Error removeDir sync !: ' + err);
@@ -734,31 +735,33 @@ function _archive_complete_traitement(dest_path, safe_folder, slug) {
     })
 }
 
+export function parse_url(file_url : any) {
+    return url.parse(file_url).host;
+}
+
+/*
 var upload_functions = {
-    read,
-    desarchived: _desarchived,
-    checkFiles: _checkFiles,
-    unlinkSync: _unlinkSync,
-    download_from_url: _download_from_url,
-    delete_useless_files: _delete_useless_files,
-    create_new_tabOfName: _create_new_tabOfName,
-    create_indexJSON: _create_indexJSON,
-    sendToSwift: _sendToSwift,
-    getFromSwift: _getFromSwift,
+    unlinkSync: unlinkSync,
+    download_from_url: download_from_url,
+    delete_useless_files: delete_useless_files,
+    create_new_tabOfName: create_new_tabOfName,
+    create_indexJSON: create_indexJSON,
+    sendToSwift: sendToSwift,
+    getFromSwift: getFromSwift,
     createArchive,
     createArchiveFromDirectory,
-    removeDir: _removeDir,
-    renameDir: _renameDir,
-    createArbo: _createArbo,
-    copyFile: _copyFile,
-    copyDir: _copyDir,
-    moveDir: _moveDir,
-    fileExists: _fileExists,
-    load_tabOfName: _load_tabOfName,
-    archive_traitement: _archive_traitement,
-    archive_complete_traitement: _archive_complete_traitement,
-    createDir: _createDir,
-    parse_url: function (file_url) {
+    removeDir: removeDir,
+    renameDir: renameDir,
+    createArbo: createArbo,
+    copyFile: copyFile,
+    copyDir: copyDir,
+    moveDir: moveDir,
+    fileExists: fileExists,
+    load_tabOfName: load_tabOfName,
+    archive_traitement: archive_traitement,
+    archive_complete_traitement: archive_complete_traitement,
+    createDir: createDir,
+    parse_url: function (file_url : any) {
         return url.parse(file_url).host;
     },
     saveIndexJson,
@@ -767,3 +770,4 @@ var upload_functions = {
 };
 
 module.exports = upload_functions;
+*/

@@ -1,14 +1,14 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose'
 var Log = mongoose.model('Log');
 
-function _create(type, action, message = null, author = null, server = null) {
+export function create(type : any, action : any, message : any = null, author : any = null, server : any = null) {
     return new Promise((resolve, reject) => {
         var log = new Log();
-        log.type = type;
-        log.action = action;
-        log.message = message;
-        log.author = author;
-        log.server = server;
+        (log as any).type = type;
+        (log as any).action = action;
+        (log as any).message = message;
+        (log as any).author = author;
+        (log as any).server = server;
         return log.save().then(() => {
             console.log(log);
             return resolve(log);
@@ -19,21 +19,13 @@ function _create(type, action, message = null, author = null, server = null) {
     });
 }
 
-function _delete(log) {
+export function remove(log : any) {
     return new Promise((resolve, reject) => {
-        log.remove().then(() => {
-            return resolve();
-        }, (err) => {
+      log.remove()
+        .then(resolve)
+        .catch((err : Error) => {
             console.log('Error deleting log !: ' + err);
             return reject(err);
         });
     });
-
 }
-
-var log_functions = {
-    create: _create,
-    delete: _delete,
-}
-
-module.exports = log_functions;

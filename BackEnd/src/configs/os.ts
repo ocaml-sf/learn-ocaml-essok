@@ -1,5 +1,5 @@
 // rename this file OS.js
-// var OS = {
+// const OS = {
 //     provider: '',
 //     identityApiVersion: '',
 //     username: '',
@@ -11,4 +11,4 @@
 //     defaultContainerName: ''
 // };
 
-// module.exports = OS;
+// export default OS;
