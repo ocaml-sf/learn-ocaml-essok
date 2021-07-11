@@ -1,0 +1,25 @@
+{
+    "compilerOptions" : {
+        /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+        /* Basic Options */
+        "lib" : [ "es2020" ],
+        "module" : "commonjs",
+        "outDir" : "./dist",
+        "sourceMap" : true,
+        "target" : "es6",
+
+        /* Strict Type-Checking Options */
+        "strict" : true,
+	"emitDecoratorMetadata" : true,
+	"experimentalDecorators" : true,
+
+        /* Module Resolution Options */
+        "moduleResolution" : "node",
+        "esModuleInterop" : true
+    },
+    "include" : [
+        "src/**/*.ts",
+        "test/**/*.ts",
+    ]
+}
