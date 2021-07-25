@@ -3,9 +3,10 @@
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     /* Basic Options */
+    "baseUrl": "src/",
     "lib" : [ "es2020" ],
     "module" : "commonjs",
-    "outDir" : "./dist",
+    "outDir" : "dist",
     "sourceMap" : true,
     "target" : "es6",
 

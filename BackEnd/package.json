@@ -4,8 +4,11 @@
   "description": "essok on node",
   "main": "app.ts",
   "scripts": {
-    "build": "tsc -p tsconfig-build.json",
-    "nodemon": "nodemon src/app.ts",
+    "build": "npm run tsc && npm run copy",
+    "tsc": "tsc -p tsconfig-build.json",
+    "copy": "cp src/configs/*.json dist/configs/",
+    "prod": "NODE_PATH=dist/ NODE_ENV=production node dist/app.js",
+    "nodemon": "NODE_PATH=src/ nodemon src/app.ts",
     "dev": "NODE_ENV=development DOTENV_CONFIG_PATH=.env-dev npm run nodemon",
     "lint": "eslint src/**/*.ts --quiet"
   },
@@ -20,7 +23,9 @@
     "body-parser": "^1.19.0",
     "child_process": "^1.0.2",
     "cors": "2.8.5",
+    "dotenv": "^10.0.0",
     "ejs": "3.1.5",
+    "envalid": "^7.1.1",
     "errorhandler": "1.5.1",
     "express": "^4.17.1",
     "express-generator": "^4.16.1",
