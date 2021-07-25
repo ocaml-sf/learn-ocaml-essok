@@ -1,5 +1,8 @@
 {
   "events": {
     "start": "clear"
-  }
+  },
+  "ext": "ts",
+  "ignore": [".git", "node_modules", "dist", "uploads"],
+  "watch": ["./src"]
 }

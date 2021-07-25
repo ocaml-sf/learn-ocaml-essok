@@ -12,16 +12,16 @@ function _readNamespace(namespace : string) {
 };
 
 function _createObjectNamespace(name : any) {
-    return {
-        metadata: {
-            name,
-        },
-    };
+  return {
+    metadata: {
+      name,
+    },
+  };
 }
 var user_functions = {
-    createNamespace: _createNamespace,
-    readNamespace: _readNamespace,
-    createObjectNamespace: _createObjectNamespace,
+  createNamespace: _createNamespace,
+  readNamespace: _readNamespace,
+  createObjectNamespace: _createObjectNamespace,
 }
 
 module.exports = user_functions;
