@@ -16,10 +16,7 @@ To get the Node server running locally:
 
 - [@kubernetes/client-node](https://github.com/kubernetes-client/javascript) - A Kubernetes client for node
 - [archiver](https://github.com/kubernetes-client/javascript) - A streaming interface for archive generation
-- [body-parser](https://github.com/expressjs/body-parser) - Node.js body parsing middleware
 - [cors](https://github.com/expressjs/cors) - Node.js CORS middleware
-- [ejs](https://github.com/mde/ejs) - Embedded JavaScript templates
-- [errorhandler](https://github.com/expressjs/errorhandler) - Development-only error handler middleware
 - [express](https://github.com/expressjs/express) - The server for handling and routing HTTP requests
 - [express-jwt](https://github.com/auth0/express-jwt) - Middleware for validating JWTs for authentication
 - [formidable](https://github.com/node-formidable/formidable) - A node.js module for parsing form data, especially file uploads
