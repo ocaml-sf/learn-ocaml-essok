@@ -2,8 +2,8 @@ import express from 'express'
 import { AddressInfo } from 'net'
 
 import env from './env'
-
 import { middlesDev, middlesProd } from './middlewares'
+import { api } from './controllers'
 
 const mongoose = require('mongoose')
 
@@ -30,9 +30,9 @@ require('./models/User');
 require('./models/Server');
 require('./models/Log');
 require('./configs/passport');
-
-app.use(require('./routes'));
 /* eslint-enable */
+
+app.use('/api', api())
 
 // finally, let's start our server...
 const server = app.listen(process.env.PORT || 3000, function () {

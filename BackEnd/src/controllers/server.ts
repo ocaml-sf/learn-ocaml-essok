@@ -2,15 +2,15 @@ import { Router } from 'express';
 var mongoose = require('mongoose');
 var Server = mongoose.model('Server');
 var User = mongoose.model('User');
-const defaultContainerName = require('../../configs/OS').defaultContainerName;
+const defaultContainerName = require('../configs/OS').defaultContainerName;
 
-import auth from '../auth';
+import auth from './auth';
 
-import * as server_functions from '../../lib/server_functions';
-import * as log_functions from '../../lib/log_functions';
+import * as server_functions from '../lib/server_functions';
+import * as log_functions from '../lib/log_functions';
 
-import api_code from '../../configs/api_code';
-import log_message from '../../configs/log_message';
+import api_code from '../configs/api_code';
+import log_message from '../configs/log_message';
 
 const router = Router();
 

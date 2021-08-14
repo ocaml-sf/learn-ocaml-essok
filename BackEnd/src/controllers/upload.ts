@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 
-import auth from '../auth';
+import auth from './auth';
 
-import * as upload_functions from '../../lib/upload_functions';
-import upload_errors from '../../lib/errors';
+import * as upload_functions from '../lib/upload_functions';
+import upload_errors from '../lib/errors';
 
-import api_code from '../../configs/api_code';
+import api_code from '../configs/api_code';
 
 const dirPath = './uploads/';
 var destPath = '';
