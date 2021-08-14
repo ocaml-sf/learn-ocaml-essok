@@ -3,12 +3,12 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var User = mongoose.model('User');
 
-import auth from '../auth';
+import auth from './auth';
 
-import * as server_functions from '../../lib/server_functions';
-import * as global_functions from '../../lib/global_functions';
+import * as server_functions from '../lib/server_functions';
+import * as global_functions from '../lib/global_functions';
 
-import api_code from '../../configs/api_code';
+import api_code from '../configs/api_code';
 
 const router = Router();
 
