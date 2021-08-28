@@ -39,3 +39,9 @@ const server = app.listen(process.env.PORT || 3000, function () {
   console.log('Listening on port ' + (server.address() as AddressInfo).port)
 })
 server.setTimeout(30 * 60 * 1000)
+
+/* eslint-disable */
+import { SwiftService } from './cloud/SwiftService'
+
+new SwiftService()
+/* eslint-enable */
