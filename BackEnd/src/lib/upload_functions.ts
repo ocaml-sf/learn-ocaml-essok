@@ -4,7 +4,6 @@ const unzipper = require('unzipper');
 const url = require('url');
 const child_process = require('child_process');
 const rimraf = require("rimraf");
-const swiftClient = require('../clients/swiftClient');
 const global_functions = require('./global_functions');
 const saveFile = 'index_saved.txt'
 const separator = '®';
@@ -13,8 +12,6 @@ const repository = 'repository/';
 const sync = 'sync/';
 const archiver = require('archiver');
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
-
 
 const path = require('path');
 const fsPromises = fs.promises;
@@ -474,46 +471,6 @@ export function create_indexJSON(path : any, tabOfName : any) {
   });
 }
 
-export async function getFromSwift(path : any, slug : any, target : any) {
-  let openrc = 'cd ~ && source openrc.sh';
-  let swift = 'swift download ' + slug
-        + ' -D ' + path
-        + ' --skip-identical > /dev/null';
-
-  if (target !== 'all') {
-    swift += ' -p ' + target;
-  }
-  let cmd = openrc + ' && ' + swift;
-  console.log('downloading...');
-  console.log(cmd);
-
-  return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
-    .then(() => 'done')
-    .catch((err : any) => {
-      console.log('Error exec !: ' + err);
-      throw err;
-    });
-}
-
-export async function sendToSwift(path : any, slug : any, remote : any) {
-  let openrc = 'cd ~ && source openrc.sh';
-  let swift = 'swift upload ' + slug
-        + ' ' + path
-        + ' --skip-identical > /dev/null';
-
-  if(remote !== undefined) {
-    swift += ' --object-name ' + remote;
-  }
-
-  let cmd = openrc + ' && ' + swift;
-  return exec(cmd, { shell: '/bin/bash', maxBuffer: 1024 * 4096 })
-    .then(() => 'done')
-    .catch((err : any) => {
-      console.log('Error exec !: ' + err);
-      throw err;
-    });
-}
-
 export function removeDir(path : any) {
   return new Promise(function (resolve, reject) {
     if (fs.existsSync(path)) {
@@ -678,63 +635,6 @@ export function archive_traitement(dest_path : any, source_path : any,
   });
 }
 
-export function archive_complete_traitement(dest_path : any, safe_folder : any,
-  slug : any) {
-  return new Promise(function (resolve, reject) {
-    var fileProcessed = 0;
-    checkFiles(dest_path + safe_folder + repository)
-      .then((files : any) => {
-        console.log('checkFiles done');
-        if (files === undefined || files === [] || files.length === 0) {
-          return reject('no correct repository found, please update an archive with the correct format : repository + sync');
-        } else {
-          files.forEach((element : any, index : any, array : any) => {
-            global_functions.asyncFunction(element, () => {
-              copyDir(dest_path + safe_folder + repository + '/' + element, dest_path + safe_folder + element).then((response : any) => {
-                console.log('copyDir ' + fileProcessed + ' done');
-                fileProcessed++;
-                if (fileProcessed === array.length) {
-                  console.log('checkFiles done');
-                  // return resolve('ok');
-                  sendToSwift(dest_path + safe_folder + repository, slug, repository).then(() => {
-                    console.log('repository send');
-                    sendToSwift(dest_path + safe_folder + sync, slug, sync).then(() => {
-                      console.log('sync send');
-                      removeDir(dest_path + safe_folder + repository).then(() => {
-                        removeDir(dest_path + safe_folder + sync).then(() => {
-                          return resolve('ok');
-                        }, (err) => {
-                          console.log('Error removeDir sync !: ' + err);
-                          return reject(err);
-                        });
-                      }, (err) => {
-                        console.log('Error removeDir repo !: ' + err);
-                        return reject(err);
-                      });
-                    }, (err) => {
-                      console.log('Error send repository to swift !: ' + err);
-                      return reject(err);
-                    });
-                  }, (err) => {
-                    console.log('Error send sync to swift !: ' + err);
-                    return reject(err);
-                  });
-
-                }
-              }, (err) => {
-                console.log('Error copy dir !: ' + err);
-                return reject(err);
-              });
-            });
-          })
-        }
-      }, (err) => {
-        console.log('Error checkfiles !: ' + err);
-        return reject(err);
-      });
-  })
-}
-
 export function parse_url(file_url : any) {
   return url.parse(file_url).host;
 }
@@ -746,8 +646,6 @@ var upload_functions = {
     delete_useless_files: delete_useless_files,
     create_new_tabOfName: create_new_tabOfName,
     create_indexJSON: create_indexJSON,
-    sendToSwift: sendToSwift,
-    getFromSwift: getFromSwift,
     createArchive,
     createArchiveFromDirectory,
     removeDir: removeDir,
@@ -759,7 +657,6 @@ var upload_functions = {
     fileExists: fileExists,
     load_tabOfName: load_tabOfName,
     archive_traitement: archive_traitement,
-    archive_complete_traitement: archive_complete_traitement,
     createDir: createDir,
     parse_url: function (file_url : any) {
         return url.parse(file_url).host;

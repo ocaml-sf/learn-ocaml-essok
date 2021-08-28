@@ -9,11 +9,9 @@ k8sApiIngress.defaultHeaders = {
   'Content-Type': 'application/strategic-merge-patch+json',
   ...k8sApiIngress.defaultHeaders,
 };
-import { swiftClient } from '../clients/swiftClient';
-import { OS } from '../configs/OS';
 
+import env from 'env'
 import * as global_functions from './global_functions';
-import * as upload_functions from './upload_functions';
 
 const podLabelPrefix = 'app=';
 const intervalTime = 5000;
@@ -139,35 +137,35 @@ function createObjectDeployment(slug : string) {
             }],
             env: [{
               name: 'OS_AUTH_URL',
-              value: OS.authUrl
-            },
-            {
-              name: 'ST_AUTH_VERION',
-              value: OS.identityApiVersion
-            },
-            {
-              name: 'OS_USERNAME',
-              value: OS.username
+              value: env.OS_AUTH_URL
             },
             {
               name: 'OS_USER_DOMAIN_NAME',
-              value: OS.domainName
-            },
-            {
-              name: 'OS_PASSWORD',
-              value: OS.password
-            },
-            {
-              name: 'OS_PROJECT_NAME',
-              value: OS.projectName
+              value: env.OS_USER_DOMAIN_NAME
             },
             {
               name: 'OS_PROJECT_DOMAIN_NAME',
-              value: OS.domainName
+              value: env.OS_PROJECT_DOMAIN_NAME
+            },
+            {
+              name: 'OS_USERNAME',
+              value: env.OS_USERNAME
+            },
+            {
+              name: 'OS_PASSWORD',
+              value: env.OS_PASSWORD
+            },
+            {
+              name: 'OS_TENANT_ID',
+              value: env.OS_TENANT_ID
+            },
+            {
+              name: 'OS_TENANT_NAME',
+              value: env.OS_TENANT_NAME
             },
             {
               name: 'OS_REGION_NAME',
-              value: OS.region
+              value: env.OS_REGION_NAME
             }
             ],
             args: [slug]
@@ -218,13 +216,6 @@ export function createObjectRule(slug : string, username : string) {
   }
 }
 
-function createObjectContainer(slug : string) {
-  return {
-    name: slug,
-    metadata: {}
-  }
-}
-
 export async function createkubelink(slug : string, username : string,
   namespace : string) {
   const deployment = createObjectDeployment(slug);
@@ -237,79 +228,6 @@ export async function createkubelink(slug : string, username : string,
 
   console.log('kubelink created');
   return 'done';
-};
-
-export function createSwiftContainer(slug : string) {
-  return new Promise(function (resolve, reject) {
-    swiftClient.createContainer(createObjectContainer(slug),
-      function (err : any, container : any) {
-        if (err) return reject(err);
-        return resolve(container);
-      });
-  });
-};
-
-function getSwiftContainer(slug : string) {
-  return new Promise(function (resolve, reject) {
-    swiftClient.getContainers(function (err : any, containers : any) {
-      if (err) return reject(err);
-      else {
-        for (let i = 0; i < containers.length; i++) {
-          if (containers[i].name === slug) {
-            return resolve(containers[i]);
-          } else {
-            if (i === containers.length - 1) {
-              return reject('not found');
-            }
-          }
-        }
-      }
-    });
-  });
-};
-
-export function copySwiftContainerFile(containerSrc : any, containerDst : any, file : any) {
-  return new Promise((resolve, reject) => {
-    swiftClient.copy({
-      sourceContainer: containerSrc,
-      destinationContainer: containerDst,
-      sourceFile: file,
-      destinationFile: file
-    }, (err : any, res : any) => {
-      if (err !== null)
-        reject(err);
-      resolve(res);
-    });
-  });
-}
-
-export function copySwiftContainer(containerSrc : any, containerDst : any) {
-  return new Promise((resolve, reject) => {
-    swiftClient.getFiles(containerSrc, (err : any, files : any) => {
-      if (err !== null)
-        reject(err);
-      files = files.map((file : any) => copySwiftContainerFile(containerSrc,
-        containerDst,
-        file));
-      Promise.all(files).then(resolve, reject);
-    });
-  });
-}
-
-function destroySwiftContainer(slug : string) {
-  return new Promise(function (resolve, reject) {
-    getSwiftContainer(slug)
-      .then(function (response) {
-        swiftClient.destroyContainer(response,
-          function (err : any, result : any) {
-            if (err) return reject(err);
-            return resolve(result);
-          });
-      }).catch(() => {
-        console.log('already deleted');
-        return resolve('already deleted');
-      });
-  });
 };
 
 function removeIngressFile(rules : any, slug : string) {
@@ -367,16 +285,5 @@ export async function removekubelink(slug : string, namespace : string) {
   await deleteNamespacedDeployment(slug, namespace)
     .then(() => console.log('deployment removed'))
     .catch(() => console.error('deployment error, ignoring...'));
-  return 'done';
-}
-
-export async function deleteAll(slug : string, namespace : string,
-  path : string) {
-  await removekubelink(slug, namespace)
-    .then(() => console.log('kubelink removed'));
-  await destroySwiftContainer(slug)
-    .then(() => console.log('swift container removed'));
-  await upload_functions.removeDir(path)
-    .then(() => console.log('server deleted'));
   return 'done';
 }

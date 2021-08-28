@@ -1,12 +1,17 @@
 import { Router, Request, Response, NextFunction } from 'express'
 
-export function api () {
+import { CloudService } from 'cloud/CloudService'
+import { userAPI } from './users'
+import { serverAPI } from './server'
+import { uploadAPI } from './upload'
+
+export function api (cloud: CloudService) {
   const router = Router()
   /* TODO: use ES6 import */
-  router.use(require('./users'))
+  router.use(userAPI(cloud))
   router.use('/profiles', require('./profiles'))
-  router.use('/servers', require('./server'))
-  router.use('/uploads', require('./upload'))
+  router.use('/servers', serverAPI(cloud))
+  router.use('/uploads', uploadAPI(cloud))
 
   /* TODO: move or remove this error handler */
   function mongooseErrorHandler (err: any, _req: Request,

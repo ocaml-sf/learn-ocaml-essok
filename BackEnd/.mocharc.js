@@ -10,5 +10,5 @@ module.exports = {
     reporter : "spec",
     require : ["ts-node/register, dotenv/config"],
     watch : true,
-    watchFiles : ["src/**/*.ts", "test/**/*.ts"]
+    watchFiles : ["src/**/*.ts"]
 }

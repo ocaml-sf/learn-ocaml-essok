@@ -26,7 +26,6 @@ To get the Node server running locally:
 - [mongoose-unique-validator](https://github.com/blakehaswell/mongoose-unique-validator) - For handling unique validation errors in Mongoose. Mongoose only handles validation at the document level, so a unique index across a collection will throw an exception at the driver level. The `mongoose-unique-validator` plugin helps us by formatting the error like a normal mongoose `ValidationError`.
 - [morgan](https://github.com/expressjs/morgan) - HTTP request logger middleware for node.js
 - [passport](https://github.com/jaredhanson/passport) - For handling user authentication
-- [pkgcloud](https://github.com/pkgcloud/pkgcloud) - A provider agnostic cloud library for Node.js
 - [rimraf](https://github.com/isaacs/rimraf) - A deep deletion module for node (like `rm -rf`)
 - [slug](https://github.com/dodo/node-slug) - For encoding titles into a URL-friendly format
 
