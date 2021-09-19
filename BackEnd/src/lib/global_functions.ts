@@ -1,4 +1,4 @@
-const tokenObj = {
+export const tokenObj = {
     regexps: [
         'Initial teacher token created: ',
         'Found the following teacher tokens:\n  - ',
@@ -7,7 +7,7 @@ const tokenObj = {
     errorNotFound: 'Token not found',
 };
 
-function _asyncFunction(item, cb) {
+export function asyncFunction(item : any, cb : Function) {
     setTimeout(() => {
         console.log('done with', item);
         cb();
@@ -18,40 +18,32 @@ function _asyncFunction(item, cb) {
  * create a Promise that wait before returning result
  * callback must be a function that take no arguments (only unit)
  */
-async function _timedRun(callback, ms) {
+export async function timedRun(callback : Function, ms : number) {
     let result = await new Promise(resolve => {
         setTimeout(() => resolve(callback()), ms);
     });
     return result;
 }
 
-async function _tryFindTeacherToken(log, regexp, regexpLen) {
+async function tryFindTeacherToken(log : string,
+                                    regexp : string, regexpLen : number) {
     var index = log.indexOf(regexp);
     if (index === -1)
         throw tokenObj.errorNotFound;
     return log.substr(index + regexpLen, tokenObj.length);
 }
 
-async function _tryAllFindTeacherToken(log) {
-    async function _tryFindIter(regexps) {
+export async function tryAllFindTeacherToken(log : any) {
+    async function tryFindIter(regexps : string[]) : Promise<string> {
         let regexp = regexps[0];
 
-        return _tryFindTeacherToken(log, regexp, regexp.length)
+        return tryFindTeacherToken(log, regexp, regexp.length)
             .catch(err => {
                 if (err === tokenObj.errorNotFound && regexps.length > 1)
-                    return _tryFindIter(regexps.slice(1));
+                    return tryFindIter(regexps.slice(1));
                 else
                     throw err;
             });
     }
-    return _tryFindIter(tokenObj.regexps);
+    return tryFindIter(tokenObj.regexps);
 }
-
-var global_functions = {
-    tokenObj,
-    asyncFunction: _asyncFunction,
-    tryFindTeacherToken: _tryAllFindTeacherToken,
-    timedRun: _timedRun
-};
-
-module.exports = global_functions;

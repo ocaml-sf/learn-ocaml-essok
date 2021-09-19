@@ -1,7 +1,8 @@
-var jwt = require('express-jwt');
-var secret = require('../configs').secret;
+const jwt = require('express-jwt');
 
-function getTokenFromHeader(req) {
+import { secret } from '../configs';
+
+function getTokenFromHeader(req : any) {
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token' ||
     req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
     return req.headers.authorization.split(' ')[1];
@@ -10,7 +11,7 @@ function getTokenFromHeader(req) {
   return null;
 }
 
-var auth = {
+const auth = {
   required: jwt({
     secret: secret,
     userProperty: 'payload',
@@ -26,4 +27,4 @@ var auth = {
   })
 };
 
-module.exports = auth;
+export default auth;

@@ -1,21 +1,24 @@
-var router = require('express').Router();
+import { Router } from 'express';
 var mongoose = require('mongoose');
 var Server = mongoose.model('Server');
 var User = mongoose.model('User');
-var auth = require('../auth');
-var events = require('events');
-const server_functions = require('../../lib/server_functions');
-const log_functions = require('../../lib/log_functions');
-const errors_functions = require('../../lib/errors');
-const log_message = require('../../configs/log_message');
-const api_code = require('../../configs/api_code');
 const defaultContainerName = require('../../configs/OS').defaultContainerName;
 
+import auth from '../auth';
+
+import * as server_functions from '../../lib/server_functions';
+import * as log_functions from '../../lib/log_functions';
+
+import api_code from '../../configs/api_code';
+import log_message from '../../configs/log_message';
+
+const router = Router();
+
 // Preload server objects on routes with ':server'
-router.param('server', function (req, res, next, slug) {
+router.param('server', function (req : any, res, next, slug) {
     Server.findOne({ slug: slug })
         .populate('author')
-        .then(function (server) {
+        .then(function (server : any) {
             if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
 
             req.server = server;
@@ -24,12 +27,13 @@ router.param('server', function (req, res, next, slug) {
         }).catch(next);
 });
 
-router.get('/', auth.required, function (req, res, next) {
+router.get('/', auth.required, function (req : any, res, next) {
 
-    User.findById(req.payload.id).then(function (user) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (!user) {
             log_functions.create('error', 'get /server/',
-                log_message.user_account_unknown + user, user, req.server);
+                                 log_message.user_account_unknown + user,
+                                 user, req.server);
             return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
         }
         if (!user.isAdmin() && !user.authorized) {
@@ -44,16 +48,17 @@ router.get('/', auth.required, function (req, res, next) {
             return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
         }
         var author = req.query.author;
-        user.findAnUser(author).then(function (results) {
+        user.findAnUser(author).then(function (results : any) {
 
             author = results[0];
             console.log(author);
-            user.findAllServersOfAnUser(req.query, author, req.payload).then(function (results) {
+            user.findAllServersOfAnUser(req.query, author, req.payload)
+                .then(function (results : any) {
                 var servers = results[0];
                 var serversCount = results[1];
                 log_functions.create('general', 'get /server/', 'ok', user, req.server)
                 return res.json({
-                    servers: servers.map(function (server) {
+                    servers: servers.map(function (server : any) {
                         return server.toJSONFor(author);
                     }),
                     serversCount: serversCount
@@ -64,8 +69,8 @@ router.get('/', auth.required, function (req, res, next) {
 
 });
 
-router.post('/', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
+router.post('/', auth.required, function (req : any, res, next) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (!user) {
             log_functions.create('error', 'post /server/',
                 log_message.user_account_unknown + user, user, req.server);
@@ -85,13 +90,15 @@ router.post('/', auth.required, function (req, res, next) {
         server.author = user;
         log_functions.create('bin', 'post /server/', log_message.user_server_created, user, server);
         return server.save().then(function () {
-            server_functions.createSwiftContainer(server.slug).then((_) => {
-                server_functions.copySwiftContainer(defaultContainerName, server.slug).then(_ => {
+            server_functions.createSwiftContainer(server.slug)
+                .then(() => {
+                    server_functions.copySwiftContainer(defaultContainerName, server.slug)
+                        .then(() => {
                     log_functions.create('general', 'post /server/', log_message.user_swift_created, user, server);
                     console.log('swift created');
                     return res.json({ server: server.toJSONFor(user) });
                 });
-            }, (err) => {
+            }, (err : any) => {
                 log_functions.create('error', 'post /server/',
                     log_message.user_swift_error, user, server);
                 return res.status(api_code.error).send({ errors: { err } });
@@ -102,7 +109,7 @@ router.post('/', auth.required, function (req, res, next) {
 });
 
 // return a server
-router.get('/:server', auth.required, function (req, res, next) {
+router.get('/:server', auth.required, function (req : any, res, next) {
     Promise.all([
         req.payload ? User.findById(req.payload.id) : null,
         req.server.populate('author').execPopulate(),
@@ -133,8 +140,8 @@ router.get('/:server', auth.required, function (req, res, next) {
 });
 
 // update server
-router.put('/:server', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
+router.put('/:server', auth.required, function (req : any, res, next) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (!user.active) {
             log_functions.create('error', 'put /server/:' + req.server.slug,
                 log_message.user_account_error, user, req.server);
@@ -164,7 +171,7 @@ router.put('/:server', auth.required, function (req, res, next) {
                 req.server.body = req.body.server.body;
             }
 
-            req.server.save().then(function (server) {
+            req.server.save().then(function (server : any) {
                 log_functions.create('bin', 'put /server/:' + req.server.slug, 'server information updated', user, req.server);
                 return res.json({ server: server.toJSONFor(user) });
             }).catch(next);
@@ -177,8 +184,8 @@ router.put('/:server', auth.required, function (req, res, next) {
 });
 
 //disable or enable a server
-router.post('/disable/:server', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
+router.post('/disable/:server', auth.required, function (req : any, res, next) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
             if (!user.active) {
                 log_functions.create('error', 'post /server/disable/:' + req.server.slug,
@@ -207,7 +214,8 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
                 user.startProcessing().then(() => {
                     log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
                     console.log('user.processing : ' + user.processing);
-                    server_functions.shut_off(slug, namespace, volume).then((response) => {
+                    server_functions.removekubelink(slug, namespace)
+                        .then((response : any) => {
                         user.endProcessing().then(() => {
                             log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
                             console.log('user.processing : ' + user.processing);
@@ -217,7 +225,7 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
                                 return res.sendStatus(api_code.ok);
                             });
                         });
-                    }, (err) => {
+                        }, (err : any) => {
                         user.endProcessing().then(() => {
                             log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_off, user);
                             return res.status(api_code.error).send({ errors: { err } });
@@ -229,7 +237,8 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
                 user.startProcessing().then(() => {
                     log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
                     console.log('user.processing : ' + user.processing);
-                    server_functions.shut_on(slug, username, namespace).then((response) => {
+                    server_functions.createkubelink(slug, username, namespace)
+                        .then((response : any) => {
                         user.endProcessing().then(() => {
                             log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
                             console.log('user.processing : ' + user.processing);
@@ -240,7 +249,7 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
                                 return res.sendStatus(api_code.ok);
                             });
                         });
-                    }, (err) => {
+                        }, (err : any) => {
                         user.endProcessing().then(() => {
                             log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
                             return res.status(api_code.error).send({ errors: { err } });
@@ -257,8 +266,8 @@ router.post('/disable/:server', auth.required, function (req, res, next) {
 });
 
 // delete server
-router.delete('/:server', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
+router.delete('/:server', auth.required, function (req : any, res, next) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (!user) {
             log_functions.create('error', 'delete /server/:' + req.server.slug,
                 log_message.user_account_unknown + user, user, req.server);
@@ -291,7 +300,7 @@ router.delete('/:server', auth.required, function (req, res, next) {
 
             user.startProcessing().then(() => {
                 log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_start, user);
-                server_functions.delete(slug, namespace, './uploads/' + user.username + '/' + slug + '/').then((response) => {
+                server_functions.deleteAll(slug, namespace, './uploads/' + user.username + '/' + slug + '/').then((response : any) => {
                     user.endProcessing().then(() => {
                         log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
                         log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.server_deletion_ok, user, req.server).then(() => {
@@ -300,8 +309,9 @@ router.delete('/:server', auth.required, function (req, res, next) {
                             });
                         })
                     });
-                }, (err) => {
+                }, (err : any) => {
                     user.endProcessing().then(() => {
+                        console.error(err);
                         log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
                         return res.status(api_code.error).send({ errors: { err } });
                     });
@@ -315,8 +325,8 @@ router.delete('/:server', auth.required, function (req, res, next) {
     }).catch(next);
 });
 
-router.post('/token/:server', auth.required, function (req, res, next) {
-    User.findById(req.payload.id).then(function (user) {
+router.post('/token/:server', auth.required, function (req : any, res, next) {
+    User.findById(req.payload.id).then(function (user : any) {
         if (!user) {
             log_functions.create('error', 'post /server/:' + req.server.slug,
                 log_message.user_account_unknown + user, user, req.server);
@@ -342,14 +352,14 @@ router.post('/token/:server', auth.required, function (req, res, next) {
                 var slug = req.server.slug;
                 var namespace = 'default';
                 user.startProcessing().then(() => server_functions.catchTeacherToken(slug, namespace))
-                    .then(token => {
+                    .then((token : any) => {
                         log_functions.create('bin', 'post /server/token:' + req.server.slug, log_message.user_token_ok, user, req.server);
                         req.server.token = token;
                         return req.server.save();
                     })
                     .then(() => user.endProcessing())
                     .then(() => res.json({ server: req.server.toJSONFor(user) }))
-                    .catch(async err => {
+                    .catch(async (err : any) => {
                         await user.endProcessing();
                         log_functions.create('error', 'post /server/',
                             log_message.user_token_error + req.server.slug,

@@ -1,7 +1,9 @@
+import express from 'express';
+import { AddressInfo } from 'net';
+
 const https = require('https'),
   path = require('path'),
   methods = require('methods'),
-  express = require('express'),
   bodyParser = require('body-parser'),
   session = require('express-session'),
   cors = require('cors'),
@@ -41,7 +43,7 @@ if (!isProduction) {
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/essok', { useNewUrlParser: true, useUnifiedTopology: true });
+  mongoose.connect('mongodb://172.17.0.2/essok', { useNewUrlParser: true, useUnifiedTopology: true });
   mongoose.set('useCreateIndex', true);
   mongoose.set('debug', true);
 }
@@ -52,12 +54,12 @@ require('./models/Log');
 require('./configs/passport');
 
 /// catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use(function (_req, res, next) {
   //set headers to allow cross origin request.
   res.header("Access-Control-Allow-Origin", 'http://localhost:4200');
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', "true");
   next();
 });
 
@@ -68,7 +70,8 @@ app.use(require('./routes'));
 // development error handler
 // will print stacktrace
 if (!isProduction) {
-  app.use(function (err, req, res, next) {
+  app.use(function (err : any, _req : express.Request,
+                    res : express.Response, _next: express.NextFunction) {
     console.log(err.stack);
 
     res.status(err.status || 500);
@@ -84,7 +87,8 @@ if (!isProduction) {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res, next) {
+app.use(function (err : any, _req : express.Request,
+                  res : express.Response, _next : express.NextFunction) {
   res.status(err.status || 500);
   res.json({
     'errors': {
@@ -96,7 +100,7 @@ app.use(function (err, req, res, next) {
 
 // finally, let's start our server...
 var server = app.listen(process.env.PORT || 3000, function () {
-  console.log('Listening on port ' + server.address().port);
+  console.log('Listening on port ' + (server.address() as AddressInfo).port);
 });
 server.setTimeout(30 * 60 * 1000);
 

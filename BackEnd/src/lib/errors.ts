@@ -1,6 +1,6 @@
-var errors = {
+export default {
 
-    wget_error: function (code) {
+    wget_error: function (code : number) {
         var message = '';
         switch (code) {
             case 4:
@@ -22,7 +22,7 @@ var errors = {
         return message;
     },
 
-    group_duplicate: function (files) {
+    group_duplicate: function (files : any) {
         for (let i = 0; i < files.length - 1; i++) {
             for (let j = i + 1; j < files.length; j++) {
                 if (files[i][0] === files[j][0]) {
@@ -38,7 +38,7 @@ var errors = {
 
     },
 
-    wrap_error: function (fun, status, err) {
+    wrap_error: function (fun : any, status : any, err : any) {
         if (err.fun === undefined) {
             throw { fun, status, err };
         } else {
@@ -46,7 +46,7 @@ var errors = {
         }
     },
 
-    unwrap_error: function (res, err) {
+    unwrap_error: function (res : any, err : any) {
         if (err.fun !== undefined) {
             console.log('Error ' + err.fun + ': ');
             console.log(err.err);
@@ -56,5 +56,3 @@ var errors = {
         }
     }
 };
-
-module.exports = errors;

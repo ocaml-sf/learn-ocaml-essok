@@ -1,7 +1,7 @@
 var openstack = require('pkgcloud');
-var OS = require('../configs/OS');
+import { OS } from '../configs/OS';
 
-var swiftClient = openstack.storage.createClient({
+export const swiftClient = openstack.storage.createClient({
     provider: OS.provider,
     keystoneAuthVersion: 'v' + OS.identityApiVersion,
     username: OS.username,
@@ -10,5 +10,3 @@ var swiftClient = openstack.storage.createClient({
     domainName: OS.domainName,
     region: OS.region
 });
-
-module.exports = swiftClient;

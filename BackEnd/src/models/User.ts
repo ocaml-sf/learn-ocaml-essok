@@ -1,12 +1,26 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 var uniqueValidator = require('mongoose-unique-validator');
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 var secret = require('../configs').secret;
 
 var UserSchema = new mongoose.Schema({
-    username: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/^[a-zA-Z0-9]+$/, 'is invalid'], index: true },
-    email: { type: String, lowercase: true, unique: true, required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true },
+  username: {
+    type: String,
+    lowercase: true,
+    unique: true,
+    required: [true, "can't be blank"],
+    match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
+    index: true
+  },
+  email: {
+    type: String,
+    lowercase: true,
+    unique: true,
+    required: [true, "can't be blank"],
+    match: [/\S+@\S+\.\S+/, 'is invalid'],
+    index: true
+  },
     description: String,
     place: String,
     goal: String,
@@ -22,13 +36,13 @@ var UserSchema = new mongoose.Schema({
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
 UserSchema.methods.validPassword = function(password) {
-    var hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-    return this.hash === hash;
+    var hash = crypto.pbkdf2Sync(password, (this as any).salt, 10000, 512, 'sha512').toString('hex');
+    return (this as any).hash === hash;
 };
 
 UserSchema.methods.setPassword = function(password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
+    (this as any).salt = crypto.randomBytes(16).toString('hex');
+    (this as any).hash = crypto.pbkdf2Sync(password, (this as any).salt, 10000, 512, 'sha512').toString('hex');
 };
 
 UserSchema.methods.generateJWT = function() {
@@ -38,20 +52,20 @@ UserSchema.methods.generateJWT = function() {
 
     return jwt.sign({
         id: this._id,
-        username: this.username,
-        exp: parseInt(exp.getTime() / 1000),
+        username: (this as any).username,
+        exp: (exp.getTime() / 1000),
     }, secret);
 };
 
 UserSchema.methods.isAdmin = function() {
-    return this.admin;
+    return (this as any).admin;
 };
 
 UserSchema.methods.startProcessing = function() {
     var user = this;
     return new Promise(function(resolve, reject) {
-        user.processing = true;
-        if (user.processing === true) {
+        (user as any).processing = true;
+        if ((user as any).processing === true) {
             user.save().then(() => {
                 return resolve(true);
             })
@@ -62,8 +76,8 @@ UserSchema.methods.startProcessing = function() {
 UserSchema.methods.endProcessing = function() {
     var user = this;
     return new Promise(function(resolve, reject) {
-        user.processing = false;
-        if (user.processing === false) {
+        (user as any).processing = false;
+        if ((user as any).processing === false) {
             user.save().then(() => {
                 return resolve(true);
             })
@@ -73,7 +87,7 @@ UserSchema.methods.endProcessing = function() {
 
 UserSchema.methods.findAllUsers = function(query, limit, offset) {
 
-    if (this.isAdmin()) {
+    if ((this as any).isAdmin()) {
 
         return Promise.all([
             mongoose.model('User').find(query)
@@ -87,7 +101,7 @@ UserSchema.methods.findAllUsers = function(query, limit, offset) {
 };
 
 UserSchema.methods.findAllLogs = function(query, limit, offset) {
-    if (this.isAdmin()) {
+    if ((this as any).isAdmin()) {
 
         return Promise.all([
             mongoose.model('Log').find(query)
@@ -119,15 +133,15 @@ UserSchema.methods.findAllServersOfAnUser = function(query_, author, payload) {
         offset = query_.offset;
     }
     if (typeof query_.active !== 'undefined') {
-        query.active = query_.active;
+        (query as any).active = query_.active;
     }
 
-    if (this.isAdmin()) {
+    if ((this as any).isAdmin()) {
         if (author) {
-            query.author = author._id;
+            (query as any).author = author._id;
         }
     } else {
-        query.author = payload.id;
+        (query as any).author = payload.id;
     }
     return Promise.all([
         mongoose.model('Server').find(query)
@@ -142,31 +156,31 @@ UserSchema.methods.findAllServersOfAnUser = function(query_, author, payload) {
 
 UserSchema.methods.toAuthJSON = function() {
     return {
-        username: this.username,
-        email: this.email,
-        token: this.generateJWT(),
-        description: this.description,
-        place: this.place,
-        goal: this.goal,
-        admin: this.admin,
-        image: this.image,
-        active: this.active,
-        processing: this.processing,
-        authorized: this.authorized,
+        username: (this as any).username,
+        email: (this as any).email,
+        token: (this as any).generateJWT(),
+        description: (this as any).description,
+        place: (this as any).place,
+        goal: (this as any).goal,
+        admin: (this as any).admin,
+        image: (this as any).image,
+        active: (this as any).active,
+        processing: (this as any).processing,
+        authorized: (this as any).authorized,
     };
 }
 
 UserSchema.methods.toProfileJSONFor = function() {
     return {
-        email: this.email,
-        username: this.username,
-        description: this.description,
-        place: this.place,
-        goal: this.goal,
-        active: this.active,
-        authorized: this.authorized,
-        processing: this.processing,
-        image: this.image || 'https://essok.learn-ocaml.org/assets/images/default_avatar.jpg',
+        email: (this as any).email,
+        username: (this as any).username,
+        description: (this as any).description,
+        place: (this as any).place,
+        goal: (this as any).goal,
+        active: (this as any).active,
+        authorized: (this as any).authorized,
+        processing: (this as any).processing,
+        image: (this as any).image || 'https://essok.learn-ocaml.org/assets/images/default_avatar.jpg',
     };
 };
 
