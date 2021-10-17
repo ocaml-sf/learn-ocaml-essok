@@ -2,9 +2,10 @@ import express from 'express'
 import { AddressInfo } from 'net'
 
 import env from './env'
-import { middlesDev, middlesProd } from './middlewares'
+import { errorsDev, errorsProd, middlesDev, middlesProd } from './middlewares'
 import { api } from './controllers'
 import { SwiftService } from './cloud/SwiftService'
+import { AdmZipService } from './archive/AdmZipService'
 
 const mongoose = require('mongoose')
 
@@ -31,7 +32,16 @@ require('./configs/passport');
 const cloud = new SwiftService()
 cloud.init()
 
-app.use('/api', api(cloud))
+app.use('/api', api(cloud, new AdmZipService()))
+
+let errhandlers: Function[] = []
+if (env.isDev) {
+  errhandlers = Object.values(errorsDev)
+} else if (env.isProd) {
+  errhandlers = Object.values(errorsProd)
+}
+errhandlers.forEach(eh => app.use(eh()))
+
 
 // finally, let's start our server...
 const server = app.listen(process.env.PORT || 3000, function () {

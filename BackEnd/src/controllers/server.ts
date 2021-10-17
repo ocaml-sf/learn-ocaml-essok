@@ -1,385 +1,369 @@
-import { Router } from 'express';
+import { Router } from 'express'
+import fs from 'fs'
 import path from 'path'
 
-import auth from './auth';
+import auth from './auth'
 
-import * as server_functions from '../lib/server_functions';
-import * as upload_functions from '../lib/upload_functions';
-import * as log_functions from '../lib/log_functions';
+// eslint-disable-next-line
+import * as server_functions from '../lib/server_functions'
+// eslint-disable-next-line
+import * as log_functions from '../lib/log_functions'
 
-import api_code from '../configs/api_code';
-import log_message from '../configs/log_message';
+import apiCode from '../configs/api_code'
+
+// eslint-disable-next-line
+import log_message from '../configs/log_message'
 
 import env from 'env'
 import { Server, User } from 'models'
-import { CloudService } from 'cloud/CloudService';
+import { CloudService } from 'cloud/CloudService'
 
-export function serverAPI(cloud: CloudService) {
-  const router = Router();
+export function serverAPI (cloud: CloudService) {
+  const router = Router()
 
   // Preload server objects on routes with ':server'
-  router.param('server', function(req: any, res, next, slug) {
-    Server.findOne({ slug: slug })
-      .populate('author')
-      .then(function(server: any) {
-        if (!server) { return res.sendStatus(api_code.not_found).json({ errors: { errors: 'Server ' + slug + ' not found' } }); }
+  router.param('server', async function (req: any, res, next, slug) {
+    const server = await Server.findOne({ slug: slug }).populate('author')
+    if (!server) {
+      return res.sendStatus(apiCode.not_found)
+        .json({ errors: { errors: 'Server ' + slug + ' not found' } })
+    }
+    req.server = server
+    return next()
+  })
 
-        req.server = server;
+  router.get('/', auth.required, async function (req: any, res) {
+    const user = await User.findById(req.payload.id)
+    if (!user) {
+      log_functions.create('error', 'get /server/',
+        log_message.user_account_unknown + user,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'get /server/',
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
 
-        return next();
-      }).catch(next);
-  });
+    if ((user.username !== req.query.author) && !user.isAdmin()) {
+      log_functions.create('error', 'get /server/',
+        log_message.user_owner_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
 
-  router.get('/', auth.required, function(req: any, res, next) {
+    const [author] = await user.findAnUser(req.query.author)
+    console.log(author)
+    const [servers, serversCount] =
+      await user.findAllServersOfAnUser(req.query, author, req.payload)
+    log_functions.create('general', 'get /server/', 'ok', user, req.server)
+    return res.json({
+      servers: servers.map((server: any) => server.toJSONFor(author)),
+      serversCount: serversCount
+    })
+  })
 
-    User.findById(req.payload.id).then(function(user: any) {
-      if (!user) {
-        log_functions.create('error', 'get /server/',
-          log_message.user_account_unknown + user,
-          user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'get /server/',
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
+  router.post('/', auth.required, async function (req: any, res, _next) {
+    const user = await User.findById(req.payload.id)
+    if (!user) {
+      log_functions.create('error', 'post /server/',
+        log_message.user_account_unknown + user, user,
+        req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.active) {
+      log_functions.create('error', 'post /server/',
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'post /server/',
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
 
-      if ((user.username !== req.query.author) && !user.isAdmin()) {
-        log_functions.create('error', 'get /server/',
-          log_message.user_owner_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      var author = req.query.author;
-      user.findAnUser(author).then(function(results: any) {
+    const server = new Server(req.body.server)
+    server.author = user
+    log_functions.create('bin', 'post /server/',
+      log_message.user_server_created, user, server)
+    await server.save()
+    await cloud.createContainer(server.slug)
+    await cloud.copyObjects(env.OS_DEFAULT_CONTAINER, server.slug)
 
-        author = results[0];
-        console.log(author);
-        user.findAllServersOfAnUser(req.query, author, req.payload)
-          .then(function(results: any) {
-            var servers = results[0];
-            var serversCount = results[1];
-            log_functions.create('general', 'get /server/', 'ok', user, req.server)
-            return res.json({
-              servers: servers.map(function(server: any) {
-                return server.toJSONFor(author);
-              }),
-              serversCount: serversCount
-            });
-          });
-      }).catch(next);
-    }).catch(next);
-
-  });
-
-  router.post('/', auth.required, function(req: any, res, next) {
-    User.findById(req.payload.id).then(function(user: any) {
-      if (!user) {
-        log_functions.create('error', 'post /server/',
-          log_message.user_account_unknown + user, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.active) {
-        log_functions.create('error', 'post /server/',
-          log_message.user_account_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'post /server/',
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      var server = new Server(req.body.server);
-      server.author = user;
-      log_functions.create('bin', 'post /server/', log_message.user_server_created, user, server);
-      return server.save().then(async function() {
-        await cloud.createContainer(server.slug)
-        await cloud.copyObjects(env.OS_DEFAULT_CONTAINER, server.slug)
-
-        log_functions.create('general', 'post /server/',
-                             log_message.user_swift_created, user, server);
-        console.log('swift created');
-        return res.json({ server: server.toJSONFor(user) });
-      }).catch((err: any) => {
-        console.error(err)
-        log_functions.create('error', 'post /server/',
-                             log_message.user_swift_error, user, server);
-        return res.status(api_code.error).send({ errors: { err } });
-      })
-    }).catch(next);
-  });
+    log_functions.create('general', 'post /server/',
+      log_message.user_swift_created, user, server)
+    console.log('swift created')
+    return res.json({ server: server.toJSONFor(user) })
+  })
 
   // return a server
-  router.get('/:server', auth.required, function(req: any, res, next) {
-    Promise.all([
-      req.payload ? User.findById(req.payload.id) : null,
-      req.server.populate('author'),
+  router.get('/:server', auth.required, async function (req: any, res) {
+    const user = await User.findById(req.payload.id)
+    if (!user) {
+      log_functions.create('error', 'get /server/:' + req.server.slug,
+        log_message.user_account_unknown + user,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'get /server/:' + req.server.slug,
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
 
-    ]).then(function(results) {
-      var user = results[0];
-      var server = req.server.toJSONFor(user);
-      if (!user) {
-        log_functions.create('error', 'get /server/:' + req.server.slug,
-          log_message.user_account_unknown + user, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'get /server/:' + req.server.slug,
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
+    const server = req.server.toJSONFor(user)
+    if ((user.username !== server.author.username) && (!user.isAdmin())) {
+      log_functions.create('error', 'get /server/:' + req.server.slug,
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
 
-      if ((user.username !== server.author.username) && (!user.isAdmin())) {
-        log_functions.create('error', 'get /server/:' + req.server.slug,
-          log_message.user_account_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      log_functions.create('general', 'get /server/:' + req.server.slug, 'ok', user, req.server);
-      return res.json({ server });
-
-    }).catch(next);
-  });
+    log_functions.create('general', 'get /server/:' + req.server.slug, 'ok',
+      user, req.server)
+    return res.json({ server })
+  })
 
   // update server
-  router.put('/:server', auth.required, function(req: any, res, next) {
-    User.findById(req.payload.id).then(function(user: any) {
-      if (!user.active) {
-        log_functions.create('error', 'put /server/:' + req.server.slug,
-          log_message.user_account_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'put /server/:' + req.server.slug,
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (user.processing) {
-        log_functions.create('error', 'put /server/:' + req.server.slug,
-          log_message.user_processing_unauthorised, user, req.server);
-        return res.sendStatus(api_code.forbidden);
-      }
-      if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+  router.put('/:server', auth.required, async function (req: any, res) {
+    const user = await User.findById(req.payload.id)
+    if (!user.active) {
+      log_functions.create('error', 'put /server/:' + req.server.slug,
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'put /server/:' + req.server.slug,
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (user.processing) {
+      log_functions.create('error', 'put /server/:' + req.server.slug,
+        log_message.user_processing_unauthorised,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
+    if (req.server.author._id.toString() !== req.payload.id.toString() &&
+      !user.isAdmin()) {
+      log_functions.create('error', 'put /server/:' + req.server.slug,
+        log_message.user_owner_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
 
-        if (typeof req.body.server.title !== 'undefined') {
-          req.server.title = req.body.server.title;
-        }
+    if (typeof req.body.server.title !== 'undefined') {
+      req.server.title = req.body.server.title
+    }
+    if (typeof req.body.server.description !== 'undefined') {
+      req.server.description = req.body.server.description
+    }
+    if (typeof req.body.server.body !== 'undefined') {
+      req.server.body = req.body.server.body
+    }
 
-        if (typeof req.body.server.description !== 'undefined') {
-          req.server.description = req.body.server.description;
-        }
+    const server = req.server.save()
+    log_functions.create('bin', 'put /server/:' + req.server.slug,
+      'server information updated', user, req.server)
+    return res.json({ server: server.toJSONFor(user) })
+  })
 
-        if (typeof req.body.server.body !== 'undefined') {
-          req.server.body = req.body.server.body;
-        }
+  // disable or enable a server
+  router.post('/disable/:server', auth.required, async function (req: any, res: any) {
+    const user = await User.findById(req.payload.id)
+    if (req.server.author._id.toString() !== req.payload.id.toString() &&
+      user.isAdmin()) {
+      log_functions.create('error', 'get /server/disable/:' + req.server.slug,
+        log_message.user_owner_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
+    if (!user.active) {
+      log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (user.processing) {
+      log_functions.create('error', 'post /server/disable/:' + req.server.slug,
+        log_message.user_processing_unauthorised,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
 
-        req.server.save().then(function(server: any) {
-          log_functions.create('bin', 'put /server/:' + req.server.slug, 'server information updated', user, req.server);
-          return res.json({ server: server.toJSONFor(user) });
-        }).catch(next);
-      } else {
-        log_functions.create('error', 'put /server/:' + req.server.slug,
-          log_message.user_owner_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-    });
-  });
+    const slug = req.server.slug
+    const username = req.server.author.username
+    const namespace = 'default'
 
-  //disable or enable a server
-  router.post('/disable/:server', auth.required, function(req: any, res, next) {
-    User.findById(req.payload.id).then(function(user: any) {
-      if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
-        if (!user.active) {
-          log_functions.create('error', 'post /server/disable/:' + req.server.slug,
-            log_message.user_account_error, user, req.server);
-          return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-        }
-        if (!user.isAdmin() && !user.authorized) {
-          log_functions.create('error', 'post /server/disable/:' + req.server.slug,
-            log_message.user_activated_error, user, req.server);
-          return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-        }
-        if (user.processing) {
-          log_functions.create('error', 'post /server/disable/:' + req.server.slug,
-            log_message.user_processing_unauthorised, user, req.server);
-          return res.sendStatus(api_code.forbidden);
-        }
+    if (!req.server.active) {
+      console.log('shut_on')
+      await user.startProcessing()
+      console.log('user.processing : ' + user.processing)
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.user_processing_start, user)
 
-        var slug = req.server.slug;
-        var username = req.server.author.username;
-        var namespace = 'default';
+      await server_functions.createkubelink(slug, username, namespace)
 
-        if (req.server.active) {
-          console.log('shut_off');
-          var volume = req.server.volume;
-          console.log('volume : ' + volume);
-          user.startProcessing().then(() => {
-            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
-            console.log('user.processing : ' + user.processing);
-            server_functions.removekubelink(slug, namespace)
-              .then((response: any) => {
-                user.endProcessing().then(() => {
-                  log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
-                  console.log('user.processing : ' + user.processing);
-                  req.server.active = false;
-                  req.server.save().then(function() {
-                    log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_off, user, req.server);
-                    return res.sendStatus(api_code.ok);
-                  });
-                });
-              }, (err: any) => {
-                user.endProcessing().then(() => {
-                  log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_off, user);
-                  return res.status(api_code.error).send({ errors: { err } });
-                });
-              });
-          });
-        } else {
-          console.log('shut_on');
-          user.startProcessing().then(() => {
-            log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_start, user);
-            console.log('user.processing : ' + user.processing);
-            server_functions.createkubelink(slug, username, namespace)
-              .then((response: any) => {
-                user.endProcessing().then(() => {
-                  log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
-                  console.log('user.processing : ' + user.processing);
-                  req.server.volume = response;
-                  req.server.active = true;
-                  req.server.save().then(function() {
-                    log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.server_shut_on, user, req.server);
-                    return res.sendStatus(api_code.ok);
-                  });
-                });
-              }, (err: any) => {
-                user.endProcessing().then(() => {
-                  log_functions.create('bin', 'post /server/disable/:' + req.server.slug, log_message.user_processing_end, user);
-                  return res.status(api_code.error).send({ errors: { err } });
-                });
-              });
-          });
-        }
-      } else {
-        log_functions.create('error', 'get /server/disable/:' + req.server.slug,
-          log_message.user_owner_error, user, req.server);
-        return res.sendStatus(api_code.forbidden);
-      }
-    }).catch(next);
-  });
+      await user.endProcessing()
+      console.log('user.processing : ' + user.processing)
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.user_processing_end, user)
+
+      req.server.active = true
+      await req.server.save()
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.server_shut_on, user, req.server)
+      return res.sendStatus(apiCode.ok)
+    } else {
+      console.log('shut_off')
+      await user.startProcessing()
+      console.log('user.processing : ' + user.processing)
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.user_processing_start, user)
+
+      server_functions.removekubelink(slug, namespace)
+
+      await user.endProcessing()
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.user_processing_end, user)
+      console.log('user.processing : ' + user.processing)
+
+      req.server.active = false
+      await req.server.save()
+      log_functions.create('bin', 'post /server/disable/:' + req.server.slug,
+        log_message.server_shut_off, user, req.server)
+      return res.sendStatus(apiCode.ok)
+    }
+  })
 
   // delete server
-  router.delete('/:server', auth.required, function(req: any, res, next) {
-    User.findById(req.payload.id).then(function(user: any) {
-      if (!user) {
-        log_functions.create('error', 'delete /server/:' + req.server.slug,
-          log_message.user_account_unknown + user, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.active) {
-        log_functions.create('error', 'delete /server/:' + req.server.slug,
-          log_message.user_account_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'delete /server/:' + req.server.slug,
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (user.processing) {
-        log_functions.create('error', 'delete /server/:' + req.server.slug,
-          log_message.user_processing_unauthorised, user, req.server);
-        return res.sendStatus(api_code.forbidden);
-      }
+  router.delete('/:server', auth.required, async function (req: any, res) {
+    const user = await User.findById(req.payload.id)
+    if (!user) {
+      log_functions.create('error', 'delete /server/:' + req.server.slug,
+        log_message.user_account_unknown + user,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.active) {
+      log_functions.create('error', 'delete /server/:' + req.server.slug,
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'delete /server/:' + req.server.slug,
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (user.processing) {
+      log_functions.create('error', 'delete /server/:' + req.server.slug,
+        log_message.user_processing_unauthorised,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
 
-      if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+    if (req.server.author._id.toString() !== req.payload.id.toString() &&
+      user.isAdmin()) {
+      log_functions.create('error', 'delete /server/:' + req.server.slug,
+        log_message.user_owner_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
 
-        var slug = req.server.slug;
-        var namespace = 'default';
-        console.log('asking for a deletion');
-        console.log('slug : ' + slug);
-        log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_deletion_ask, user, req.server);
+    const slug = req.server.slug
+    const namespace = 'default'
 
-        user.startProcessing().then(async () => {
-          log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_start, user);
+    console.log('asking for a deletion')
+    console.log('slug : ' + slug)
+    log_functions.create('bin', 'delete /server/:' + req.server.slug,
+      log_message.user_deletion_ask, user, req.server)
 
-          await server_functions.removekubelink(slug, namespace)
-          console.log('kubelink removed')
+    await user.startProcessing()
+    log_functions.create('bin', 'delete /server/:' + req.server.slug,
+      log_message.user_processing_start, user)
 
-          await cloud.deleteObjects(slug)
-          await cloud.deleteContainer(slug)
-          console.log('swift container removed')
+    await server_functions.removekubelink(slug, namespace)
+    console.log('kubelink removed')
 
-          const serverDir = path.join('./uploads', user.username, slug)
-          await upload_functions.removeDir(serverDir)
-          console.log('server deleted')
+    await cloud.deleteObjects(slug)
+    await cloud.deleteContainer(slug)
+    console.log('swift container removed')
 
-          await user.endProcessing()
-          log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
-          await log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.server_deletion_ok, user, req.server)
-          await req.server.remove()
-          return res.sendStatus(api_code.ok)
-        }, async (err: any) => {
-          await user.endProcessing()
-          console.error(err);
-          log_functions.create('bin', 'delete /server/:' + req.server.slug, log_message.user_processing_end, user);
-          return res.status(api_code.error).send({ errors: { err } });
-        })
-      } else {
-        log_functions.create('error', 'delete /server/:' + req.server.slug,
-                             log_message.user_owner_error, user, req.server);
-        return res.sendStatus(api_code.forbidden);
-      }
-    }).catch(next);
-  });
+    const serverDir = path.join('./uploads', user.username, slug)
+    await fs.promises.rm(serverDir, { recursive: true })
+    console.log('server deleted')
 
-  router.post('/token/:server', auth.required, function(req: any, res, next) {
-    User.findById(req.payload.id).then(function(user: any) {
-      if (!user) {
-        log_functions.create('error', 'post /server/:' + req.server.slug,
-          log_message.user_account_unknown + user, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.active) {
-        log_functions.create('error', 'post /server/:' + req.server.slug,
-          log_message.user_account_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
-      if (!user.isAdmin() && !user.authorized) {
-        log_functions.create('error', 'post /server/:' + req.server.slug,
-          log_message.user_activated_error, user, req.server);
-        return res.sendStatus(api_code.forbidden).json({ errors: { errors: 'Unauthorized' } });
-      }
+    await user.endProcessing()
+    log_functions.create('bin', 'delete /server/:' + req.server.slug,
+      log_message.user_processing_end, user)
+    log_functions.create('bin', 'delete /server/:' + req.server.slug,
+      log_message.server_deletion_ok, user, req.server)
+    await req.server.remove()
+    return res.sendStatus(apiCode.ok)
+  })
 
-      if (req.server.author._id.toString() === req.payload.id.toString() || user.isAdmin()) {
+  router.post('/token/:server', auth.required, async function (req: any, res) {
+    const user = await User.findById(req.payload.id)
+    if (!user) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        log_message.user_account_unknown + user,
+        user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.active) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        log_message.user_account_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (!user.isAdmin() && !user.authorized) {
+      log_functions.create('error', 'post /server/:' + req.server.slug,
+        log_message.user_activated_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+        .json({ errors: { errors: 'Unauthorized' } })
+    }
+    if (req.server.author._id.toString() !== req.payload.id.toString() &&
+        user.isAdmin()) {
+      log_functions.create('error', 'get /server/disable/:' + req.server.slug,
+        log_message.user_owner_error, user, req.server)
+      return res.sendStatus(apiCode.forbidden)
+    }
 
-        if (req.server.token !== undefined) {
-          console.log(req.server.token);
-          return res.status(api_code.error).send({ errors: 'teacher token already retrieve' });
-        } else {
-          var slug = req.server.slug;
-          var namespace = 'default';
-          user.startProcessing().then(() => server_functions.catchTeacherToken(slug, namespace))
-            .then((token: any) => {
-              log_functions.create('bin', 'post /server/token:' + req.server.slug, log_message.user_token_ok, user, req.server);
-              req.server.token = token;
-              return req.server.save();
-            })
-            .then(() => user.endProcessing())
-            .then(() => res.json({ server: req.server.toJSONFor(user) }))
-            .catch(async (err: any) => {
-              await user.endProcessing();
-              log_functions.create('error', 'post /server/',
-                log_message.user_token_error + req.server.slug,
-                user, req.server);
-              return res.status(api_code.error).send({ errors: { err } });
-            });
-        }
-      } else {
-        log_functions.create('error', 'get /server/disable/:' + req.server.slug,
-          log_message.user_owner_error, user, req.server);
-        return res.sendStatus(api_code.forbidden);
-      }
-    }).catch(next);
-  });
+    if (req.server.token !== undefined) {
+      console.log(req.server.token)
+      return res.status(apiCode.error)
+        .send({ errors: 'teacher token already retrieve' })
+    }
+
+    const slug = req.server.slug
+    const namespace = 'default'
+    await user.startProcessing()
+
+    const token = server_functions.catchTeacherToken(slug, namespace)
+    log_functions.create('bin', 'post /server/token:' + req.server.slug,
+      log_message.user_token_ok, user, req.server)
+    req.server.token = token
+
+    await req.server.save()
+    await user.endProcessing()
+    return res.json({ server: req.server.toJSONFor(user) })
+  })
 
   return router
 }

@@ -1,23 +1,28 @@
 import { cors, json, urlencoded } from './core'
-import { devError } from './errorhandlers'
+import { devError, prodError } from './errorhandlers'
 import { morgan } from './logging'
 import { helmet } from './security'
-import { session } from './session'
 
 const middlesAll = {
   cors,
   json,
   morgan,
-  session,
   urlencoded
 }
 
 export const middlesDev = {
-  ...middlesAll,
-  devError
+  ...middlesAll
 }
 
 export const middlesProd = {
   ...middlesAll,
   helmet
+}
+
+export const errorsDev = {
+  devError
+}
+
+export const errorsProd = {
+  prodError
 }
