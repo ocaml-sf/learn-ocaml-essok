@@ -2,9 +2,9 @@ import { Router } from 'express';
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
-import auth from '../auth';
+import auth from './auth';
 
-import api_code from '../../configs/api_code';
+import api_code from '../configs/api_code';
 
 const router = Router();
 

@@ -1,5 +1,11 @@
 {
-    "events": {
-        "start": "clear"
-    }
+  "events": {
+    "start": "clear"
+  },
+  "execMap": {
+    "ts": "ts-node -r dotenv/config"
+  },
+  "ext": "ts",
+  "ignore": [".git", "node_modules", "dist", "uploads"],
+  "watch": ["./src"]
 }

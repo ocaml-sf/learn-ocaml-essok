@@ -4,9 +4,15 @@
   "description": "essok on node",
   "main": "app.ts",
   "scripts": {
-    "build": "tsc -p tsconfig-build.json",
-    "nodemon": "nodemon src/app.ts --ignore uploads",
-    "dev": "NODE_ENV=development DOTENV_CONFIG_PATH=.env-dev npm run nodemon"
+    "build": "npm run tsc && npm run copy",
+    "tsc": "tsc -p tsconfig-build.json",
+    "copy": "cp src/configs/*.json dist/configs/",
+    "prod": "NODE_PATH=dist/ NODE_ENV=production node dist/app.js",
+    "nodemon": "NODE_PATH=src/ nodemon src/app.ts",
+    "dev": "NODE_ENV=development DOTENV_CONFIG_PATH=.env-dev npm run nodemon",
+    "lint": "eslint {src,test}/**/*.ts --quiet",
+    "mocha": "NODE_ENV=test NODE_PATH=. DOTENV_CONFIG_PATH=.env-test mocha",
+    "test": "npm run mocha ./test/"
   },
   "repository": {
     "type": "git",
@@ -16,15 +22,14 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.13.2",
     "archiver": "^5.2.0",
-    "body-parser": "^1.19.0",
     "child_process": "^1.0.2",
     "cors": "2.8.5",
-    "ejs": "3.1.5",
-    "errorhandler": "1.5.1",
+    "dotenv": "^10.0.0",
+    "envalid": "^7.1.1",
     "express": "^4.17.1",
     "express-generator": "^4.16.1",
     "express-jwt": "6.0.0",
-    "express-session": "^1.17.1",
+    "express-session": "^1.17.2",
     "formidable": "^1.2.2",
     "fs-extra": "^9.0.1",
     "fs-readdir-recursive": "^1.1.0",
@@ -33,7 +38,6 @@
     "helmet": "^4.3.1",
     "jsonwebtoken": "8.5.1",
     "method-override": "3.0.0",
-    "methods": "1.1.2",
     "mongoose": "^5.13.2",
     "mongoose-unique-validator": "2.0.3",
     "morgan": "^1.10.0",
@@ -48,8 +52,20 @@
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
-    "newman": "^5.2.2",
-    "nodemon": "^2.0.7"
+    "@types/express-session": "^1.17.4",
+    "@types/mocha": "^9.0.0",
+    "@types/morgan": "^1.9.3",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "mocha": "^9.1.2",
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.2.1"
   }
 }

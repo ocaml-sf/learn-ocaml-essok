@@ -1,0 +1,11 @@
+# this is a workaround to sanitizing uncleaned files step by step
+#src/app.ts
+src/clients/**/*.ts
+src/configs/**/*.ts
+src/lib/**/*.ts
+src/models/*.ts
+src/controllers/auth.ts
+src/controllers/users.ts
+src/controllers/profiles.ts
+src/controllers/server.ts
+src/controllers/upload.ts
