@@ -20,13 +20,18 @@ export class ServerPreviewComponent {
   errors = {};
   color = 'primary';
   mode = 'determinate';
+  showToken = false;
   value = 0;
-  getToken() {
-    this.serverService.getToken(this.server.slug).subscribe(
-      (serverData) => {
-        this.server = serverData;
-      }
-    );
+  toggleShowToken() {
+    this.showToken = !this.showToken;
+    console.log(this.server.token);
+    if(!this.server.token) {
+      this.serverService.getToken(this.server.slug).subscribe(
+        (serverData) => {
+          this.server = serverData;
+        }
+      );
+    }
   }
   download() {
     this.value = 0; this.mode = 'indeterminate'; this.color = 'primary';
