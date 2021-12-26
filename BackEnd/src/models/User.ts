@@ -184,4 +184,4 @@ UserSchema.methods.toProfileJSONFor = function() {
   };
 };
 
-mongoose.model('User', UserSchema);
+export const User = mongoose.model('User', UserSchema);

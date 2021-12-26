@@ -21,4 +21,4 @@ LogSchema.methods.toJSONFor = function (user : any) {
   };
 };
 
-mongoose.model('Log', LogSchema);
+export const Log = mongoose.model('Log', LogSchema);

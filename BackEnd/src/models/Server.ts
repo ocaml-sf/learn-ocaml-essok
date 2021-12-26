@@ -47,4 +47,4 @@ ServerSchema.methods.toJSONFor = function (user) {
   };
 };
 
-mongoose.model('Server', ServerSchema);
+export const Server = mongoose.model('Server', ServerSchema);

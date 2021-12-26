@@ -18,13 +18,8 @@ if (env.isDev) {
 middlewares.forEach(m => app.use(m()))
 
 /* eslint-disable */
-if (env.isProd) {
-  mongoose.connect(process.env.MONGODB_URI);
-} else {
-  mongoose.connect('mongodb://172.17.0.2/essok', { useNewUrlParser: true, useUnifiedTopology: true });
-  mongoose.set('useCreateIndex', true);
-  mongoose.set('debug', true);
-}
+mongoose.connect(`mongodb://${env.DB_HOSTNAME}/essok`);
+mongoose.set('debug', env.DB_DEBUG)
 
 require('./models/User');
 require('./models/Server');
