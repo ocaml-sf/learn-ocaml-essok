@@ -19,9 +19,7 @@ To get the Node server running locally:
 - [cors](https://github.com/expressjs/cors) - Node.js CORS middleware
 - [express](https://github.com/expressjs/express) - The server for handling and routing HTTP requests
 - [express-jwt](https://github.com/auth0/express-jwt) - Middleware for validating JWTs for authentication
-- [formidable](https://github.com/node-formidable/formidable) - A node.js module for parsing form data, especially file uploads
 - [fs-extra](https://github.com/jprichardson/node-fs-extra) - It contains methods that aren't included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove
-- [gulp](https://gulpjs.com) - The streaming build system
 - [helmet](https://helmetjs.github.io/) - Help secure Express/Connect apps with various HTTP headers
 - [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) - For generating JWTs used by authentication
 - [mongoose](https://github.com/Automattic/mongoose) - For modeling and mapping MongoDB data to javascript 
