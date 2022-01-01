@@ -1,5 +1,4 @@
-import mongoose from 'mongoose'
-var Log = mongoose.model('Log');
+import { Log } from 'models'
 
 export function create(type : any, action : any, message : any = null, author : any = null, server : any = null) {
   return new Promise((resolve, reject) => {
@@ -12,7 +11,7 @@ export function create(type : any, action : any, message : any = null, author : 
     return log.save().then(() => {
       console.log(log);
       return resolve(log);
-    }, (err) => {
+    }, (err: any) => {
       console.log('Error creating log !: ' + err);
       return reject(err);
     });

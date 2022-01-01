@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import assert from 'assert'
+import path from 'path'
 
 export type Path = string
 
@@ -20,11 +20,37 @@ export type OutputData =
       output: Path }
 
 export function bufferFromData (iData: InputData): Buffer {
-  if (iData.kind === DataKind.Buffer) {
-    return iData.input
-  } else if (iData.kind === DataKind.Path) {
-    return readFileSync(iData.input)
-  } else {
-    assert(false, 'bufferFromData: DataKind')
+  switch(iData.kind) {
+    case DataKind.Buffer:
+      return iData.input
+    case DataKind.Path:
+      return readFileSync(iData.input)
+  }
+}
+
+/**
+ * Append filename to directory path (from a Path kind of InputData)
+ */
+export function dirToFileInput(dirData: InputData, filename: string) {
+  switch(dirData.kind) {
+    case DataKind.Buffer:
+      return dirData
+    case DataKind.Path:
+      return {
+        ...dirData,
+        input: path.join(dirData.input, filename)
+      }
+  }
+}
+
+export function dirToFileOutput(dirData: OutputData, filename: string) {
+  switch(dirData.kind) {
+    case DataKind.Buffer:
+      return dirData
+    case DataKind.Path:
+      return {
+        ...dirData,
+        output: path.join(dirData.output, filename)
+      }
   }
 }

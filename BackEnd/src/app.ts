@@ -4,6 +4,7 @@ import { AddressInfo } from 'net'
 import env from './env'
 import { middlesDev, middlesProd } from './middlewares'
 import { api } from './controllers'
+import { SwiftService } from './cloud/SwiftService'
 
 const mongoose = require('mongoose')
 
@@ -27,7 +28,10 @@ require('./models/Log');
 require('./configs/passport');
 /* eslint-enable */
 
-app.use('/api', api())
+const cloud = new SwiftService()
+cloud.init()
+
+app.use('/api', api(cloud))
 
 // finally, let's start our server...
 const server = app.listen(process.env.PORT || 3000, function () {
