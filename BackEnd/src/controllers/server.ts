@@ -112,7 +112,7 @@ router.post('/', auth.required, function (req : any, res, next) {
 router.get('/:server', auth.required, function (req : any, res, next) {
     Promise.all([
         req.payload ? User.findById(req.payload.id) : null,
-        req.server.populate('author').execPopulate(),
+        req.server.populate('author'),
 
     ]).then(function (results) {
         var user = results[0];

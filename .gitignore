@@ -89,3 +89,4 @@
 /BackEnd/src/configs/OS.ts
 /BackEnd/dist
 /BackEnd/.env*
+/BackEnd/deps
