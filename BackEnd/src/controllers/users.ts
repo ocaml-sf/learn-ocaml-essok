@@ -10,7 +10,7 @@ import * as global_functions from '../lib/global_functions';
 
 import api_code from '../configs/api_code';
 
-import { CloudService, deleteObjects } from 'cloud/CloudService'
+import { CloudService } from 'cloud/CloudService'
 import { User } from 'models'
 
 // can delegate cloud API call to serverAPI ?
@@ -347,7 +347,7 @@ export function userAPI(cloud: CloudService) {
               await server_functions.removekubelink(server.slug, namespace)
               console.log('kubelink removed')
 
-              await deleteObjects(cloud, server.slug)
+              await cloud.deleteObjects(server.slug)
               console.log('swift container removed')
 
               const serverDir =

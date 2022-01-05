@@ -9,7 +9,7 @@ export function api (cloud: CloudService) {
   const router = Router()
   /* TODO: use ES6 import */
   router.use(userAPI(cloud))
-  router.use('/profiles', require('./profiles'))
+  router.use('/profiles', require('./profiles')) // eslint-disable-line
   router.use('/servers', serverAPI(cloud))
   router.use('/uploads', uploadAPI(cloud))
 

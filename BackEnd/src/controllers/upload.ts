@@ -10,8 +10,8 @@ import * as upload_functions from '../lib/upload_functions';
 import upload_errors from '../lib/errors';
 
 import api_code from '../configs/api_code';
-import { CloudService, downloadObjects } from 'cloud/CloudService';
-import { DataKind } from 'utils/Data';
+import { CloudService } from 'cloud/CloudService';
+import { DataKind, outPathData } from 'utils/Data';
 
 const dirPath = './uploads/';
 var destPath = '';
@@ -445,10 +445,8 @@ export function uploadAPI(cloud: CloudService) {
           .catch((err: any) => upload_errors.wrap_error('createArbo', api_code.error, err))
 
         if(target === 'all') {
-          await downloadObjects(cloud, server.slug, {
-            kind: DataKind.Path,
-            output: path.join(dest_path, download_folder)
-          })
+          const downloadPath = path.join(dest_path, download_folder)
+          await cloud.downloadAllObjs(server.slug, outPathData(downloadPath))
         } else {
           const targetArchive = target + '.zip'
           await cloud.downloadObject(server.slug, targetArchive, {

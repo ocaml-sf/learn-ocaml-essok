@@ -1,56 +1,57 @@
-import { readFileSync } from 'fs'
+import fs from 'fs'
 import path from 'path'
 
 export type Path = string
 
 export const enum DataKind {
   Buffer,
-  Path,
+  Path
 }
 
-export type InputData =
-  | { kind: DataKind.Buffer,
-      input: Buffer }
-  | { kind: DataKind.Path,
-      input: Path }
+export type BufferInputData = { kind: DataKind.Buffer, input: Buffer }
+export type PathInputData = { kind: DataKind.Path, input: Path }
+export type InputData = BufferInputData | PathInputData
 
-export type OutputData =
-  | { kind: DataKind.Buffer }
-  | { kind: DataKind.Path,
-      output: Path }
+export type BufferOutputData = { kind: DataKind.Buffer }
+export type PathOutputData = { kind: DataKind.Path, output: Path }
+export type OutputData = BufferOutputData | PathOutputData
 
-export function bufferFromData (iData: InputData): Buffer {
-  switch(iData.kind) {
-    case DataKind.Buffer:
-      return iData.input
-    case DataKind.Path:
-      return readFileSync(iData.input)
-  }
+export function inBufferData (input: Buffer) : BufferInputData {
+  return { kind: DataKind.Buffer, input }
+}
+export function inPathData (input: Path) : PathInputData {
+  return { kind: DataKind.Path, input }
 }
 
-/**
- * Append filename to directory path (from a Path kind of InputData)
- */
-export function dirToFileInput(dirData: InputData, filename: string) {
-  switch(dirData.kind) {
+export const outBufferData: OutputData = { kind: DataKind.Buffer }
+export function outPathData (output: Path) : OutputData {
+  return { kind: DataKind.Path, output }
+}
+
+export function convertData (iData: InputData, oData: OutputData) : InputData {
+  switch (iData.kind) {
     case DataKind.Buffer:
-      return dirData
-    case DataKind.Path:
-      return {
-        ...dirData,
-        input: path.join(dirData.input, filename)
+      switch (oData.kind) {
+        case DataKind.Buffer:
+          return iData
+        case DataKind.Path:
+          fs.mkdirSync(path.dirname(oData.output), { recursive: true })
+          fs.writeFileSync(oData.output, iData.input)
+          return { kind: DataKind.Path, input: oData.output }
       }
-  }
-}
-
-export function dirToFileOutput(dirData: OutputData, filename: string) {
-  switch(dirData.kind) {
-    case DataKind.Buffer:
-      return dirData
+      // break omitted as we are unreachable here (comment for eslint rule)
     case DataKind.Path:
-      return {
-        ...dirData,
-        output: path.join(dirData.output, filename)
+      switch (oData.kind) {
+        case DataKind.Buffer:
+          return { kind: DataKind.Buffer, input: fs.readFileSync(iData.input) }
+        case DataKind.Path:
+          if (iData.input !== oData.output) {
+            fs.mkdirSync(path.dirname(oData.output), { recursive: true })
+            fs.copyFileSync(iData.input, oData.output)
+            return { kind: DataKind.Path, input: oData.output }
+          } else {
+            return iData
+          }
       }
   }
 }

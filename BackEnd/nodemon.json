@@ -3,7 +3,7 @@
     "start": "clear"
   },
   "execMap": {
-    "ts": "ts-node -r dotenv/config"
+    "ts": "node --inspect -r ts-node/register -r dotenv/config"
   },
   "ext": "ts",
   "ignore": [".git", "node_modules", "dist", "uploads"],

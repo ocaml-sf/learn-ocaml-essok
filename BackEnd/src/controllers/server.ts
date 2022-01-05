@@ -12,11 +12,7 @@ import log_message from '../configs/log_message';
 
 import env from 'env'
 import { Server, User } from 'models'
-import {
-  CloudService,
-  copyObjects,
-  deleteObjects
-} from 'cloud/CloudService';
+import { CloudService } from 'cloud/CloudService';
 
 export function serverAPI(cloud: CloudService) {
   const router = Router();
@@ -98,7 +94,7 @@ export function serverAPI(cloud: CloudService) {
       log_functions.create('bin', 'post /server/', log_message.user_server_created, user, server);
       return server.save().then(async function() {
         await cloud.createContainer(server.slug)
-        await copyObjects(cloud, env.OS_DEFAULT_CONTAINER, server.slug)
+        await cloud.copyObjects(env.OS_DEFAULT_CONTAINER, server.slug)
 
         log_functions.create('general', 'post /server/',
                              log_message.user_swift_created, user, server);
@@ -308,7 +304,7 @@ export function serverAPI(cloud: CloudService) {
           await server_functions.removekubelink(slug, namespace)
           console.log('kubelink removed')
 
-          await deleteObjects(cloud, slug)
+          await cloud.deleteObjects(slug)
           await cloud.deleteContainer(slug)
           console.log('swift container removed')
 
