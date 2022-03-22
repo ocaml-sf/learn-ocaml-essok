@@ -25,7 +25,7 @@ export function serverAPI (cloud: CloudService) {
   router.param('server', async function (req: any, res, next, slug) {
     const server = await Server.findOne({ slug: slug }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Server ' + slug + ' not found' } })
     }
     req.server = server
@@ -34,24 +34,25 @@ export function serverAPI (cloud: CloudService) {
 
   router.get('/', auth.required, async function (req: any, res) {
     const user = await User.findById(req.payload.id)
+    debugger
     if (!user) {
       log_functions.create('error', 'get /server/',
         log_message.user_account_unknown + user,
         user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'get /server/',
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
     if ((user.username !== req.query.author) && !user.isAdmin()) {
       log_functions.create('error', 'get /server/',
         log_message.user_owner_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -72,19 +73,19 @@ export function serverAPI (cloud: CloudService) {
       log_functions.create('error', 'post /server/',
         log_message.user_account_unknown + user, user,
         req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.active) {
       log_functions.create('error', 'post /server/',
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'post /server/',
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -109,13 +110,13 @@ export function serverAPI (cloud: CloudService) {
       log_functions.create('error', 'get /server/:' + req.server.slug,
         log_message.user_account_unknown + user,
         user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'get /server/:' + req.server.slug,
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -123,7 +124,7 @@ export function serverAPI (cloud: CloudService) {
     if ((user.username !== server.author.username) && (!user.isAdmin())) {
       log_functions.create('error', 'get /server/:' + req.server.slug,
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -138,13 +139,13 @@ export function serverAPI (cloud: CloudService) {
     if (!user.active) {
       log_functions.create('error', 'put /server/:' + req.server.slug,
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'put /server/:' + req.server.slug,
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -188,13 +189,13 @@ export function serverAPI (cloud: CloudService) {
     if (!user.active) {
       log_functions.create('error', 'post /server/disable/:' + req.server.slug,
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'post /server/disable/:' + req.server.slug,
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -256,19 +257,19 @@ export function serverAPI (cloud: CloudService) {
       log_functions.create('error', 'delete /server/:' + req.server.slug,
         log_message.user_account_unknown + user,
         user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.active) {
       log_functions.create('error', 'delete /server/:' + req.server.slug,
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'delete /server/:' + req.server.slug,
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -323,19 +324,19 @@ export function serverAPI (cloud: CloudService) {
       log_functions.create('error', 'post /server/:' + req.server.slug,
         log_message.user_account_unknown + user,
         user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.active) {
       log_functions.create('error', 'post /server/:' + req.server.slug,
         log_message.user_account_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
       log_functions.create('error', 'post /server/:' + req.server.slug,
         log_message.user_activated_error, user, req.server)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (req.server.author._id.toString() !== req.payload.id.toString() &&

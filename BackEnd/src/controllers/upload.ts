@@ -50,7 +50,7 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.param('server', async (req, res, next, slug) => {
     const server = await Server.findOne({ slug: slug }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: `Server ${slug} not found` } })
     }
     req.body.server = server
@@ -60,11 +60,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/index', auth.required, async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -74,13 +74,13 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const server =
       await Server.findOne({ slug: req.body.server }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Server not found' } })
     }
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
       console.log(server.author.username)
       console.log(user.username)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -107,11 +107,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/check', auth.required, upload.single('file'), async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -120,13 +120,13 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const server =
       await Server.findOne({ slug: req.body.server }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Server not found' } })
     }
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
       console.log(server.author.username)
       console.log(user.username)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!req.file) {
@@ -165,11 +165,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/full', auth.required, upload.single('file'), async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -179,13 +179,13 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const server =
       await Server.findOne({ slug: req.body.server }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Server not found' } })
     }
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
       console.log(server.author.username)
       console.log(user.username)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!req.file) {
@@ -238,11 +238,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/url', auth.required, async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
@@ -251,11 +251,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
 
     const server = await Server.findOne({ slug: req.body.server }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Server not found' } })
     }
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -292,11 +292,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/send', auth.required, async function (req: any, res: any) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) { return res.sendStatus(apiCode.forbidden) }
@@ -304,11 +304,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const server =
       await Server.findOne({ slug: req.body.server }).populate('author')
     if (!server) {
-      return res.sendStatus(apiCode.not_found)
+      return res.status(apiCode.not_found)
         .json({ errors: { errors: 'Not found' } })
     }
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -345,11 +345,11 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
   router.post('/download/:server', auth.required, async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) { return res.sendStatus(apiCode.forbidden) }
@@ -358,7 +358,7 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
       console.log(server.author.username)
       console.log(user.username)
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 

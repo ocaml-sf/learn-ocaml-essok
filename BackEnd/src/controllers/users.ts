@@ -20,7 +20,7 @@ export function userAPI (cloud: CloudService) {
   router.get('/user', auth.required, async function (req: any, res) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -51,7 +51,7 @@ export function userAPI (cloud: CloudService) {
 
     const user = await User.findById(req.payload.id)
     if (!user || !user.isAdmin()) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.isAdmin()) {
@@ -63,15 +63,15 @@ export function userAPI (cloud: CloudService) {
   router.put('/user', auth.required, async function (req: any, res, next) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.active) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
 
@@ -136,15 +136,15 @@ export function userAPI (cloud: CloudService) {
 
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.active) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.isAdmin() && !user.authorized) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!req.body.user.email) {
@@ -176,15 +176,15 @@ export function userAPI (cloud: CloudService) {
   router.post('/users/disable', auth.required, async function (req: any, res, next) {
     const user = await User.findById(req.payload.id)
     if (!user) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (!user.authorized && !user.isAdmin()) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
     if (user.processing) {
-      return res.sendStatus(apiCode.forbidden)
+      return res.status(apiCode.forbidden)
     }
 
     if (!req.body.user.email) {
@@ -315,8 +315,7 @@ export function userAPI (cloud: CloudService) {
       await cloud.deleteObjects(server.slug)
       console.log('swift container removed')
 
-      const serverDir =
-        path.join('./uploads', user.username, server.slug)
+      const serverDir = path.join('./uploads', user.username, server.slug)
       await fs.promises.rm(serverDir, { recursive: true })
       console.log('server deleted from uploads')
 

@@ -67,13 +67,15 @@ export class DeleteAccountComponent implements OnInit {
   }
 
   submitForm() {
+    const own_deletion =
+      this.user.username === this.deleteAccountForm.value.username_verification
     if (this.isAssuming && this.isChecked) {
       this.preForm();
       this.userService
         .delete(this.deleteAccountForm.value, this.authForm.value)
         .subscribe(
           succes => {
-            if (!this.user.admin)
+            if (own_deletion)
               this.userService.purgeAuth();
             this.router.navigateByUrl('/');
           },

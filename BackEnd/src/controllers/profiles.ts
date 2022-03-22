@@ -14,7 +14,7 @@ const router = Router()
 router.param('username', async function (req: any, res, next, username) {
   const user = await User.findOne({ username: username })
   if (!user) {
-    return res.sendStatus(apiCode.not_found)
+    return res.status(apiCode.not_found)
       .json({ errors: { errors: 'User not found' } })
   }
   req.profile = user
