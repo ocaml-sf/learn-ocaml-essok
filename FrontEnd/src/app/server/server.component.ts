@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModalService } from '../modal';
 
@@ -78,6 +77,7 @@ export class ServerComponent implements OnInit {
       .subscribe(
         success => {
           this.modalService.close('pleaseWait2');
+          // bad modal service can lead to black screen after closing
           this.router.navigateByUrl('/');
         }
       );

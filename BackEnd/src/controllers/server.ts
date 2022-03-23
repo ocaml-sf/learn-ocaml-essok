@@ -181,7 +181,7 @@ export function serverAPI (cloud: CloudService) {
   router.post('/disable/:server', auth.required, async function (req: any, res: any) {
     const user = await User.findById(req.payload.id)
     if (req.server.author._id.toString() !== req.payload.id.toString() &&
-      user.isAdmin()) {
+      !user.isAdmin()) {
       log_functions.create('error', 'get /server/disable/:' + req.server.slug,
         log_message.user_owner_error, user, req.server)
       return res.sendStatus(apiCode.forbidden)
@@ -356,7 +356,7 @@ export function serverAPI (cloud: CloudService) {
     const namespace = 'default'
     await user.startProcessing()
 
-    const token = server_functions.catchTeacherToken(slug, namespace)
+    const token = await server_functions.catchTeacherToken(slug, namespace)
     log_functions.create('bin', 'post /server/token:' + req.server.slug,
       log_message.user_token_ok, user, req.server)
     req.server.token = token

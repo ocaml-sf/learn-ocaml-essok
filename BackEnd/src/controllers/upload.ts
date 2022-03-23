@@ -90,6 +90,7 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
       await fs.promises.readFile(path.join(serverPath, 'exercises/index.json'),
         { encoding: 'utf8' })
         .then(JSON.parse)
+        .then(index => index.groups)
         .catch(err => {
           if (err.code === 'ENOENT') { return [] } else { throw err }
         }) as { [id: string]: { exercises: string[] }}
@@ -325,15 +326,17 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const indexPath = path.join(exercisesPath, 'index.json')
     const groups =
       req.body.groups as { [id: string]: { title: string, exercises: string[] }}
-    const indexData = JSON.stringify(groups, null, 4)
+    const index = { learnocaml_version: '1', groups }
+    const indexData = JSON.stringify(index, null, 4)
 
     if (Object.keys(groups).length === 0) {
       return res.status(400).send({ errors: { file: ': No groups received' } })
     }
     await fs.promises.writeFile(indexPath, indexData, 'utf8')
 
+    const repoDir = 'repository/exercises'
     const safePathData =
-      fileData(inPathData(exercisesPath), exercisesPath) as PathFileData
+      fileData(inPathData(exercisesPath), repoDir) as PathFileData
     const zipData = await archive.zipFromDir(safePathData, outBufferData)
     cloud.uploadObject(server.slug, 'repository.zip', zipData)
 
@@ -352,7 +355,9 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
       return res.status(apiCode.forbidden)
         .json({ errors: { errors: 'Unauthorized' } })
     }
-    if (user.processing) { return res.sendStatus(apiCode.forbidden) }
+    if (user.processing) {
+      return res.sendStatus(apiCode.forbidden)
+    }
 
     const server = req.body.server
     if ((server.author.username !== user.username) && (!user.isAdmin())) {
@@ -376,10 +381,13 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
           .then(filesLists => filesLists.flat())
       const allZip = await archive.zip(files, outBufferData)
 
+      await user.endProcessing()
       return res.send(allZip.input)
     } else {
       const zip =
         await cloud.downloadObject(server.slug, `${target}.zip`, outBufferData)
+
+      await user.endProcessing()
       return res.send(zip.input)
     }
   })
