@@ -19,7 +19,7 @@ export class ServerComponent implements OnInit {
   canModify: boolean;
   isSubmitting = false;
   isDeleting = false;
-  isDisabled = false;
+  isDisabling = false;
   isDangerous = false;
 
   constructor(
@@ -71,13 +71,10 @@ export class ServerComponent implements OnInit {
   }
 
   toggleServerStatus() {
-    this.modalService.open('pleaseWait2');
-    this.isDisabled = true;
+    this.isDisabling = true;
     this.serversService.disable(this.server.slug)
       .subscribe(
         success => {
-          this.modalService.close('pleaseWait2');
-          // bad modal service can lead to black screen after closing
           this.router.navigateByUrl('/');
         }
       );
