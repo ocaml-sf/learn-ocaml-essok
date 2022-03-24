@@ -98,7 +98,8 @@ export function uploadAPI (cloud: CloudService, archive: ArchiveService) {
     const usedList = Object.values(groups).flatMap(group => group.exercises)
     const exercisesList =
       await fs.promises.readdir(path.join(serverPath, 'exercises'))
-        .then(files => files.filter(file => !usedList.includes(file)))
+        .then(files => files.filter(file =>
+          !usedList.includes(file) && file !== 'index.json'))
         .catch(err => {
           if (err.code === 'ENOENT') { return [] } else { throw err }
         })

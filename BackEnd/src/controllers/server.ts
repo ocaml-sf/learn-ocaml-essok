@@ -298,15 +298,15 @@ export function serverAPI (cloud: CloudService) {
     log_functions.create('bin', 'delete /server/:' + req.server.slug,
       log_message.user_processing_start, user)
 
-    await server_functions.removekubelink(slug, namespace)
+    await server_functions.removekubelink(slug, namespace).catch(console.error)
     console.log('kubelink removed')
 
-    await cloud.deleteObjects(slug)
-    await cloud.deleteContainer(slug)
+    await cloud.deleteObjects(slug).catch(console.error)
+    await cloud.deleteContainer(slug).catch(console.error)
     console.log('swift container removed')
 
     const serverDir = path.join('./uploads', user.username, slug)
-    await fs.promises.rm(serverDir, { recursive: true })
+    await fs.promises.rm(serverDir, { recursive: true }).catch(console.error)
     console.log('server deleted')
 
     await user.endProcessing()
@@ -314,7 +314,7 @@ export function serverAPI (cloud: CloudService) {
       log_message.user_processing_end, user)
     log_functions.create('bin', 'delete /server/:' + req.server.slug,
       log_message.server_deletion_ok, user, req.server)
-    await req.server.remove()
+    await req.server.remove().catch(console.error)
     return res.sendStatus(apiCode.ok)
   })
 
