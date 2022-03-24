@@ -4,9 +4,11 @@ import fs from 'fs'
 import env from 'env'
 import {
   DataKind as ObjectDataKind,
+  BufferInputData as BufferObjectData,
   InputData as ObjectData,
   OutputData as ObjectDataOptions,
-  bufferFromData
+  convertData,
+  outBufferData
 } from 'utils/Data'
 import { CloudService, ContainerName, ObjectName } from './CloudService'
 import * as auth from './swift/SWIFTAUTH'
@@ -15,15 +17,23 @@ import { SwiftError, SwiftErrorType } from './swift/SwiftError'
 
 type Token = string
 type UrlService = string
-export class SwiftService implements CloudService {
-  token!: Token
-  cloudUrl!: UrlService
-  updateSuccess!: boolean
-  readonly updateOnce!: boolean
+export class SwiftService extends CloudService {
+  private token!: Token
+  private cloudUrl!: UrlService
+  private updateSuccess!: boolean
+  private readonly updateOnce!: boolean
 
   constructor ({ updateOnce } = { updateOnce: false }) {
+    super()
     this.updateSuccess = false
     this.updateOnce = updateOnce
+  }
+
+  /**
+   * Used for tests
+   */
+  get success () {
+    return this.updateSuccess
   }
 
   async init (): Promise<void> {
@@ -142,7 +152,7 @@ export class SwiftService implements CloudService {
       responseType: 'arraybuffer'
     })
 
-    switch(oOptions.kind) {
+    switch (oOptions.kind) {
       case ObjectDataKind.Buffer:
         return { kind: ObjectDataKind.Buffer, input: res.data }
       case ObjectDataKind.Path:
@@ -159,7 +169,7 @@ export class SwiftService implements CloudService {
       baseURL: this.cloudUrl,
       url: `/${cName}/${oName}`,
       headers: { 'X-Auth-Token': this.token },
-      data: bufferFromData(oData)
+      data: (convertData(oData, outBufferData) as BufferObjectData).input
     })
   }
 

@@ -2,61 +2,64 @@ import path from 'path'
 
 import {
   DataKind,
-  dirToFileOutput,
   InputData as ObjectData,
+  outPathData,
   OutputData as ObjectDataOptions
 } from 'utils/Data'
 
 export type ContainerName = string
 export type ObjectName = string
 
-export interface CloudService {
-  listContainers(): Promise<ContainerName[]>
-  createContainer(name: ContainerName): Promise<void>
-  deleteContainer(name: ContainerName): Promise<void>
+export abstract class CloudService {
+  abstract listContainers(): Promise<ContainerName[]>
+  abstract createContainer(name: ContainerName): Promise<void>
+  abstract deleteContainer(name: ContainerName): Promise<void>
 
-  listObjects(name: ContainerName): Promise<ObjectName[]>
-  downloadObject(cName: ContainerName, oName: ObjectName,
-                 oOptions: ObjectDataOptions): Promise<ObjectData>
-  uploadObject(cName: ContainerName,
-               oName: ObjectName, oData: ObjectData): Promise<void>
-  deleteObject(cName: ContainerName, oName: ObjectName): Promise<void>
-}
+  abstract listObjects(name: ContainerName): Promise<ObjectName[]>
+  abstract downloadObject(cName: ContainerName, oName: ObjectName,
+                          oOptions: ObjectDataOptions): Promise<ObjectData>
 
-type ApplyFun<T> = (oName: string, index: number) => Promise<T>
-async function applyObjects<T>(cloud: CloudService, cName: ContainerName,
-                            apply: ApplyFun<T>)
-: Promise<T[]> {
-  const oNames = await cloud.listObjects(cName)
-  return Promise.all(oNames.map(apply))
-}
+  abstract uploadObject(cName: ContainerName,
+                        oName: ObjectName, oData: ObjectData): Promise<void>
 
-type DirectoryDataOption = ObjectDataOptions
-export type AllObjsDataOptions = DirectoryDataOption | ObjectDataOptions[]
-export async function downloadObjects(cloud: CloudService,
-                                         cName: ContainerName,
-                                         oOptions: AllObjsDataOptions)
-: Promise<ObjectData[]> {
-  const applyFun = (oName: string, objiOptions: ObjectDataOptions) =>
-    cloud.downloadObject(cName, oName, objiOptions)
-  const applyFunOptions = (Array.isArray(oOptions)) ?
-    (oName: string, i: number) => applyFun(oName, oOptions[i])
-  : (oName: string) => applyFun(oName, dirToFileOutput(oOptions, oName))
+  abstract deleteObject(cName: ContainerName, oName: ObjectName): Promise<void>
 
-  return applyObjects(cloud, cName, applyFunOptions)
-}
+  /**
+   * Generic function used in the next functions
+   */
+  private async _applyObjects<T> (cName: ContainerName,
+                         apply: (oName: string) => Promise<T>): Promise<T[]> {
+    const oNames = await this.listObjects(cName)
+    return Promise.all(oNames.map(apply))
+  }
 
-export async function copyObjects(cloud: CloudService,
-                                     cNameSrc: ContainerName,
-                                     cNameDst: ContainerName): Promise<void> {
-  await applyObjects(cloud, cNameSrc, async (oName: string) => {
-    const objBufferData =
-      await cloud.downloadObject(cNameSrc, oName, { kind: DataKind.Buffer })
-    await cloud.uploadObject(cNameDst, oName, objBufferData)
-  })
-}
+  /**
+   * If downloading to a list of Path, oOptions expect a directory
+   */
+  async downloadAllObjs (cName: ContainerName,
+                         oOptions: ObjectDataOptions): Promise<ObjectData[]> {
+    switch (oOptions.kind) {
+      case DataKind.Buffer:
+        return this._applyObjects(cName, (oName: string) =>
+          this.downloadObject(cName, oName, oOptions))
+      case DataKind.Path:
+        return this._applyObjects(cName, (oName: string) => {
+          const oOptionsWithDir = outPathData(path.join(oOptions.output, oName))
+          return this.downloadObject(cName, oName, oOptionsWithDir)
+        })
+    }
+  }
 
-export async function deleteObjects(cloud: CloudService,
-                                       cName: ContainerName): Promise<void> {
-  await applyObjects(cloud, cName, oName => cloud.deleteObject(cName, oName))
+  async copyObjects (cNameSrc: ContainerName,
+                     cNameDst: ContainerName): Promise<void> {
+    await this._applyObjects(cNameSrc, async (oName: string) => {
+      const objBufferData =
+        await this.downloadObject(cNameSrc, oName, { kind: DataKind.Buffer })
+      await this.uploadObject(cNameDst, oName, objBufferData)
+    })
+  }
+
+  async deleteObjects (cName: ContainerName): Promise<void> {
+    await this._applyObjects(cName, oName => this.deleteObject(cName, oName))
+  }
 }

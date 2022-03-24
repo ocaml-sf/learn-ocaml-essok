@@ -22,8 +22,8 @@ describe('SwiftService', function () {
       it('should set token and cloudUrl', async function () {
         const service = new SwiftService({ updateOnce: true })
         await service.init()
-        assert.ok(service.token)
-        assert.ok(service.cloudUrl)
+
+        assert.equal(service.success, true)
       })
     })
   })
@@ -35,9 +35,9 @@ describe('SwiftService', function () {
     })
 
     describe('Container', function () {
-      const lsName = 'list'
-      const crName = 'creation'
-      const dlName = 'deletion'
+      const lsName = 'test-list'
+      const crName = 'test-creation'
+      const dlName = 'test-deletion'
 
       describe('listContainers()', function () {
         it('should return list of containers', async function () {
@@ -74,13 +74,13 @@ describe('SwiftService', function () {
     })
 
     describe('Objects from container', function () {
-      const cName = 'objects'
-      const lsOName = 'listObj'
-      const dlOName = 'dlObj'
-      const dlOData = 'data'
-      const crOName = 'creationObj'
-      const crOData = 'cData'
-      const delOName = 'deletionObj'
+      const cName = 'test-objects'
+      const lsOName = 'listObject'
+      const ddlOName = 'downloadObject'
+      const ddlOData = 'downloadData'
+      const crOName = 'creationObject'
+      const crOData = 'creationData'
+      const dlOName = 'deletionObject'
 
       const options: OutputData = { kind: DataKind.Buffer }
 
@@ -91,10 +91,10 @@ describe('SwiftService', function () {
         })
       })
 
-      describe(`downloadObject(${cName}, ${dlOName})`, function () {
-        it(`should return the data of object ${dlOName}`, async function () {
-          const buffer = await service.downloadObject(cName, dlOName, options)
-          assert.equal(buffer.input.toString(), dlOData)
+      describe(`downloadObject(${cName}, ${ddlOName})`, function () {
+        it(`should return the data of object ${ddlOName}`, async function () {
+          const buffer = await service.downloadObject(cName, ddlOName, options)
+          assert.equal(buffer.input.toString(), ddlOData)
         })
       })
 
@@ -110,19 +110,19 @@ describe('SwiftService', function () {
         })
       })
 
-      describe(`deleteObject(${cName}, ${delOName})`, function () {
+      describe(`deleteObject(${cName}, ${dlOName})`, function () {
         beforeEach(async function () {
           const oData: InputData = {
             kind: DataKind.Buffer,
             input: Buffer.from('')
           }
-          await service.uploadObject(cName, delOName, oData)
+          await service.uploadObject(cName, dlOName, oData)
         })
 
-        it(`should delete object named ${delOName}`, async function () {
-          await service.deleteObject(cName, delOName)
+        it(`should delete object named ${dlOName}`, async function () {
+          await service.deleteObject(cName, dlOName)
           const objects = await service.listObjects(cName)
-          assert(!objects.includes(delOName))
+          assert(!objects.includes(dlOName))
         })
       })
     })

@@ -21,6 +21,9 @@ module.exports = {
       FunctionExpression: { parameters: 'off' },
       SwitchCase: 1, // level of indentation
     }],
-    '@typescript-eslint/type-annotation-spacing': 'error'
+    'no-fallthrough': ['error', { 'commentPattern': 'break[\\s\\w]*omitted' }],
+    '@typescript-eslint/type-annotation-spacing': ['error', {
+      overrides: { returnType: { before: true } }
+    }]
   }
 }

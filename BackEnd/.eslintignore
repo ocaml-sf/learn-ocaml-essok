@@ -8,4 +8,4 @@ src/controllers/auth.ts
 src/controllers/users.ts
 src/controllers/profiles.ts
 src/controllers/server.ts
-src/controllers/upload.ts
+#src/controllers/upload.ts

@@ -47,7 +47,6 @@ export class ServerSettingsComponent implements OnInit {
   exercisesDropList: string[] = [];
   trashDropList: string[] = [];
   groupsList: Group[] = [];
-  useless: ExercisesList = {} as ExercisesList;
   IMGPANELS = IMGPANELS;
   uploadHeaders: string[] = ['name', 'size', 'status'];
   dangerousZonePanelState: boolean = false;
@@ -90,7 +89,6 @@ export class ServerSettingsComponent implements OnInit {
   updateExercisesDropList() {
     this.exercisesDropList = ['trash-list', 'exercises-list', 'create-group-list',
       ...this.groupsList.map(group => group.id)];
-    console.log(this.exercisesDropList);
   }
 
   generateGroupID() {
@@ -119,28 +117,23 @@ export class ServerSettingsComponent implements OnInit {
   loadGroups() {
     this.serversService
       .getGroups(this.server.slug)
-      .subscribe(
-        data => {
-          this.useless = JSON.parse(JSON.stringify(data));
-          this.groupsList = this.useless.group.map(
-            group => { return { ...group, id: this.generateGroupID() }; });
-          this.updateExercisesDropList()
-          this.exercisesList = this.useless.name;
-          this.trashList = [];
-          this.errors = {};
-        },
-        err => {
-          this.errors = err;
-        }
-      )
+      .subscribe(data => {
+        const groups =
+          data.groups as { [id: string]: { title: string, exercises: string[] }}
+        this.groupsList = Object.entries(groups)
+          .map(([id, group]) => ({ id, ...group }))
+        this.updateExercisesDropList()
+        this.exercisesList = data.exercisesList;
+        this.trashList = [];
+        this.errors = {};
+      }, err => { this.errors = err })
   }
 
   uploadPrepare() {
     this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
-    this.uploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-      console.log('FileUpload:uploaded:', item, status, response);
-      this.useless = JSON.parse(response);
-      this.exercisesList = this.useless.name;
+    this.uploader.onCompleteItem = (item: any, res: any, status: any, headers: any) => {
+      console.log('FileUpload:uploaded:', item, status, res);
+      this.exercisesList = res.name;
       this.trashList = [];
       this.loadGroups();
       // move to the next slide
@@ -173,8 +166,7 @@ export class ServerSettingsComponent implements OnInit {
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
-        this.useless = JSON.parse(JSON.stringify(data));
-        this.exercisesList = this.useless.name;
+        this.exercisesList = data.name;
         this.loadGroups();
       },
       err => {
@@ -189,8 +181,7 @@ export class ServerSettingsComponent implements OnInit {
     this.serversService.uploadFromUrl(this.server.slug, this.serverSettingsForm.value).subscribe(
 
       data => {
-        this.useless = JSON.parse(JSON.stringify(data));
-        this.exercisesList = this.useless.name;
+        this.exercisesList = data.name;
         this.loadGroups();
       },
       err => {
@@ -232,16 +223,11 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   send() {
-    var groups = [[]];
-    this.modalService.open('pleaseWait2');
-    // TODO: remove the horrible matrix structure
-    this.groupsList.forEach(element => {
-      groups.push([element.title].concat(element.exercises));
-    });
+    let groups = this.groupsList
+      .reduce((acc, { id, ...group }) => ({ ...acc, [id]: group }), {})
     this.serversService.send(this.server.slug, this.exercisesList, groups,
                              this.trashList)
       .subscribe(_res => {
-        this.modalService.close('pleaseWait2');
         this.isDisabled = false;
         this.loadGroups();
         let that = this;
@@ -252,7 +238,6 @@ export class ServerSettingsComponent implements OnInit {
         })
       },
       err => {
-        this.modalService.close('pleaseWait2');
         this.errors = err;
         this.isSubmitting = false;
       }

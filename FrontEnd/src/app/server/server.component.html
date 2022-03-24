@@ -8,6 +8,7 @@
         Manage Server
       </button>
       <button mat-stroked-button color="warn"
+              [disabled]="isDisabling"
               (click)="toggleServerStatus()">
         <mat-icon>power_settings_new</mat-icon>
         {{!server.active ? 'Enable Server' : 'Disable Server'}}
