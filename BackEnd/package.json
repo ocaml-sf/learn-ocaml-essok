@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@kubernetes/client-node": "^0.13.2",
+    "@kubernetes/client-node": "^0.18.1",
     "archiver": "^5.2.0",
     "axios": "^0.24.0",
     "child_process": "^1.0.2",
@@ -43,6 +43,7 @@
     "passport-local": "1.0.0",
     "rimraf": "^3.0.2",
     "slug": "4.0.2",
+    "typescript": "^5.2.2",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
