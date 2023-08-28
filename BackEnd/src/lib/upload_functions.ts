@@ -212,7 +212,7 @@ export async function createArchiveFromDirectory(source : string, dest : string,
   var files = read(source)
     .map((file : string) =>
       [path.join(source, file), path.join(dest, file)]);
-  if (files === []) {
+  if (files.length == 0) {
     throw 'empty files list';
   }
   await createArchive(files, format, archive_name);
@@ -321,7 +321,7 @@ export function download_from_url(file_url : any, dest_path : any) {
 export function delete_useless_files(useless : any, path : any,
   tabOfName : any, files : any) {
   return new Promise(function (resolve, reject) {
-    if (useless === [] || useless === undefined || useless === null) {
+    if (!Array.isArray(useless) || useless.length == 0) {
       return resolve('nothing to delete');
     }
     //console.log('tabOfName before filter : ' + tabOfName);

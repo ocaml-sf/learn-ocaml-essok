@@ -97,8 +97,8 @@ export function serverAPI(cloud: CloudService) {
       server.author = user;
       log_functions.create('bin', 'post /server/', log_message.user_server_created, user, server);
       return server.save().then(async function() {
-        await cloud.createContainer(server.slug)
-        await copyObjects(cloud, env.OS_DEFAULT_CONTAINER, server.slug)
+        await cloud.createContainer(server.slug as string)
+        await copyObjects(cloud, env.OS_DEFAULT_CONTAINER, server.slug as string)
 
         log_functions.create('general', 'post /server/',
                              log_message.user_swift_created, user, server);

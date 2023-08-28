@@ -3,7 +3,7 @@ const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 const k8sApiDeploy = kc.makeApiClient(k8s.AppsV1Api);
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-const k8sApiIngress = kc.makeApiClient(k8s.ExtensionsV1beta1Api);
+const k8sApiIngress = kc.makeApiClient(k8s.NetworkingV1Api);
 
 k8sApiIngress.defaultHeaders = {
   'Content-Type': 'application/strategic-merge-patch+json',
@@ -204,12 +204,18 @@ function createObjectService(slug : string) {
 export function createObjectRule(slug : string, username : string) {
   return {
     // TODO: remove hard coded URL
-    host: username + '.' + slug + '.learn-ocaml.org',
+    host: slug + "-" + username + ".learn-ocaml.org",
     http: {
       paths: [{
+        path: "/",
+        pathType: "Prefix",
         backend: {
-          serviceName: slug,
-          servicePort: 80
+          service: {
+            name: slug,
+            port: {
+              number: 80
+            }
+          }
         }
       }]
     }
