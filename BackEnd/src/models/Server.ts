@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { User } from './User'
+
 var uniqueValidator = require('mongoose-unique-validator');
 var slug = require('slug');
 const domain = 'learn-ocaml.org';
@@ -42,11 +44,14 @@ var ServerSchema = new mongoose.Schema({
 
 ServerSchema.plugin(uniqueValidator, { message: 'is already taken' });
 
-ServerSchema.pre('validate', function (next) {
+ServerSchema.pre('validate', async function (next) {
   if (!(this as any).slug) {
     (this as any).slugify();
   }
-  (this as any).url = (this as any).author.username + '.' + (this as any).slug + '.' + domain;
+
+  console.log((this as any).author);
+  let user = await User.findOne({ _id: (this as any).author }, "username").exec();
+  (this as any).url = (this as any).slug + '-' + (user as any).username + '.' + domain;
   next();
 });
 
